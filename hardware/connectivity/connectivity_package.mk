@@ -1,7 +1,6 @@
 # Connectivity Packages
 PRODUCT_PACKAGES += \
     libwapi \
-    libwifitest \
     wpa_supplicant.conf \
     libkeystore-wifi-hidl \
     wpa_supplicant_overlay.conf \
