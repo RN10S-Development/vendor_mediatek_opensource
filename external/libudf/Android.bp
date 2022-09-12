@@ -33,7 +33,6 @@ cc_library_static {
     },
     native_coverage: false,
 
-    // -Wno-error=format-zero-length needed for gcc to compile.
     cflags: [
         "-Wall",
         "-Werror",
@@ -79,7 +78,6 @@ cc_library_shared {
         "ubrd_core/dump.c",
         "mmap_debug/mmap_debug.c",
         "fdleak_debug/fdleak_debug.cpp",
-        // "pthread_debug/pthread_debug.cpp",
     ],
 
     arch: {
@@ -92,7 +90,7 @@ cc_library_shared {
                 "unwind/arch-arm/backtrace-arm.c",
             ],
         },
-	// Added temporarily to build x86 binary for Cuttlestone
+
         x86: {
             srcs: [
                 "unwind/arch-x86/backtrace.c",
@@ -129,7 +127,6 @@ cc_library_shared {
     },
 
     include_dirs: [
-        "vendor/mediatek/opensource/external/aee/binary/inc",
         "system/unwinding/libunwindstack/include"
     ],
 

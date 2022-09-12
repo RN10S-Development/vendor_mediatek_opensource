@@ -36,7 +36,6 @@
 
 #include "ccci_log.h"
 #include "ccci_common.h"
-#include "../../../external/aee/binary/inc/aee.h"
 
 /********************************************************************************
  * Configure region
@@ -45,23 +44,10 @@
 #define KERNEL_SETTING_FILE         "/sys/kernel/ccci/kcfg_setting"
 
 #define KERNEL_SETTING_BUF_SIZE     4096
-#define AEE_STR_TMP_BUF_SIZE        4096
-
-#define LIB_AED                        "libaed.so"
-
-
 
 /****************************************************************************/
 /****  lk load status check support section   *******************************/
 /****************************************************************************/
-static void show_warning_for_lk_ld_fail(char warn_msg[])
-{
-    const char *mod = "ccci_mdinit";
-    if (wait_for_property("init.svc.debuggerd", "running", 30*1000) == 0)
-        sleep(1);
-    show_aee_system_exception(mod, "external.ccci_mdinit", 0, "%s", warn_msg);
-}
-
 int check_lk_load_md_status(int md_id)
 {
     int fd;
@@ -105,9 +91,6 @@ int check_lk_load_md_status(int md_id)
         CCCI_LOGD("LK load modem success\n");
         goto _Exit;
     }
-
-    show_warning_for_lk_ld_fail(lk_info_buf);
-    ret = -1;
 
 _Exit:
     free(lk_info_buf);
@@ -177,66 +160,6 @@ unsigned int str2uint(char *str)
     }
     return ret_val;
 }
-
-
-/****************************************************************************/
-/****  so support section   *************************************************/
-/****************************************************************************/
-static int (*aee_system_exception_fun_ptr)(const char*, const char*, unsigned int, const char*,...);
-typedef int (*aee_system_exception_t)(const char*, const char*, unsigned int, const char*,...);
-static void *lib_handle_aed = NULL;
-
-
-int show_aee_system_exception(const char *module, const char *path, unsigned int flag, const char* msg, ...)
-{
-    va_list args;
-    char *temp_log;
-    int ret;
-
-    temp_log = (char*)malloc(AEE_STR_TMP_BUF_SIZE);
-    if (temp_log == NULL)
-        return -2;
-
-    va_start(args, msg);
-    vsnprintf(temp_log, AEE_STR_TMP_BUF_SIZE, msg, args);
-    va_end(args);
-
-    if (aee_system_exception_fun_ptr)
-        ret = aee_system_exception_fun_ptr(module, path, flag, temp_log);
-    else
-        ret = -1;
-    free(temp_log);
-
-    return ret;
-}
-
-
-void depends_so_prepare(void)
-{
-    void *func = NULL;
-
-    /* AEE */
-    aee_system_exception_fun_ptr = NULL;
-    lib_handle_aed = dlopen(LIB_AED, RTLD_NOW);
-    if (lib_handle_aed) {
-        func = dlsym(lib_handle_aed, "aee_system_exception");
-        if (func == NULL)
-            CCCI_LOGI("load sym:aee_system_exception fail\n");
-        else
-            aee_system_exception_fun_ptr = (aee_system_exception_t)func;
-    } else
-        CCCI_LOGI("disable aee\n");
-}
-
-
-void depends_so_free(void)
-{
-    /* Free AED */
-    if (lib_handle_aed)
-        dlclose(lib_handle_aed);
-}
-
-
 
 /****************************************************************************/
 /****  Kernel setting parse section   ***************************************/

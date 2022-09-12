@@ -6,7 +6,6 @@
 #include "../include/backtrace.h"
 #include "../include/recorder.h"
 
-#include <aee.h>
 #include <pthread.h>
 #include <async_safe/log.h>
 #include <sys/uio.h>
@@ -100,45 +99,6 @@ static char fdleak_init_error_msg[128];
 static int fdleak_inti_flag = 0;
 
 void _fdlog(const char* fmt, ...) __attribute__((__format__(printf, 1, 2)));
-
-typedef int (*AEE_SYSTEM_EXCEPTION_FUNC)(const char *, const char *, unsigned int, const char *,...);
-
-void fdleak_aee_system_exception(char *aee_output_message)
-{
-    void *handle = NULL;
-    AEE_SYSTEM_EXCEPTION_FUNC func = NULL;
-
-    #define VENDOR_PREFIX "/vendor/"
-    char exe_path[strlen(VENDOR_PREFIX) + 256];
-    ssize_t len;
-    char libaed[32];
-
-    len = readlink("/proc/self/exe", exe_path, sizeof(exe_path));
-    if (len  == -1) {
-        ubrd_error_log("readlink /proc/self/exe fail, %s", strerror(errno));
-        *((volatile size_t *)0)= 0xdeadffff;
-    }
-
-    if (len != -1 && !strncmp(VENDOR_PREFIX, exe_path, strlen(VENDOR_PREFIX))) {
-        snprintf(libaed, sizeof(libaed), "libaedv.so");
-    } else {
-        snprintf(libaed, sizeof(libaed), "libaed.so");
-    }
-
-    handle =(void *)dlopen(libaed, RTLD_NOW);
-    if (handle) {
-        func = (AEE_SYSTEM_EXCEPTION_FUNC)(dlsym(handle, "aee_system_exception"));
-        if (func) {
-            if (func("[FDLEAK_DEBUG]\nBacktrace", NULL, DB_OPT_PROCESS_COREDUMP, " \n%s", aee_output_message) == -1)
-                abort();
-        } else {
-            *((volatile size_t *)0)= 0xdeadffff;
-        }
-        dlclose(handle);
-    } else {
-        *((volatile size_t *)0)= 0xdeadffff;
-    }
-}
 
 static void* lookupSymbol(void* handle, const char* symbol) {
     void* addr = NULL;
@@ -531,7 +491,6 @@ static size_t gFDMspaceSize = 0;
 static volatile void* gFDMspaceBackup = NULL;
 static int fd_record_thd = FD_RECORD_THD;
 static volatile int rlimit_flag = 0;
-static volatile int aee_flag = 0;
 static int fd_bt2log = 0;
 
 // manage fd backtrace
@@ -673,12 +632,6 @@ void fdleak_debug_initialize(void) {
     }
     if (strstr(progname, "/system/bin/logd")) {
         fdleak_inti_flag = 1;
-    }
-
-    // white list: filter process
-    if (strstr(progname, "system/bin/aee") || //bypass aee and aee_dumpstate
-        strstr(progname, "/system/bin/logd")) {
-        fdleak_debug_enable = 0;
     }
 
     // control for only one specific program to enable fdleak debug.
@@ -1074,8 +1027,7 @@ void fdleak_record_backtrace(int fd) {
                 rlimit_flag = 1;
             }
         }
-        else if((fd >= 1024) && (!aee_flag)) {
-            aee_flag = 1;
+        else if((fd >= 1024)) {
             ubrd_debug_log("[FDLEAK_DEBUG]fd over RLIMIT_NOFILE:%ld\n", r.rlim_cur);
 
             PFdBtEntry entry = gPFDBtEntryTable->gPMaxFdBtEntry;
@@ -1120,9 +1072,6 @@ void fdleak_record_backtrace(int fd) {
                 snprintf(buf, sizeof(buf), "  #0%zu fd %p %p\n", i, (void*)(entry->backtrace[i]), (void*)(relativ_pc));
                 strlcat(tmp, buf, sizeof(tmp));
             }
-
-            // trigger system_exception_api
-            fdleak_aee_system_exception(tmp);
         }
     }
 }

@@ -13,8 +13,7 @@ bool bypass_white_list()
         !strcmp(progname, "/system/bin/logcat") ||
         !strcmp(progname, "/system/bin/installd") ||
         !strcmp(progname, "/system/bin/dex2oat") ||
-        strstr(progname, "dumpsys") ||
-        strstr(progname, "aee")) {
+        strstr(progname, "dumpsys")) {
             return true;
         } else {
             return false;

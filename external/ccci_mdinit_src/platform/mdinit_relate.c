@@ -25,7 +25,6 @@
 #include "ccci_common.h"
 #include "mdinit_relate.h"
 
-#include "../../../external/aee/binary/inc/aee.h"
 #include "libnvram.h"
 #include "libnvram_log.h"
 // for FSD wake_lock not released
@@ -376,8 +375,6 @@ static int wait_nvram_ready(int wait_level)
             snprintf(mod_name, 32, "md3");
         else
             snprintf(mod_name, 32, "mdx");
-        show_aee_system_exception("ccci_mdinit", mod_name, DB_OPT_FTRACE,
-                "Wait service.nvram_init ready timeout, please ask nvram owner to check!");
         exit(-0xF1);
     }
     return ret;

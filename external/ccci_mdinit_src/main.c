@@ -75,8 +75,6 @@ int main(int argc, char **argv)
     boot_prof_fd = open(BOOT_PROF_FILE, O_RDWR);
     update_inf_to_bootprof("md_init srv start");
 
-    depends_so_prepare();
-
     if (check_lk_load_md_status(curr_md_id) < 0) {
         CCCI_LOGV("detect lk info fail, exit");
         return 0;
@@ -99,8 +97,6 @@ int main(int argc, char **argv)
         main_v1(curr_md_id, 1);
     else
         main_v1(curr_md_id, 0);
-
-    depends_so_free();
 
     if (boot_prof_fd >= 0)
         close(boot_prof_fd);
