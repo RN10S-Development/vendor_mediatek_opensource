@@ -15,7 +15,7 @@
  */
 
 /*** STANDARD INCLUDES *******************************************************/
-#define LOG_NDEBUG 0 // support ALOGV
+#define LOG_NDEBUG 0  // support ALOGV
 
 #include <stdio.h>
 #include <stdlib.h>
@@ -47,7 +47,7 @@
 
 //#define PERFD_DEBUG_LOG
 
-//using namespace vendor::mediatek::hardware::power::V2_0;
+// using namespace vendor::mediatek::hardware::power::V2_0;
 using namespace vendor::mediatek::hardware::mtkpower::V1_0;
 
 #define LIB_FULL_NAME "libpowerhal.so"
@@ -90,7 +90,7 @@ static int (*perfUserScnEnable)(int) = NULL;
 static int (*perfUserScnDisable)(int) = NULL;
 
 /* Global variable */
-static void * _gpTimerMng;
+static void* _gpTimerMng;
 static int pboost_timeout = 0;
 
 static int gMyPid = 0;
@@ -100,17 +100,17 @@ static int powerdOnOff = 1;
 static int bDuringProcessCreate = 0;
 static char currPackname[512];
 
-#define MAX_EXT_LAUNCH_COUNT          3
-#define MAX_TIMER_COUNT             256
-#define MAX_CUS_HINT_COUNT          128
-#define GAME_LAUNCH_DURATION      10000
-#define CHECK_USER_SCN_DURATION  300000
+#define MAX_EXT_LAUNCH_COUNT 3
+#define MAX_TIMER_COUNT 256
+#define MAX_CUS_HINT_COUNT 128
+#define GAME_LAUNCH_DURATION 10000
+#define CHECK_USER_SCN_DURATION 300000
 
 enum {
     TIMER_MSG_POWER_HINT_ENABLE_TIMEOUT = 0,
-    TIMER_MSG_PERF_LOCK_TIMEOUT         = 1,
-    TIMER_MSG_USER_SCN_ENABLE_TIMEOUT   = 2,
-    TIMER_MSG_CHECK_USER_SCN_TIMEOUT    = 3,
+    TIMER_MSG_PERF_LOCK_TIMEOUT = 1,
+    TIMER_MSG_USER_SCN_ENABLE_TIMEOUT = 2,
+    TIMER_MSG_CHECK_USER_SCN_TIMEOUT = 3,
 };
 
 struct tTimer {
@@ -118,7 +118,7 @@ struct tTimer {
     int idx;
     int msg;
     int handle;
-    void *p_pTimer;
+    void* p_pTimer;
 };
 
 struct extLaunchScn {
@@ -128,18 +128,17 @@ struct extLaunchScn {
 };
 
 static int nPerfSupport = 0;
-struct tTimer powerdTimer[MAX_TIMER_COUNT]; // temp
-//struct extLaunchScn tExtScn[MAX_EXT_LAUNCH_COUNT]; // temp
+struct tTimer powerdTimer[MAX_TIMER_COUNT];  // temp
+// struct extLaunchScn tExtScn[MAX_EXT_LAUNCH_COUNT]; // temp
 
 static int gtCusHintTbl[MAX_CUS_HINT_COUNT];
 
-//static int cusHintTblSize = 0;
+// static int cusHintTblSize = 0;
 
 /*****************
    Function
  *****************/
-static int load_api(void)
-{
+static int load_api(void) {
     void *handle, *func;
 
     handle = dlopen(LIB_FULL_NAME, RTLD_NOW);
@@ -304,8 +303,7 @@ static int load_api(void)
     return 0;
 }
 
-int reset_timer(int i)
-{
+int reset_timer(int i) {
     powerdTimer[i].used = 0;
     powerdTimer[i].msg = -1;
     powerdTimer[i].handle = -1;
@@ -313,11 +311,10 @@ int reset_timer(int i)
     return 0;
 }
 
-int allocate_timer(void)
-{
+int allocate_timer(void) {
     int i;
-    for(i=0; i<MAX_TIMER_COUNT; i++) {
-        if(powerdTimer[i].used == 0) {
+    for (i = 0; i < MAX_TIMER_COUNT; i++) {
+        if (powerdTimer[i].used == 0) {
             powerdTimer[i].used = 1;
             return i;
         }
@@ -325,21 +322,19 @@ int allocate_timer(void)
     return -1;
 }
 
-int find_timer(int msg, int handle)
-{
+int find_timer(int msg, int handle) {
     int i;
-    for(i=0; i<MAX_TIMER_COUNT; i++) {
-        if(powerdTimer[i].used && powerdTimer[i].handle == handle && powerdTimer[i].msg == msg)
+    for (i = 0; i < MAX_TIMER_COUNT; i++) {
+        if (powerdTimer[i].used && powerdTimer[i].handle == handle && powerdTimer[i].msg == msg)
             return i;
     }
     return -1;
 }
 
-int remove_scn_timer(int msg, int handle)
-{
+int remove_scn_timer(int msg, int handle) {
     int idx;
 
-    if((idx = find_timer(msg, handle)) >= 0) {
+    if ((idx = find_timer(msg, handle)) >= 0) {
         ptimer_stop(powerdTimer[idx].p_pTimer);
         ptimer_delete(powerdTimer[idx].p_pTimer);
         reset_timer(idx);
@@ -347,11 +342,10 @@ int remove_scn_timer(int msg, int handle)
     return 0;
 }
 
-int start_scn_timer(int msg, int handle, int timeout)
-{
+int start_scn_timer(int msg, int handle, int timeout) {
     int idx;
-    if((idx = allocate_timer()) >= 0) {
-        //ALOGI("[start_scn_timer] idx:%d, handle:%d, timeout:%d", idx, handle, timeout);
+    if ((idx = allocate_timer()) >= 0) {
+        // ALOGI("[start_scn_timer] idx:%d, handle:%d, timeout:%d", idx, handle, timeout);
         powerdTimer[idx].msg = msg;
         powerdTimer[idx].handle = handle;
         ptimer_create(&(powerdTimer[idx].p_pTimer));
@@ -360,31 +354,29 @@ int start_scn_timer(int msg, int handle, int timeout)
     return 0;
 }
 
-int start_periodic_check_timer(int firstLaunch)
-{
+int start_periodic_check_timer(int firstLaunch) {
     static int idx = 0;
 
-    if(firstLaunch) {
-        if((idx = allocate_timer()) >= 0) {
-            //ALOGI("[start_scn_timer] idx:%d, handle:%d, timeout:%d", idx, handle, timeout);
+    if (firstLaunch) {
+        if ((idx = allocate_timer()) >= 0) {
+            // ALOGI("[start_scn_timer] idx:%d, handle:%d, timeout:%d", idx, handle, timeout);
             powerdTimer[idx].msg = TIMER_MSG_CHECK_USER_SCN_TIMEOUT;
             powerdTimer[idx].handle = 0;
             ptimer_create(&(powerdTimer[idx].p_pTimer));
-        }
-        else
+        } else
             return 0;
     }
 
-    ptimer_start(_gpTimerMng, powerdTimer[idx].p_pTimer, CHECK_USER_SCN_DURATION, &(powerdTimer[idx]));
+    ptimer_start(_gpTimerMng, powerdTimer[idx].p_pTimer, CHECK_USER_SCN_DURATION,
+                 &(powerdTimer[idx]));
     return 0;
 }
 
-int powerd_core_pre_init(void)
-{
-    if(load_api() == 0)
+int powerd_core_pre_init(void) {
+    if (load_api() == 0)
         nPerfSupport = 1;
     else
-        return 0; // libperfservice is not supported
+        return 0;  // libperfservice is not supported
 
     gMyPid = (int)getpid();
     gMyTid = (int)gettid();
@@ -398,13 +390,12 @@ int powerd_core_pre_init(void)
     return 0;
 }
 
-int powerd_core_init(void * pTimerMng)
-{
+int powerd_core_init(void* pTimerMng) {
     int i = 0;
 
     _gpTimerMng = pTimerMng;
 
-    for(i=0; i<MAX_TIMER_COUNT; i++) {
+    for (i = 0; i < MAX_TIMER_COUNT; i++) {
         powerdTimer[i].used = 0;
         powerdTimer[i].idx = i;
         powerdTimer[i].msg = -1;
@@ -413,395 +404,428 @@ int powerd_core_init(void * pTimerMng)
     }
 
     /* start periodic timer to check invalid user scenario */
-    if (nPerfSupport)
-        start_periodic_check_timer(1);
+    if (nPerfSupport) start_periodic_check_timer(1);
 
     /* cus hint */
-    for(i=0; i<MAX_CUS_HINT_COUNT; i++)
-        gtCusHintTbl[i] = 0;
+    for (i = 0; i < MAX_CUS_HINT_COUNT; i++) gtCusHintTbl[i] = 0;
 
     return 0;
 }
 
-int powerd_core_timer_handle(void * pTimer, void * pData)
-{
-    //int i = 0;
-    struct tTimer *ptTimer = (struct tTimer *)pData;
+int powerd_core_timer_handle(void* pTimer, void* pData) {
+    // int i = 0;
+    struct tTimer* ptTimer = (struct tTimer*)pData;
 
-    if(ptTimer->p_pTimer != pTimer)
-        return -1;
+    if (ptTimer->p_pTimer != pTimer) return -1;
 
-    switch(ptTimer->msg) {
-    case TIMER_MSG_POWER_HINT_ENABLE_TIMEOUT:
-        if (nPerfSupport)
-            perfBoostDisable(ptTimer->handle);
-        ptimer_delete(ptTimer->p_pTimer);
-        reset_timer(ptTimer->idx);
-        break;
+    switch (ptTimer->msg) {
+        case TIMER_MSG_POWER_HINT_ENABLE_TIMEOUT:
+            if (nPerfSupport) perfBoostDisable(ptTimer->handle);
+            ptimer_delete(ptTimer->p_pTimer);
+            reset_timer(ptTimer->idx);
+            break;
 
-    case TIMER_MSG_PERF_LOCK_TIMEOUT:
+        case TIMER_MSG_PERF_LOCK_TIMEOUT:
 #ifdef PERFD_DEBUG_LOG
-        ALOGI("[powerd_req] TIMER_MSG_PERF_LOCK_TIMEOUT hdl:%d", ptTimer->handle);
+            ALOGI("[powerd_req] TIMER_MSG_PERF_LOCK_TIMEOUT hdl:%d", ptTimer->handle);
 #endif
-        if (nPerfSupport)
-            perfLockRel(ptTimer->handle);
-        ptimer_delete(ptTimer->p_pTimer);
-        reset_timer(ptTimer->idx);
-        break;
+            if (nPerfSupport) perfLockRel(ptTimer->handle);
+            ptimer_delete(ptTimer->p_pTimer);
+            reset_timer(ptTimer->idx);
+            break;
 
-    case TIMER_MSG_USER_SCN_ENABLE_TIMEOUT:
-        if (nPerfSupport)
-            perfUserScnDisable(ptTimer->handle);
-        ptimer_delete(ptTimer->p_pTimer);
-        reset_timer(ptTimer->idx);
-        break;
+        case TIMER_MSG_USER_SCN_ENABLE_TIMEOUT:
+            if (nPerfSupport) perfUserScnDisable(ptTimer->handle);
+            ptimer_delete(ptTimer->p_pTimer);
+            reset_timer(ptTimer->idx);
+            break;
 
-    case TIMER_MSG_CHECK_USER_SCN_TIMEOUT:
-        if (nPerfSupport) {
-            perfUserScnCheckAll();
-            perfDumpAll();
-        }
-        start_periodic_check_timer(0);
-        break;
+        case TIMER_MSG_CHECK_USER_SCN_TIMEOUT:
+            if (nPerfSupport) {
+                perfUserScnCheckAll();
+                perfDumpAll();
+            }
+            start_periodic_check_timer(0);
+            break;
     }
 
     return 0;
 }
 
-//extern "C"
-int powerd_req(void * pMsg, void ** pRspMsg)
-{
-    struct tScnData    *vpScnData = NULL, *vpRspScn = NULL;
-    struct tHintData   *vpHintData = NULL;
+// extern "C"
+int powerd_req(void* pMsg, void** pRspMsg) {
+    struct tScnData *vpScnData = NULL, *vpRspScn = NULL;
+    struct tHintData* vpHintData = NULL;
     struct tPerfLockData *vpPerfLockData = NULL, *vpRspPerfLock = NULL;
-    struct tAppStateData *vpAppState = NULL;
-    struct tQueryInfoData  *vpQueryData = NULL, *vpRspQuery = NULL;
-    struct tPowerData * vpData = (struct tPowerData *) pMsg;
-    struct tPowerData * vpRsp = NULL;
+    struct tAppStateData* vpAppState = NULL;
+    struct tQueryInfoData *vpQueryData = NULL, *vpRspQuery = NULL;
+    struct tPowerData* vpData = (struct tPowerData*)pMsg;
+    struct tPowerData* vpRsp = NULL;
     struct tSysInfoData *vSysInfoData = NULL, *vpRspSysInfo = NULL;
     int hdl = 0, new_hdl = 0, i, cus_index;
     int hint_hold = 0, ext_hint = 0, ext_hint_hold = 0, launch_boost_time = 0;
-    //struct tHintData        *vpRspHint;
-    //struct tAppStateDate    *vpRspAppState;
+    // struct tHintData        *vpRspHint;
+    // struct tAppStateDate    *vpRspAppState;
 
-    if(!nPerfSupport) {
-        if(vpData->msg != POWER_MSG_MTK_HINT) // log reduction
+    if (!nPerfSupport) {
+        if (vpData->msg != POWER_MSG_MTK_HINT)  // log reduction
             ALOGI("libpowerhal not supported\n");
         return -1;
     }
 
-    if((vpRsp = (struct tPowerData *) malloc(sizeof(struct tPowerData))) == NULL) {
+    if ((vpRsp = (struct tPowerData*)malloc(sizeof(struct tPowerData))) == NULL) {
         ALOGI("%s malloc failed\n", __func__);
         return -1;
     }
 
-    if(vpRsp) {
+    if (vpRsp) {
         vpRsp->msg = vpData->msg;
         vpRsp->pBuf = NULL;
     }
 
-    if(vpData) {
-        switch(vpData->msg) {
-        case POWER_MSG_AOSP_HINT:
-            if(vpData->pBuf && powerdOnOff) {
-                vpHintData = (struct tHintData*)(vpData->pBuf);
+    if (vpData) {
+        switch (vpData->msg) {
+            case POWER_MSG_AOSP_HINT:
+                if (vpData->pBuf && powerdOnOff) {
+                    vpHintData = (struct tHintData*)(vpData->pBuf);
 
-                ALOGD("[powerd_req] POWER_MSG_AOSP_HINT: hint:%d, data:%d", vpHintData->hint, vpHintData->data);
-                if(vpHintData->data) {
-                    perfBoostEnable(vpHintData->hint);
+                    ALOGD("[powerd_req] POWER_MSG_AOSP_HINT: hint:%d, data:%d", vpHintData->hint,
+                          vpHintData->data);
+                    if (vpHintData->data) {
+                        perfBoostEnable(vpHintData->hint);
 
-                    /* All power hint support timeout */
-                    remove_scn_timer(TIMER_MSG_POWER_HINT_ENABLE_TIMEOUT, vpHintData->hint);
-                    if(vpHintData->data != MTKPOWER_HINT_ALWAYS_ENABLE) { // not MTK_HINT_ALWAYS_ENABLE
-                        start_scn_timer(TIMER_MSG_POWER_HINT_ENABLE_TIMEOUT, vpHintData->hint, vpHintData->data);
-                    }
-                } else {
-                    perfBoostDisable(vpHintData->hint);
-                }
-            }
-            break;
-
-        case POWER_MSG_SCN_DISABLE_ALL:
-            if(vpData->pBuf && powerdOnOff) {
-                ALOGI("[powerd_req] POWER_MSG_SCN_DISABLE_ALL");
-                vpScnData = (struct tScnData*)(vpData->pBuf);
-                perfUserScnDisableAll();
-            }
-            break;
-
-        case POWER_MSG_SCN_RESTORE_ALL:
-            if(vpData->pBuf && powerdOnOff) {
-                ALOGI("[powerd_req] POWER_MSG_SCN_RESTORE_ALL");
-                vpScnData = (struct tScnData*)(vpData->pBuf);
-                perfUserScnRestoreAll();
-            }
-            break;
-
-        case POWER_MSG_MTK_HINT:
-            if(vpData->pBuf && powerdOnOff) {
-                vpHintData = (struct tHintData*)(vpData->pBuf);
-
-                ALOGD("[powerd_req] POWER_MSG_MTK_HINT: hint:%d, data:%d", vpHintData->hint, vpHintData->data);
-                if(vpHintData->data) {
-                    remove_scn_timer(TIMER_MSG_POWER_HINT_ENABLE_TIMEOUT, vpHintData->hint);
-                    if(vpHintData->data != MTKPOWER_HINT_ALWAYS_ENABLE) { // not MTKPOWER_HINT_ALWAYS_ENABLE
-                        start_scn_timer(TIMER_MSG_POWER_HINT_ENABLE_TIMEOUT, vpHintData->hint, vpHintData->data);
-                    }
-
-                    perfBoostEnable(vpHintData->hint);
-
-                    if (vpHintData->hint == MTKPOWER_HINT_PROCESS_CREATE && vpHintData->data > 1)
-                        bDuringProcessCreate = 1; // for white list boost
-
-                } else {
-                    remove_scn_timer(TIMER_MSG_POWER_HINT_ENABLE_TIMEOUT, vpHintData->hint);
-
-                    /* hint hold time */
-                    hint_hold = perfUserGetCapability(MTKPOWER_CMD_GET_POWER_HINT_HOLD_TIME, vpHintData->hint);
-
-                    if(hint_hold > 0)
-                        start_scn_timer(TIMER_MSG_POWER_HINT_ENABLE_TIMEOUT, vpHintData->hint, hint_hold);
-                    else
+                        /* All power hint support timeout */
+                        remove_scn_timer(TIMER_MSG_POWER_HINT_ENABLE_TIMEOUT, vpHintData->hint);
+                        if (vpHintData->data !=
+                            MTKPOWER_HINT_ALWAYS_ENABLE) {  // not MTK_HINT_ALWAYS_ENABLE
+                            start_scn_timer(TIMER_MSG_POWER_HINT_ENABLE_TIMEOUT, vpHintData->hint,
+                                            vpHintData->data);
+                        }
+                    } else {
                         perfBoostDisable(vpHintData->hint);
-
-                    /* ext hint */
-                    ext_hint = perfUserGetCapability(MTKPOWER_CMD_GET_POWER_HINT_EXT_HINT, vpHintData->hint);
-                    if(ext_hint > 0) {
-                        ext_hint_hold = perfUserGetCapability(MTKPOWER_CMD_GET_POWER_HINT_EXT_HINT_HOLD_TIME, vpHintData->hint);
-                        if(ext_hint_hold > 0) {
-                            perfBoostEnable(ext_hint);
-                            remove_scn_timer(TIMER_MSG_POWER_HINT_ENABLE_TIMEOUT, ext_hint);
-                            start_scn_timer(TIMER_MSG_POWER_HINT_ENABLE_TIMEOUT, ext_hint, ext_hint_hold);
-                        }
                     }
-
-                    ALOGV("[powerd_req] POWER_MSG_MTK_HINT: hint:%d, hold:%d, ext:%d, ext_hold:%d", vpHintData->hint, hint_hold, ext_hint, ext_hint_hold);
-
-                    if (vpHintData->hint == MTKPOWER_HINT_PROCESS_CREATE)
-                        bDuringProcessCreate = 0; // for white list boost
                 }
-            }
-            break;
+                break;
 
-        case POWER_MSG_MTK_CUS_HINT:
-            if(vpData->pBuf && powerdOnOff) {
-                vpHintData = (struct tHintData*)(vpData->pBuf);
-
-                if(vpHintData->hint >= (int)MtkCusPowerHintInternal::MTK_CUS_HINT_NUM) {
-                    ALOGI("[powerd_req] unsupport cus hint:%d", vpHintData->hint);
-                    break;
+            case POWER_MSG_SCN_DISABLE_ALL:
+                if (vpData->pBuf && powerdOnOff) {
+                    ALOGI("[powerd_req] POWER_MSG_SCN_DISABLE_ALL");
+                    vpScnData = (struct tScnData*)(vpData->pBuf);
+                    perfUserScnDisableAll();
                 }
+                break;
 
-                hdl = gtCusHintTbl[vpHintData->hint];
-                ALOGI("[powerd_req] POWER_MSG_MTK_CUS_HINT: hint:%d, hdl:%d, data:%d", vpHintData->hint, hdl, vpHintData->data);
-                if(vpHintData->data) {
-                    remove_scn_timer(TIMER_MSG_PERF_LOCK_TIMEOUT, hdl);
-                    //gtCusHintTbl[vpHintData->hint] = perfLockAcq()
-                    cus_index = -1;
-                    for (i=0; cusHintConfigImpl[i].hint!=-1; i++) {
-                        if(cusHintConfigImpl[i].hint == vpHintData->hint) {
-                            cus_index = i;
-                            break;
+            case POWER_MSG_SCN_RESTORE_ALL:
+                if (vpData->pBuf && powerdOnOff) {
+                    ALOGI("[powerd_req] POWER_MSG_SCN_RESTORE_ALL");
+                    vpScnData = (struct tScnData*)(vpData->pBuf);
+                    perfUserScnRestoreAll();
+                }
+                break;
+
+            case POWER_MSG_MTK_HINT:
+                if (vpData->pBuf && powerdOnOff) {
+                    vpHintData = (struct tHintData*)(vpData->pBuf);
+
+                    ALOGD("[powerd_req] POWER_MSG_MTK_HINT: hint:%d, data:%d", vpHintData->hint,
+                          vpHintData->data);
+                    if (vpHintData->data) {
+                        remove_scn_timer(TIMER_MSG_POWER_HINT_ENABLE_TIMEOUT, vpHintData->hint);
+                        if (vpHintData->data !=
+                            MTKPOWER_HINT_ALWAYS_ENABLE) {  // not MTKPOWER_HINT_ALWAYS_ENABLE
+                            start_scn_timer(TIMER_MSG_POWER_HINT_ENABLE_TIMEOUT, vpHintData->hint,
+                                            vpHintData->data);
                         }
-                    }
 
-                    if(cus_index == -1) {
+                        perfBoostEnable(vpHintData->hint);
+
+                        if (vpHintData->hint == MTKPOWER_HINT_PROCESS_CREATE &&
+                            vpHintData->data > 1)
+                            bDuringProcessCreate = 1;  // for white list boost
+
+                    } else {
+                        remove_scn_timer(TIMER_MSG_POWER_HINT_ENABLE_TIMEOUT, vpHintData->hint);
+
+                        /* hint hold time */
+                        hint_hold = perfUserGetCapability(MTKPOWER_CMD_GET_POWER_HINT_HOLD_TIME,
+                                                          vpHintData->hint);
+
+                        if (hint_hold > 0)
+                            start_scn_timer(TIMER_MSG_POWER_HINT_ENABLE_TIMEOUT, vpHintData->hint,
+                                            hint_hold);
+                        else
+                            perfBoostDisable(vpHintData->hint);
+
+                        /* ext hint */
+                        ext_hint = perfUserGetCapability(MTKPOWER_CMD_GET_POWER_HINT_EXT_HINT,
+                                                         vpHintData->hint);
+                        if (ext_hint > 0) {
+                            ext_hint_hold = perfUserGetCapability(
+                                    MTKPOWER_CMD_GET_POWER_HINT_EXT_HINT_HOLD_TIME,
+                                    vpHintData->hint);
+                            if (ext_hint_hold > 0) {
+                                perfBoostEnable(ext_hint);
+                                remove_scn_timer(TIMER_MSG_POWER_HINT_ENABLE_TIMEOUT, ext_hint);
+                                start_scn_timer(TIMER_MSG_POWER_HINT_ENABLE_TIMEOUT, ext_hint,
+                                                ext_hint_hold);
+                            }
+                        }
+
+                        ALOGV("[powerd_req] POWER_MSG_MTK_HINT: hint:%d, hold:%d, ext:%d, "
+                              "ext_hold:%d",
+                              vpHintData->hint, hint_hold, ext_hint, ext_hint_hold);
+
+                        if (vpHintData->hint == MTKPOWER_HINT_PROCESS_CREATE)
+                            bDuringProcessCreate = 0;  // for white list boost
+                    }
+                }
+                break;
+
+            case POWER_MSG_MTK_CUS_HINT:
+                if (vpData->pBuf && powerdOnOff) {
+                    vpHintData = (struct tHintData*)(vpData->pBuf);
+
+                    if (vpHintData->hint >= (int)MtkCusPowerHintInternal::MTK_CUS_HINT_NUM) {
                         ALOGI("[powerd_req] unsupport cus hint:%d", vpHintData->hint);
                         break;
                     }
 
-                #ifdef PERFD_DEBUG_LOG
-                    /* data log */
-                    for(i=0; i<cusHintConfigImpl[cus_index].size; i+=2) {
-                        ALOGI("[powerd_req] POWER_MSG_MTK_CUS_HINT: data:%x,%d", cusHintConfigImpl[cus_index].rscList[i], cusHintConfigImpl[cus_index].rscList[i+1]);
-                    }
-                #endif
-
-                    new_hdl = perfLockAcq(cusHintConfigImpl[cus_index].rscList, hdl,
-                        cusHintConfigImpl[cus_index].size, gMyPid, gMyTid, vpHintData->data);
-
-                    if(vpHintData->data != MTKPOWER_HINT_ALWAYS_ENABLE) { // not MTK_HINT_ALWAYS_ENABLE
-                        if(hdl == new_hdl)
-                            remove_scn_timer(TIMER_MSG_PERF_LOCK_TIMEOUT, new_hdl);
-                        start_scn_timer(TIMER_MSG_PERF_LOCK_TIMEOUT, new_hdl, vpHintData->data);
-                    }
-                    gtCusHintTbl[vpHintData->hint] = new_hdl;
-                }
-                else {
                     hdl = gtCusHintTbl[vpHintData->hint];
-                    remove_scn_timer(TIMER_MSG_PERF_LOCK_TIMEOUT, hdl);
-                    perfLockRel(hdl);
-                    gtCusHintTbl[vpHintData->hint] = 0;
-                }
-            }
-            break;
+                    ALOGI("[powerd_req] POWER_MSG_MTK_CUS_HINT: hint:%d, hdl:%d, data:%d",
+                          vpHintData->hint, hdl, vpHintData->data);
+                    if (vpHintData->data) {
+                        remove_scn_timer(TIMER_MSG_PERF_LOCK_TIMEOUT, hdl);
+                        // gtCusHintTbl[vpHintData->hint] = perfLockAcq()
+                        cus_index = -1;
+                        for (i = 0; cusHintConfigImpl[i].hint != -1; i++) {
+                            if (cusHintConfigImpl[i].hint == vpHintData->hint) {
+                                cus_index = i;
+                                break;
+                            }
+                        }
 
-        case POWER_MSG_NOTIFY_STATE:
-            ALOGV("[powerd_req] POWER_MSG_NOTIFY_STATE");
-            if(vpData->pBuf && powerdOnOff) {
-                vpAppState = (struct tAppStateData*)(vpData->pBuf);
-                ALOGV("POWER_MSG_NOTIFY_STATE: %s, %s, %d, %d, %d", vpAppState->pack, vpAppState->activity, vpAppState->state, vpAppState->pid, vpAppState->uid);
-                perfNotifyAppState(vpAppState->pack, vpAppState->activity, vpAppState->state, vpAppState->pid, vpAppState->uid);
+                        if (cus_index == -1) {
+                            ALOGI("[powerd_req] unsupport cus hint:%d", vpHintData->hint);
+                            break;
+                        }
 
-                /* package switch => check white list boost */
-                if (vpAppState->state == STATE_RESUMED && strcmp(vpAppState->pack, currPackname) != 0) {
-                    /* disable white list boost first */
-                    ALOGI("[powerd_req] POWER_MSG_NOTIFY_STATE, pc:%d, %s => %s", bDuringProcessCreate, currPackname, vpAppState->pack);
-                    strncpy(currPackname, vpAppState->pack, sizeof(currPackname)-1);
+#ifdef PERFD_DEBUG_LOG
+                        /* data log */
+                        for (i = 0; i < cusHintConfigImpl[cus_index].size; i += 2) {
+                            ALOGI("[powerd_req] POWER_MSG_MTK_CUS_HINT: data:%x,%d",
+                                  cusHintConfigImpl[cus_index].rscList[i],
+                                  cusHintConfigImpl[cus_index].rscList[i + 1]);
+                        }
+#endif
 
-                    remove_scn_timer(TIMER_MSG_POWER_HINT_ENABLE_TIMEOUT, MTKPOWER_HINT_WHITELIST_LAUNCH);
-                    perfBoostDisable(MTKPOWER_HINT_WHITELIST_LAUNCH);
+                        new_hdl = perfLockAcq(cusHintConfigImpl[cus_index].rscList, hdl,
+                                              cusHintConfigImpl[cus_index].size, gMyPid, gMyTid,
+                                              vpHintData->data);
 
-                    if (bDuringProcessCreate)
-                        launch_boost_time = perfUserGetCapability(MTKPOWER_CMD_GET_LAUNCH_TIME_COLD, 0);
-                    else
-                        launch_boost_time = perfUserGetCapability(MTKPOWER_CMD_GET_LAUNCH_TIME_WARM, 0);
-
-                    if( launch_boost_time > 0) {
-                        start_scn_timer(TIMER_MSG_POWER_HINT_ENABLE_TIMEOUT, MTKPOWER_HINT_WHITELIST_LAUNCH, launch_boost_time);
-                        perfBoostEnable(MTKPOWER_HINT_WHITELIST_LAUNCH);
+                        if (vpHintData->data !=
+                            MTKPOWER_HINT_ALWAYS_ENABLE) {  // not MTK_HINT_ALWAYS_ENABLE
+                            if (hdl == new_hdl)
+                                remove_scn_timer(TIMER_MSG_PERF_LOCK_TIMEOUT, new_hdl);
+                            start_scn_timer(TIMER_MSG_PERF_LOCK_TIMEOUT, new_hdl, vpHintData->data);
+                        }
+                        gtCusHintTbl[vpHintData->hint] = new_hdl;
+                    } else {
+                        hdl = gtCusHintTbl[vpHintData->hint];
+                        remove_scn_timer(TIMER_MSG_PERF_LOCK_TIMEOUT, hdl);
+                        perfLockRel(hdl);
+                        gtCusHintTbl[vpHintData->hint] = 0;
                     }
                 }
-            }
-            break;
+                break;
 
-        case POWER_MSG_QUERY_INFO:
-            ALOGV("[powerd_req] POWER_MSG_QUERY_INFO");
+            case POWER_MSG_NOTIFY_STATE:
+                ALOGV("[powerd_req] POWER_MSG_NOTIFY_STATE");
+                if (vpData->pBuf && powerdOnOff) {
+                    vpAppState = (struct tAppStateData*)(vpData->pBuf);
+                    ALOGV("POWER_MSG_NOTIFY_STATE: %s, %s, %d, %d, %d", vpAppState->pack,
+                          vpAppState->activity, vpAppState->state, vpAppState->pid,
+                          vpAppState->uid);
+                    perfNotifyAppState(vpAppState->pack, vpAppState->activity, vpAppState->state,
+                                       vpAppState->pid, vpAppState->uid);
 
-            if(vpData->pBuf) {
-                if((vpRspQuery = (struct tQueryInfoData*)malloc(sizeof(struct tQueryInfoData))) == NULL)
-                    break;
+                    /* package switch => check white list boost */
+                    if (vpAppState->state == STATE_RESUMED &&
+                        strcmp(vpAppState->pack, currPackname) != 0) {
+                        /* disable white list boost first */
+                        ALOGI("[powerd_req] POWER_MSG_NOTIFY_STATE, pc:%d, %s => %s",
+                              bDuringProcessCreate, currPackname, vpAppState->pack);
+                        strncpy(currPackname, vpAppState->pack, sizeof(currPackname) - 1);
 
-                vpQueryData = (struct tQueryInfoData*)(vpData->pBuf);
-                ALOGD("[powerd_req] POWER_MSG_QUERY_INFO: cmd:%d, param:%d", vpQueryData->cmd, vpQueryData->param);
+                        remove_scn_timer(TIMER_MSG_POWER_HINT_ENABLE_TIMEOUT,
+                                         MTKPOWER_HINT_WHITELIST_LAUNCH);
+                        perfBoostDisable(MTKPOWER_HINT_WHITELIST_LAUNCH);
 
-                if(vpQueryData->cmd == MTKPOWER_CMD_GET_DEBUG_DUMP_ALL) {
-                    perfDumpAll();
-                } else if(vpQueryData->cmd == MTKPOWER_CMD_GET_POWERHAL_ONOFF) {
-                    powerdOnOff = vpQueryData->param;
-                } else {
-                   vpRspQuery->value = perfUserGetCapability(vpQueryData->cmd, vpQueryData->param);
+                        if (bDuringProcessCreate)
+                            launch_boost_time =
+                                    perfUserGetCapability(MTKPOWER_CMD_GET_LAUNCH_TIME_COLD, 0);
+                        else
+                            launch_boost_time =
+                                    perfUserGetCapability(MTKPOWER_CMD_GET_LAUNCH_TIME_WARM, 0);
+
+                        if (launch_boost_time > 0) {
+                            start_scn_timer(TIMER_MSG_POWER_HINT_ENABLE_TIMEOUT,
+                                            MTKPOWER_HINT_WHITELIST_LAUNCH, launch_boost_time);
+                            perfBoostEnable(MTKPOWER_HINT_WHITELIST_LAUNCH);
+                        }
+                    }
                 }
-                vpRsp->pBuf = (void*)vpRspQuery;
-            }
-            break;
+                break;
 
-        case POWER_MSG_SET_SYSINFO:
-            if (vpData->pBuf && powerdOnOff) {
-                if((vpRspSysInfo = (struct tSysInfoData*)malloc(sizeof(struct tSysInfoData))) == NULL)
-                    break;
+            case POWER_MSG_QUERY_INFO:
+                ALOGV("[powerd_req] POWER_MSG_QUERY_INFO");
 
-                vSysInfoData = (struct tSysInfoData*)(vpData->pBuf);
-                ALOGD("[powerd_req] POWER_MSG_SET_SYSINFO, type:%d, str:%s", vSysInfoData->type, vSysInfoData->data);
-                vpRspSysInfo->ret = perfSetSysInfo(vSysInfoData->type, vSysInfoData->data);
-                vpRsp->pBuf = (void*)vpRspSysInfo;
-            }
-            break;
+                if (vpData->pBuf) {
+                    if ((vpRspQuery = (struct tQueryInfoData*)malloc(
+                                 sizeof(struct tQueryInfoData))) == NULL)
+                        break;
 
-        case POWER_MSG_PERF_LOCK_ACQ:
-            if(vpData->pBuf && powerdOnOff) {
-                if((vpRspPerfLock = (struct tPerfLockData*)malloc(sizeof(struct tPerfLockData))) == NULL)
-                    break;
+                    vpQueryData = (struct tQueryInfoData*)(vpData->pBuf);
+                    ALOGD("[powerd_req] POWER_MSG_QUERY_INFO: cmd:%d, param:%d", vpQueryData->cmd,
+                          vpQueryData->param);
 
-                vpPerfLockData = (struct tPerfLockData*)(vpData->pBuf);
-
-                ALOGI("[powerd_req] POWER_MSG_PERF_LOCK_ACQ: hdl:%d, duration:%d", vpPerfLockData->hdl, vpPerfLockData->duration);
-
-                remove_scn_timer(TIMER_MSG_PERF_LOCK_TIMEOUT, vpPerfLockData->hdl);
-
-            #ifdef PERFD_DEBUG_LOG
-                ALOGI("lock data size:%d", vpPerfLockData->size);
-                for (i=0; i<vpPerfLockData->size; i++)
-                    ALOGI("data:%d", vpPerfLockData->rscList[i]);
-            #endif
-
-                hdl = perfLockAcq(vpPerfLockData->rscList, vpPerfLockData->hdl,
-                    vpPerfLockData->size, vpPerfLockData->pid, vpPerfLockData->uid, vpPerfLockData->duration);
-                ALOGI("[powerd_req] POWER_MSG_PERF_LOCK_ACQ: return hdl:%d", hdl);
-                vpRspPerfLock->hdl = hdl;
-                vpRsp->pBuf = (void*)vpRspPerfLock;
-
-                if(vpPerfLockData->duration != 0 && hdl > 0) { // not MTK_HINT_ALWAYS_ENABLE
-                    start_scn_timer(TIMER_MSG_PERF_LOCK_TIMEOUT, hdl, vpPerfLockData->duration);
+                    if (vpQueryData->cmd == MTKPOWER_CMD_GET_DEBUG_DUMP_ALL) {
+                        perfDumpAll();
+                    } else if (vpQueryData->cmd == MTKPOWER_CMD_GET_POWERHAL_ONOFF) {
+                        powerdOnOff = vpQueryData->param;
+                    } else {
+                        vpRspQuery->value =
+                                perfUserGetCapability(vpQueryData->cmd, vpQueryData->param);
+                    }
+                    vpRsp->pBuf = (void*)vpRspQuery;
                 }
-            }
-            break;
+                break;
 
-        case POWER_MSG_PERF_LOCK_REL:
-            if(vpData->pBuf && powerdOnOff) {
-                vpPerfLockData = (struct tPerfLockData*)(vpData->pBuf);
+            case POWER_MSG_SET_SYSINFO:
+                if (vpData->pBuf && powerdOnOff) {
+                    if ((vpRspSysInfo =
+                                 (struct tSysInfoData*)malloc(sizeof(struct tSysInfoData))) == NULL)
+                        break;
 
-                ALOGI("[powerd_req] POWER_MSG_PERF_LOCK_REL: hdl:%d", vpPerfLockData->hdl);
-
-                remove_scn_timer(TIMER_MSG_PERF_LOCK_TIMEOUT, vpPerfLockData->hdl);
-
-                if(vpPerfLockData->hdl) {
-                    perfLockRel(vpPerfLockData->hdl);
+                    vSysInfoData = (struct tSysInfoData*)(vpData->pBuf);
+                    ALOGD("[powerd_req] POWER_MSG_SET_SYSINFO, type:%d, str:%s", vSysInfoData->type,
+                          vSysInfoData->data);
+                    vpRspSysInfo->ret = perfSetSysInfo(vSysInfoData->type, vSysInfoData->data);
+                    vpRsp->pBuf = (void*)vpRspSysInfo;
                 }
-            }
-            break;
+                break;
 
-        case POWER_MSG_SCN_REG:
-            ALOGV("[powerd_req] POWER_MSG_SCN_REG");
+            case POWER_MSG_PERF_LOCK_ACQ:
+                if (vpData->pBuf && powerdOnOff) {
+                    if ((vpRspPerfLock = (struct tPerfLockData*)malloc(
+                                 sizeof(struct tPerfLockData))) == NULL)
+                        break;
 
-            if(vpData->pBuf) {
-                if((vpRspScn = (struct tScnData*)malloc(sizeof(struct tScnData))) == NULL)
-                    break;
+                    vpPerfLockData = (struct tPerfLockData*)(vpData->pBuf);
 
-                vpScnData = (struct tScnData*)(vpData->pBuf);
-                ALOGD("[powerd_req] POWER_MSG_SCN_REG: pid:%d, uid:%d", vpScnData->param1, vpScnData->param2);
+                    ALOGI("[powerd_req] POWER_MSG_PERF_LOCK_ACQ: hdl:%d, duration:%d",
+                          vpPerfLockData->hdl, vpPerfLockData->duration);
 
-                vpRspScn->handle = perfUserRegScn(vpScnData->param1,vpScnData->param2); // allocate handle
-                vpRsp->pBuf = (void*)vpRspScn;
-            }
-            break;
+                    remove_scn_timer(TIMER_MSG_PERF_LOCK_TIMEOUT, vpPerfLockData->hdl);
 
-        case POWER_MSG_SCN_CONFIG:
-            if(vpData->pBuf) {
-                vpScnData = (struct tScnData*)(vpData->pBuf);
-                ALOGD("[powerd_req] POWER_MSG_SCN_CONFIG: hdl:%d, cmd:%d, param1:%d, param2:%d",
-                    vpScnData->handle, vpScnData->command, vpScnData->param1, vpScnData->param2);
-                perfUserRegScnConfig(vpScnData->handle, vpScnData->command, vpScnData->param1, vpScnData->param2, vpScnData->param3, vpScnData->param4);
-            }
-            break;
+#ifdef PERFD_DEBUG_LOG
+                    ALOGI("lock data size:%d", vpPerfLockData->size);
+                    for (i = 0; i < vpPerfLockData->size; i++)
+                        ALOGI("data:%d", vpPerfLockData->rscList[i]);
+#endif
 
-        case POWER_MSG_SCN_UNREG:
-            if(vpData->pBuf) {
-                vpScnData = (struct tScnData*)(vpData->pBuf);
-                ALOGD("[powerd_req] POWER_MSG_SCN_UNREG: hdl:%d", vpScnData->handle);
-                perfUserUnregScn(vpScnData->handle);
-            }
-            break;
+                    hdl = perfLockAcq(vpPerfLockData->rscList, vpPerfLockData->hdl,
+                                      vpPerfLockData->size, vpPerfLockData->pid,
+                                      vpPerfLockData->uid, vpPerfLockData->duration);
+                    ALOGI("[powerd_req] POWER_MSG_PERF_LOCK_ACQ: return hdl:%d", hdl);
+                    vpRspPerfLock->hdl = hdl;
+                    vpRsp->pBuf = (void*)vpRspPerfLock;
 
-        case POWER_MSG_SCN_ENABLE:
-            if(vpData->pBuf) {
-                vpScnData = (struct tScnData*)(vpData->pBuf);
-                ALOGD("[powerd_req] POWER_MSG_SCN_ENABLE: hdl:%d, timeout:%d", vpScnData->handle, vpScnData->timeout);
-
-                remove_scn_timer(TIMER_MSG_USER_SCN_ENABLE_TIMEOUT, vpScnData->handle);
-                if(vpScnData->timeout > 0) {
-                    start_scn_timer(TIMER_MSG_USER_SCN_ENABLE_TIMEOUT, vpScnData->handle, vpScnData->timeout);
+                    if (vpPerfLockData->duration != 0 && hdl > 0) {  // not MTK_HINT_ALWAYS_ENABLE
+                        start_scn_timer(TIMER_MSG_PERF_LOCK_TIMEOUT, hdl, vpPerfLockData->duration);
+                    }
                 }
-                perfUserScnEnable(vpScnData->handle);
-            }
-            break;
+                break;
 
-        case POWER_MSG_SCN_DISABLE:
-            if(vpData->pBuf) {
-                vpScnData = (struct tScnData*)(vpData->pBuf);
+            case POWER_MSG_PERF_LOCK_REL:
+                if (vpData->pBuf && powerdOnOff) {
+                    vpPerfLockData = (struct tPerfLockData*)(vpData->pBuf);
 
-                remove_scn_timer(TIMER_MSG_USER_SCN_ENABLE_TIMEOUT, vpScnData->handle);
-                perfUserScnDisable(vpScnData->handle);
-            }
-            break;
+                    ALOGI("[powerd_req] POWER_MSG_PERF_LOCK_REL: hdl:%d", vpPerfLockData->hdl);
 
+                    remove_scn_timer(TIMER_MSG_PERF_LOCK_TIMEOUT, vpPerfLockData->hdl);
 
-        default:
-            ALOGI("unknown message");
-            break;
+                    if (vpPerfLockData->hdl) {
+                        perfLockRel(vpPerfLockData->hdl);
+                    }
+                }
+                break;
+
+            case POWER_MSG_SCN_REG:
+                ALOGV("[powerd_req] POWER_MSG_SCN_REG");
+
+                if (vpData->pBuf) {
+                    if ((vpRspScn = (struct tScnData*)malloc(sizeof(struct tScnData))) == NULL)
+                        break;
+
+                    vpScnData = (struct tScnData*)(vpData->pBuf);
+                    ALOGD("[powerd_req] POWER_MSG_SCN_REG: pid:%d, uid:%d", vpScnData->param1,
+                          vpScnData->param2);
+
+                    vpRspScn->handle = perfUserRegScn(vpScnData->param1,
+                                                      vpScnData->param2);  // allocate handle
+                    vpRsp->pBuf = (void*)vpRspScn;
+                }
+                break;
+
+            case POWER_MSG_SCN_CONFIG:
+                if (vpData->pBuf) {
+                    vpScnData = (struct tScnData*)(vpData->pBuf);
+                    ALOGD("[powerd_req] POWER_MSG_SCN_CONFIG: hdl:%d, cmd:%d, param1:%d, param2:%d",
+                          vpScnData->handle, vpScnData->command, vpScnData->param1,
+                          vpScnData->param2);
+                    perfUserRegScnConfig(vpScnData->handle, vpScnData->command, vpScnData->param1,
+                                         vpScnData->param2, vpScnData->param3, vpScnData->param4);
+                }
+                break;
+
+            case POWER_MSG_SCN_UNREG:
+                if (vpData->pBuf) {
+                    vpScnData = (struct tScnData*)(vpData->pBuf);
+                    ALOGD("[powerd_req] POWER_MSG_SCN_UNREG: hdl:%d", vpScnData->handle);
+                    perfUserUnregScn(vpScnData->handle);
+                }
+                break;
+
+            case POWER_MSG_SCN_ENABLE:
+                if (vpData->pBuf) {
+                    vpScnData = (struct tScnData*)(vpData->pBuf);
+                    ALOGD("[powerd_req] POWER_MSG_SCN_ENABLE: hdl:%d, timeout:%d",
+                          vpScnData->handle, vpScnData->timeout);
+
+                    remove_scn_timer(TIMER_MSG_USER_SCN_ENABLE_TIMEOUT, vpScnData->handle);
+                    if (vpScnData->timeout > 0) {
+                        start_scn_timer(TIMER_MSG_USER_SCN_ENABLE_TIMEOUT, vpScnData->handle,
+                                        vpScnData->timeout);
+                    }
+                    perfUserScnEnable(vpScnData->handle);
+                }
+                break;
+
+            case POWER_MSG_SCN_DISABLE:
+                if (vpData->pBuf) {
+                    vpScnData = (struct tScnData*)(vpData->pBuf);
+
+                    remove_scn_timer(TIMER_MSG_USER_SCN_ENABLE_TIMEOUT, vpScnData->handle);
+                    perfUserScnDisable(vpScnData->handle);
+                }
+                break;
+
+            default:
+                ALOGI("unknown message");
+                break;
         }
 
-        *pRspMsg = (void *) vpRsp;
+        *pRspMsg = (void*)vpRsp;
     }
 
     return 0;

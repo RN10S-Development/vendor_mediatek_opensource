@@ -30,20 +30,17 @@
 
 #include <stdio.h>
 
-namespace android
-{
+namespace android {
 
-class Mode
-{
-public:
+class Mode {
+  public:
     static const int ConsumeRights = 0x00;
     static const int CheckRightsStatus = 0x01;
     static const int GetConstraints = 0x02;
 };
 
-class DrmUtil
-{
-public:
+class DrmUtil {
+  public:
     static bool checkDir(String8 dir);
     static bool checkExistence(String8 filePath);
 
@@ -76,7 +73,8 @@ public:
     static ByteBuffer getDrmKey();
 
     static ByteBuffer base64_decode_bytebuffer(ByteBuffer& buf);
-    static void base64_decrypt_buffer(unsigned char* input, unsigned char* output, int inputLength, int& outputLength);
+    static void base64_decrypt_buffer(unsigned char* input, unsigned char* output, int inputLength,
+                                      int& outputLength);
     static void rc4_encrypt_buffer(unsigned char* toBuffer, unsigned char* fromBuffer, int size);
     static void rc4_decrypt_buffer(unsigned char* toBuffer, unsigned char* fromBuffer, int size);
     static String8 hash(char* seed, int seedLen);
@@ -85,7 +83,7 @@ public:
      */
     static String8 getPathFromFd(int fd);
 
-public:
+  public:
     // checkDir
     static void CreateMulvPath(char* muldir);
 
@@ -121,7 +119,7 @@ public:
     // common
     static bool isEntryValid(Entry* entry);
     static bool isEntryUsable(Entry* entry);
-    static int getEntryNum(String8 ro_file); // deprecated, use with caution
+    static int getEntryNum(String8 ro_file);  // deprecated, use with caution
 
     // others
     static String8 readIMEI();
@@ -131,21 +129,19 @@ public:
     // for secure timer
     static int getTZOffset();
 
-public:
+  public:
     static Mutex mROLock;
     static Mutex mDCFLock;
     static bool sDDebug;
     static bool sVDebug;
 
-private:
-
+  private:
     /**
      * MAC address like 00:11:ee:ff:aa:10
      */
     static void getMAC(String8& mac);
-
 };
 
-}
+}  // namespace android
 
 #endif /* DRMUTIL_H_ */

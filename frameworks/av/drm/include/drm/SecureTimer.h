@@ -22,12 +22,10 @@
 #include <utils/threads.h>
 #include <time.h>
 
-namespace android
-{
+namespace android {
 
-class SecureTimer
-{
-public:
+class SecureTimer {
+  public:
     static const int RESULT_OK = DRM_NO_ERROR;
     static const int RESULT_ERR = DRM_ERROR_UNKNOWN;
 
@@ -35,45 +33,45 @@ public:
     static const int CLOCK_INVALID = -1;
     static const int CLOCK_NEED_SYNC = -2;
 
-public:  // singleton pattern
+  public:  // singleton pattern
     static SecureTimer& instance(void);
 
-private:  // avoid explicit construct
+  private:  // avoid explicit construct
     SecureTimer();
     SecureTimer(const SecureTimer& copy);
     SecureTimer& operator=(SecureTimer& other);
 
-public:
+  public:
     ~SecureTimer();
 
-public:
+  public:
     bool isValid();
     int updateTimeBase();
     int updateOffset();
     int updateDRMTime(time_t offset);
-    int getDRMTime(time_t& t); // time_t: long in linux
+    int getDRMTime(time_t& t);  // time_t: long in linux
     time_t getOffset();
     int load();
     int save();
     void reset();
 
-private:
+  private:
     time_t deviceTime();
     time_t deviceTicks();
 
-private:
-    static SecureTimer* m_pTimer; // for singleton pattern
-    bool m_bIsValid;    // ture if the secure clock is in valid state
-    time_t m_nOffset;   // in seconds, (t_device + offset == t_real)
-    time_t m_nBaseTicks;// in seconds, the interval since last boot of system
-    time_t m_nBaseTime; // in seconds, the device time value
-    time_t m_nLastSync; // in seconds, the time after the offset is synchronized by SNTP
-    time_t m_nLastSave; // in seconds, the time every time the secure clock state is saved
+  private:
+    static SecureTimer* m_pTimer;  // for singleton pattern
+    bool m_bIsValid;               // ture if the secure clock is in valid state
+    time_t m_nOffset;              // in seconds, (t_device + offset == t_real)
+    time_t m_nBaseTicks;           // in seconds, the interval since last boot of system
+    time_t m_nBaseTime;            // in seconds, the device time value
+    time_t m_nLastSync;            // in seconds, the time after the offset is synchronized by SNTP
+    time_t m_nLastSave;  // in seconds, the time every time the secure clock state is saved
 
-private:
+  private:
     static Mutex mLock;
 };
 
-} // namespace android
+}  // namespace android
 
 #endif /* SECURETIMER_H_ */

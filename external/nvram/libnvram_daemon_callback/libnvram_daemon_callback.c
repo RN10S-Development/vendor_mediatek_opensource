@@ -26,13 +26,13 @@
 extern pfCallbackForDaemon callback_for_nvram_daemon;
 
 int my_callback(void) {
-	ALOGD("nvram daemon callback will run!!!");
-	return 0;
+    ALOGD("nvram daemon callback will run!!!");
+    return 0;
 }
 
 int init_callback(void) {
 #ifdef MTK_PRODUCT_INFO_SUPPORT
-	callback_for_nvram_daemon = my_callback;
+    callback_for_nvram_daemon = my_callback;
 #endif
-	return 0;
+    return 0;
 }

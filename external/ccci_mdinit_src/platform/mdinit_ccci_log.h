@@ -19,12 +19,11 @@
 
 #include <android/log.h>
 
-#define CCCI_MD_TAG         "ccci_mdinit"
-#define LOG_PRINT_V(...)    __android_log_print(ANDROID_LOG_VERBOSE, CCCI_MD_TAG, __VA_ARGS__)
-#define LOG_PRINT_D(...)    __android_log_print(ANDROID_LOG_DEBUG, CCCI_MD_TAG, __VA_ARGS__)
-#define LOG_PRINT_I(...)    __android_log_print(ANDROID_LOG_INFO, CCCI_MD_TAG, __VA_ARGS__)
-#define LOG_PRINT_W(...)    __android_log_print(ANDROID_LOG_WARN, CCCI_MD_TAG, __VA_ARGS__)
-#define LOG_PRINT_E(...)    __android_log_print(ANDROID_LOG_ERROR, CCCI_MD_TAG, __VA_ARGS__)
-
+#define CCCI_MD_TAG "ccci_mdinit"
+#define LOG_PRINT_V(...) __android_log_print(ANDROID_LOG_VERBOSE, CCCI_MD_TAG, __VA_ARGS__)
+#define LOG_PRINT_D(...) __android_log_print(ANDROID_LOG_DEBUG, CCCI_MD_TAG, __VA_ARGS__)
+#define LOG_PRINT_I(...) __android_log_print(ANDROID_LOG_INFO, CCCI_MD_TAG, __VA_ARGS__)
+#define LOG_PRINT_W(...) __android_log_print(ANDROID_LOG_WARN, CCCI_MD_TAG, __VA_ARGS__)
+#define LOG_PRINT_E(...) __android_log_print(ANDROID_LOG_ERROR, CCCI_MD_TAG, __VA_ARGS__)
 
 #endif

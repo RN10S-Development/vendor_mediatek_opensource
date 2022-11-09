@@ -28,24 +28,25 @@ namespace nvram {
 namespace V1_0 {
 namespace implementation {
 
-using ::android::hidl::base::V1_0::DebugInfo;
-using ::android::hidl::base::V1_0::IBase;
-using ::vendor::mediatek::hardware::nvram::V1_0::INvram;
+using ::android::sp;
 using ::android::hardware::hidl_array;
 using ::android::hardware::hidl_memory;
 using ::android::hardware::hidl_string;
 using ::android::hardware::hidl_vec;
 using ::android::hardware::Return;
 using ::android::hardware::Void;
-using ::android::sp;
+using ::android::hidl::base::V1_0::DebugInfo;
+using ::android::hidl::base::V1_0::IBase;
+using ::vendor::mediatek::hardware::nvram::V1_0::INvram;
 
 struct Nvram : public INvram {
     // Methods from ::vendor::mediatek::hardware::nvram::V1_0::INvram follow.
-    Return<void> readFileByName(const hidl_string& filename, uint32_t size, readFileByName_cb _hidl_cb) override;
-    Return<int8_t> writeFileByNamevec(const hidl_string& filename, uint32_t size, const hidl_vec<uint8_t>& data) override;
+    Return<void> readFileByName(const hidl_string& filename, uint32_t size,
+                                readFileByName_cb _hidl_cb) override;
+    Return<int8_t> writeFileByNamevec(const hidl_string& filename, uint32_t size,
+                                      const hidl_vec<uint8_t>& data) override;
 
     // Methods from ::android::hidl::base::V1_0::IBase follow.
-
 };
 
 extern "C" INvram* HIDL_FETCH_INvram(const char* name);

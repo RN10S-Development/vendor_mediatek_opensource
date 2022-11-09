@@ -19,8 +19,5 @@
 
 #include "cfgfileinc/CFG_MDTYPE_File.h"
 
-md_type_struct stMDTypeDefault =
-{
-    0
-};
+md_type_struct stMDTypeDefault = {0};
 #endif /* _CFG_SSW_D_H */

@@ -18,8 +18,7 @@
 #define HARDWARE_LEGACY_WIFI_H
 
 #ifdef __cplusplus
-extern "C"
-{
+extern "C" {
 #endif /* __cplusplus */
 
 /**
@@ -47,18 +46,18 @@ int is_wifi_driver_loaded();
 /**
  * Return the path to requested firmware
  */
-#define WIFI_GET_FW_PATH_STA  0
+#define WIFI_GET_FW_PATH_STA 0
 #define WIFI_GET_FW_PATH_AP 1
-#define WIFI_GET_FW_PATH_P2P  2
-const char *wifi_get_fw_path(int fw_type);
+#define WIFI_GET_FW_PATH_P2P 2
+const char* wifi_get_fw_path(int fw_type);
 
 /**
  * Change the path to firmware for the wlan driver
  */
-int wifi_change_fw_path(const char *fwpath);
+int wifi_change_fw_path(const char* fwpath);
 
 #ifdef __cplusplus
 }
 #endif /* __cplusplus */
 
-#endif  /* HARDWARE_LEGACY_WIFI_H */
+#endif /* HARDWARE_LEGACY_WIFI_H */

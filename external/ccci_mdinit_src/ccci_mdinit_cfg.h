@@ -17,7 +17,7 @@
 #ifndef __CCCI_MD_INIT_CFG_H__
 #define __CCCI_MD_INIT_CFG_H__
 
-#define CCCI_TIMEZONE_FILE      "/data/vendor/ccci_cfg/timezone"
-#define CCCI_TIME_UPDATE_PORT   "/dev/ccci_ipc_5"
+#define CCCI_TIMEZONE_FILE "/data/vendor/ccci_cfg/timezone"
+#define CCCI_TIME_UPDATE_PORT "/dev/ccci_ipc_5"
 
 #endif

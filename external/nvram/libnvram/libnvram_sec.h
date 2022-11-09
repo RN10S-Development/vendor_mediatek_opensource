@@ -23,25 +23,23 @@
 #include "Custom_NvRam_LID.h"
 
 #ifdef __cplusplus
-extern "C"
-{
+extern "C" {
 #endif
 
 #define BOOT_MODE_FILE "/sys/class/BOOT/BOOT/boot/boot_mode"
 #define META_MODE '1'
 #define ADVMETA_MODE '5'
-#define ENCODE  true
-#define DECODE  false
+#define ENCODE true
+#define DECODE false
 
 bool NVM_Enc_Dnc_File(int file_lid, bool IS_end);
 bool NVM_CheckWritePermission(bool IsRead, int file_lid);
 
 typedef struct {
-	int lid;
-	unsigned char meta_mode_write;
-	unsigned char security_enable;
+    int lid;
+    unsigned char meta_mode_write;
+    unsigned char security_enable;
 } TCFG_FILE_PROTECT;
-
 
 /* used for META library */
 #define NVRAM_CIPHER_LEN (16)
@@ -50,21 +48,19 @@ typedef struct {
  *  MODEM CONTEXT FOR BOTH USER SPACE PROGRAM AND KERNEL MODULE
  ******************************************************************************/
 typedef struct {
-	unsigned char data[NVRAM_CIPHER_LEN];
-	unsigned int ret;
+    unsigned char data[NVRAM_CIPHER_LEN];
+    unsigned int ret;
 
 } META_CONTEXT;
 
 /******************************************************************************
  *  EXPORT FUNCTIONS
  ******************************************************************************/
-int __attribute__((weak)) sec_nvram_enc (META_CONTEXT *meta_ctx);
-int __attribute__((weak)) sec_nvram_dec (META_CONTEXT *meta_ctx);
-
+int __attribute__((weak)) sec_nvram_enc(META_CONTEXT* meta_ctx);
+int __attribute__((weak)) sec_nvram_dec(META_CONTEXT* meta_ctx);
 
 #ifdef __cplusplus
 }
 #endif
 
-
-#endif //__NVRAM_LIB_H
+#endif  //__NVRAM_LIB_H

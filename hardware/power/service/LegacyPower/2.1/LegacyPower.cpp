@@ -42,21 +42,11 @@ using MtkPowerCmd_2_0 = ::vendor::mediatek::hardware::power::V2_0::MtkPowerCmd;
 using MtkPowerCmd_2_1 = ::vendor::mediatek::hardware::power::V2_1::MtkPowerCmd;
 using MtkQueryCmd_2_0 = ::vendor::mediatek::hardware::power::V2_0::MtkQueryCmd;
 
-enum spm_mode {
-    DEEPIDLE = 0,
-    SODI3 = 1,
-    SPM_MODE_NUM
-};
+enum spm_mode { DEEPIDLE = 0, SODI3 = 1, SPM_MODE_NUM };
 
-enum spm_voter {
-    AP = 0,
-    SPM_VOTER_NUM
-};
+enum spm_voter { AP = 0, SPM_VOTER_NUM };
 
-enum sub_spm {
-    CONSYS = 0,
-    SUB_SPM_NUM
-};
+enum sub_spm { CONSYS = 0, SUB_SPM_NUM };
 
 static int suspend_count = 0;
 struct timespec suspend_t;
@@ -66,33 +56,33 @@ static int switchLegacyQueryCmd(MtkQueryCmd_2_0 cmd)
 {
     int mtkPowerCmd = -1;
 
-    switch(cmd) {
-    case MtkQueryCmd_2_0::CMD_GET_CLUSTER_NUM:
-        mtkPowerCmd = MTKPOWER_CMD_GET_CLUSTER_NUM;
-        break;
+    switch (cmd) {
+        case MtkQueryCmd_2_0::CMD_GET_CLUSTER_NUM:
+            mtkPowerCmd = MTKPOWER_CMD_GET_CLUSTER_NUM;
+            break;
 
-    case MtkQueryCmd_2_0::CMD_GET_CLUSTER_CPU_NUM:
-        mtkPowerCmd = MTKPOWER_CMD_GET_CLUSTER_CPU_NUM;
-        break;
+        case MtkQueryCmd_2_0::CMD_GET_CLUSTER_CPU_NUM:
+            mtkPowerCmd = MTKPOWER_CMD_GET_CLUSTER_CPU_NUM;
+            break;
 
-    case MtkQueryCmd_2_0::CMD_GET_CLUSTER_CPU_FREQ_MIN:
-        mtkPowerCmd = MTKPOWER_CMD_GET_CLUSTER_CPU_FREQ_MIN;
-        break;
+        case MtkQueryCmd_2_0::CMD_GET_CLUSTER_CPU_FREQ_MIN:
+            mtkPowerCmd = MTKPOWER_CMD_GET_CLUSTER_CPU_FREQ_MIN;
+            break;
 
-    case MtkQueryCmd_2_0::CMD_GET_CLUSTER_CPU_FREQ_MAX:
-        mtkPowerCmd = MTKPOWER_CMD_GET_CLUSTER_CPU_FREQ_MAX;
-        break;
+        case MtkQueryCmd_2_0::CMD_GET_CLUSTER_CPU_FREQ_MAX:
+            mtkPowerCmd = MTKPOWER_CMD_GET_CLUSTER_CPU_FREQ_MAX;
+            break;
 
-    case MtkQueryCmd_2_0::CMD_GET_GPU_FREQ_COUNT:
-        mtkPowerCmd = MTKPOWER_CMD_GET_GPU_FREQ_COUNT;
-        break;
+        case MtkQueryCmd_2_0::CMD_GET_GPU_FREQ_COUNT:
+            mtkPowerCmd = MTKPOWER_CMD_GET_GPU_FREQ_COUNT;
+            break;
 
-    case MtkQueryCmd_2_0::CMD_GET_FOREGROUND_PID:
-        mtkPowerCmd = MTKPOWER_CMD_GET_FOREGROUND_PID;
-        break;
+        case MtkQueryCmd_2_0::CMD_GET_FOREGROUND_PID:
+            mtkPowerCmd = MTKPOWER_CMD_GET_FOREGROUND_PID;
+            break;
 
-    default:
-        break;
+        default:
+            break;
     }
 
     return mtkPowerCmd;
@@ -165,88 +155,84 @@ Power::Power() {}
 
 Power::~Power() {}
 
-void Power::powerHintInternal(int32_t hint, int32_t data)
-{
+void Power::powerHintInternal(int32_t hint, int32_t data) {
     struct tPowerData vPowerData;
-    struct tHintData  vHintData;
-    struct tPowerData *vpRspData = NULL;
+    struct tHintData vHintData;
+    struct tPowerData* vpRspData = NULL;
 
-    //ALOGI("powerHintInternal hint:%d, data:%d", hint, data);
+    // ALOGI("powerHintInternal hint:%d, data:%d", hint, data);
 
-    switch(hint) {
+    switch (hint) {
+        /* Add switch case here to support more hint */
+        case (int32_t)::android::hardware::power::V1_0::PowerHint::LAUNCH:
+        case (int32_t)::android::hardware::power::V1_2::PowerHint::CAMERA_LAUNCH:
 
-    /* Add switch case here to support more hint */
-    case (int32_t)::android::hardware::power::V1_0::PowerHint::LAUNCH:
-    case (int32_t)::android::hardware::power::V1_2::PowerHint::CAMERA_LAUNCH:
+            ALOGI("@Deprecated powerHintInternal hint:%d, data:%d", hint, data);
 
-        ALOGI("@Deprecated powerHintInternal hint:%d, data:%d", hint, data);
+            if (ATRACE_ENABLED()) {
+                ATRACE_BEGIN(PowerHintToString(hint, data).c_str());
+            }
 
-        if (ATRACE_ENABLED()) {
-            ATRACE_BEGIN(PowerHintToString(hint, data).c_str());
-        }
+            vHintData.hint = (int)hint;
+            vHintData.data = data;
+            vPowerData.msg = POWER_MSG_AOSP_HINT;
+            vPowerData.pBuf = (void*)&vHintData;
 
-        vHintData.hint = (int)hint;
-        vHintData.data = data;
-        vPowerData.msg  = POWER_MSG_AOSP_HINT;
-        vPowerData.pBuf = (void*)&vHintData;
+            power_msg(&vPowerData, (void**)&vpRspData);
 
-        power_msg(&vPowerData, (void **) &vpRspData);
+            ATRACE_END();
+            break;
 
-        ATRACE_END();
-        break;
-
-    default:
-        ALOGD("powerHintInternal hint:%d data:%d, not support", hint, data);
-        break;
+        default:
+            ALOGD("powerHintInternal hint:%d data:%d, not support", hint, data);
+            break;
     }
 
     if (vpRspData) {
-        if(vpRspData->pBuf)
-            free(vpRspData->pBuf);
+        if (vpRspData->pBuf) free(vpRspData->pBuf);
         free(vpRspData);
     }
 }
 
-Return<void> Power::setInteractive(bool interactive)  {
+Return<void> Power::setInteractive(bool interactive) {
     struct tPowerData vPowerData;
-    struct tPowerData *vpRspData = NULL;
+    struct tPowerData* vpRspData = NULL;
     struct tScnData vScnData;
 
     if (interactive) {
-      ALOGI("@Deprecated %s %s", __func__, "Restore All");
-      vPowerData.msg  = POWER_MSG_SCN_RESTORE_ALL;
+        ALOGI("@Deprecated %s %s", __func__, "Restore All");
+        vPowerData.msg = POWER_MSG_SCN_RESTORE_ALL;
     } else {
-      vPowerData.msg  = POWER_MSG_SCN_DISABLE_ALL;
-      suspend_count++;
-      clock_gettime(CLOCK_BOOTTIME, &suspend_t);
-      ALOGI("@Deprecated %s %s %d %ld", __func__, "Disable All", suspend_count, suspend_t.tv_sec);
+        vPowerData.msg = POWER_MSG_SCN_DISABLE_ALL;
+        suspend_count++;
+        clock_gettime(CLOCK_BOOTTIME, &suspend_t);
+        ALOGI("@Deprecated %s %s %d %ld", __func__, "Disable All", suspend_count, suspend_t.tv_sec);
     }
     vPowerData.pBuf = (void*)&vScnData;
 
-    power_msg(&vPowerData, (void **) &vpRspData);
+    power_msg(&vPowerData, (void**)&vpRspData);
 
     if (vpRspData) {
-        if(vpRspData->pBuf)
-            free(vpRspData->pBuf);
+        if (vpRspData->pBuf) free(vpRspData->pBuf);
         free(vpRspData);
     }
 
     return Void();
 }
 
-Return<void> Power::powerHint(::android::hardware::power::V1_0::PowerHint hint, int32_t data)  {
+Return<void> Power::powerHint(::android::hardware::power::V1_0::PowerHint hint, int32_t data) {
     powerHintInternal((int32_t)hint, data);
     return Void();
 }
 
-Return<void> Power::setFeature(Feature feature, bool activate)  {
+Return<void> Power::setFeature(Feature feature, bool activate) {
     ALOGV("setFeature, %d, %d", (int)feature, (int)activate);
     return Void();
 }
 
-Return<void> Power::getPlatformLowPowerStats(getPlatformLowPowerStats_cb _hidl_cb)  {
+Return<void> Power::getPlatformLowPowerStats(getPlatformLowPowerStats_cb _hidl_cb) {
     hidl_vec<PowerStatePlatformSleepState> states;
-    struct PowerStatePlatformSleepState *state;
+    struct PowerStatePlatformSleepState* state;
 
     states.resize(spm_mode::SPM_MODE_NUM);
 
@@ -270,7 +256,8 @@ Return<void> Power::getPlatformLowPowerStats(getPlatformLowPowerStats_cb _hidl_c
         stats[platform_param_id::XO_ACCUMULATED_DURATION_APSS] / RPM_CLK;
     state->voters[0].totalNumberOfTimesVotedSinceBoot = stats[platform_param_id::XO_COUNT_APSS];
     */
-    state->voters[spm_voter::AP].totalTimeInMsecVotedForSinceBoot = ((uint64_t)suspend_t.tv_sec * 1000);
+    state->voters[spm_voter::AP].totalTimeInMsecVotedForSinceBoot =
+            ((uint64_t)suspend_t.tv_sec * 1000);
     state->voters[spm_voter::AP].totalNumberOfTimesVotedSinceBoot = suspend_count;
 
     state = &states[spm_mode::SODI3];
@@ -285,7 +272,7 @@ Return<void> Power::getPlatformLowPowerStats(getPlatformLowPowerStats_cb _hidl_c
     return Void();
 }
 
-static int get_consys_low_power_stats(struct PowerStateSubsystem &subsystem) {
+static int get_consys_low_power_stats(struct PowerStateSubsystem& subsystem) {
     ALOGV("get_consys_low_power_stats %s", subsystem.name.c_str());
     return 0;
 }
@@ -297,13 +284,13 @@ Return<void> Power::getSubsystemLowPowerStats(getSubsystemLowPowerStats_cb _hidl
 
     subsystems.resize(sub_spm::SUB_SPM_NUM);
 
-    //We currently have only one Subsystem for WLAN
+    // We currently have only one Subsystem for WLAN
     ret = get_consys_low_power_stats(subsystems[sub_spm::CONSYS]);
     if (ret != 0) {
         goto done;
     }
 
-    //Add query for other subsystems here
+    // Add query for other subsystems here
 
 done:
     _hidl_cb(subsystems, Status::SUCCESS);
@@ -316,51 +303,58 @@ Return<void> Power::powerHintAsync(::android::hardware::power::V1_0::PowerHint h
     return Void();
 }
 
-Return<void> Power::powerHintAsync_1_2(::android::hardware::power::V1_2::PowerHint hint, int32_t data) {
+Return<void> Power::powerHintAsync_1_2(::android::hardware::power::V1_2::PowerHint hint,
+                                       int32_t data) {
     ALOGI("@Deprecated powerHintAsync_1_2 hint:%d, data:%d", hint, data);
     powerHintInternal((int32_t)hint, data);
     return Void();
 }
 
-Return<void> Power::mtkPowerHint(::vendor::mediatek::hardware::power::V2_0::MtkPowerHint hint, int32_t data)  {
+Return<void> Power::mtkPowerHint(::vendor::mediatek::hardware::power::V2_0::MtkPowerHint hint,
+                                 int32_t data) {
     ALOGI("@Deprecated mtkPowerHint hint:%d, data:%d", hint, data);
     return Void();
 }
 
-Return<void> Power::mtkCusPowerHint(int32_t hint, int32_t data)  {
+Return<void> Power::mtkCusPowerHint(int32_t hint, int32_t data) {
     ALOGI("@Deprecated mtkCusPowerHint hint:%d, data:%d", hint, data);
     return Void();
 }
 
-Return<void> Power::notifyAppState(const hidl_string& packName, const hidl_string& actName, int32_t pid, MtkActState state) {
-    ALOGI("@Deprecated notifyAppState pack:%s, act:%s, pid:%d, state:%d", packName.c_str(), actName.c_str(), pid, state);
+Return<void> Power::notifyAppState(const hidl_string& packName, const hidl_string& actName,
+                                   int32_t pid, MtkActState state) {
+    ALOGI("@Deprecated notifyAppState pack:%s, act:%s, pid:%d, state:%d", packName.c_str(),
+          actName.c_str(), pid, state);
     return Void();
 }
 
-Return<void> Power::notifyAppState_2_1(const hidl_string& packName, const hidl_string& actName, int32_t pid, MtkActState state, int32_t uid) {
-    ALOGI("@Deprecated notifyAppState_2_1 pack:%s, act:%s, pid:%d, uid:%d, state:%d", packName.c_str(), actName.c_str(), pid, uid, state);
+Return<void> Power::notifyAppState_2_1(const hidl_string& packName, const hidl_string& actName,
+                                       int32_t pid, MtkActState state, int32_t uid) {
+    ALOGI("@Deprecated notifyAppState_2_1 pack:%s, act:%s, pid:%d, uid:%d, state:%d",
+          packName.c_str(), actName.c_str(), pid, uid, state);
     return Void();
 }
 
-Return<int32_t> Power::querySysInfo(::vendor::mediatek::hardware::power::V2_0::MtkQueryCmd cmd, int32_t param)  {
+Return<int32_t> Power::querySysInfo(::vendor::mediatek::hardware::power::V2_0::MtkQueryCmd cmd,
+                                    int32_t param) {
     ALOGD("@Deprecated querySysInfo cmd:%d, param:%d", (int)cmd, param);
 
     struct tPowerData vPowerData;
-    struct tPowerData *vpRspData = NULL;
+    struct tPowerData* vpRspData = NULL;
     struct tQueryInfoData vQueryData;
 
     vQueryData.cmd = switchLegacyQueryCmd(cmd);
     vQueryData.param = param;
-    vPowerData.msg  = POWER_MSG_QUERY_INFO;
+    vPowerData.msg = POWER_MSG_QUERY_INFO;
     vPowerData.pBuf = (void*)&vQueryData;
 
-    //ALOGI("%s %p", __func__, &vPowerData);
+    // ALOGI("%s %p", __func__, &vPowerData);
     vQueryData.value = -1;
-    power_msg(&vPowerData, (void **) &vpRspData);
+    power_msg(&vPowerData, (void**)&vpRspData);
 
-    //ALOGI("%s %p", __func__, vpRspData);
+    // ALOGI("%s %p", __func__, vpRspData);
     if (vpRspData) {
-        if(vpRspData->pBuf) {
+        if (vpRspData->pBuf) {
             vQueryData.value = ((tQueryInfoData*)(vpRspData->pBuf))->value;
             free(vpRspData->pBuf);
         }
@@ -377,22 +371,22 @@ Return<int32_t> Power::scnReg() {
     const int uid = IPCThreadState::self()->getCallingUid();
 
     struct tPowerData vPowerData;
-    struct tPowerData *vpRspData = NULL;
-    struct tScnData   vScnData;
+    struct tPowerData* vpRspData = NULL;
+    struct tScnData vScnData;
 
     vScnData.param1 = pid;
     vScnData.param2 = uid;
-    vPowerData.msg  = POWER_MSG_SCN_REG;
+    vPowerData.msg = POWER_MSG_SCN_REG;
     vPowerData.pBuf = (void*)&vScnData;
 
-    //ALOGI("%s %p", __func__, &vScnData);
+    // ALOGI("%s %p", __func__, &vScnData);
     vScnData.handle = -1;
-    power_msg(&vPowerData, (void **) &vpRspData);
+    power_msg(&vPowerData, (void**)&vpRspData);
 
-    //ALOGI("%s %p", __func__, vpRspData);
+    // ALOGI("%s %p", __func__, vpRspData);
 
     if (vpRspData) {
-        if(vpRspData->pBuf) {
+        if (vpRspData->pBuf) {
             vScnData.handle = ((tScnData*)(vpRspData->pBuf))->handle;
             ALOGI("%s hdl:%d", __func__, vScnData.handle);
             free(vpRspData->pBuf);
@@ -403,12 +397,14 @@ Return<int32_t> Power::scnReg() {
     return vScnData.handle;
 }
 
-Return<void> Power::scnConfig(int32_t hdl, MtkPowerCmd_2_0 cmd, int32_t param1, int32_t param2, int32_t param3, int32_t param4) {
-    ALOGI("@Deprecated scnConfig hdl:%d, cmd:%d, param1:%d, param2:%d, param3:%d, param4:%d", hdl, cmd, param1, param2, param3, param4);
+Return<void> Power::scnConfig(int32_t hdl, MtkPowerCmd_2_0 cmd, int32_t param1, int32_t param2,
+                              int32_t param3, int32_t param4) {
+    ALOGI("@Deprecated scnConfig hdl:%d, cmd:%d, param1:%d, param2:%d, param3:%d, param4:%d", hdl,
+          cmd, param1, param2, param3, param4);
 
     struct tPowerData vPowerData;
     struct tScnData vScnData;
-    struct tPowerData *vpRspData = NULL;
+    struct tPowerData* vpRspData = NULL;
 
     if ((int)cmd > (int32_t)MtkPowerCmd::CMD_SET_END_JUMP) {
         ALOGI("scnConfig err cmd:%d", (int)cmd);
@@ -422,30 +418,31 @@ Return<void> Power::scnConfig(int32_t hdl, MtkPowerCmd_2_0 cmd, int32_t param1, 
     vScnData.param3 = param3;
     vScnData.param4 = param4;
     vScnData.timeout = 0;
-    vPowerData.msg  = POWER_MSG_SCN_CONFIG;
+    vPowerData.msg = POWER_MSG_SCN_CONFIG;
     vPowerData.pBuf = (void*)&vScnData;
 
-    //ALOGI("%s %p", __func__, &vScnData);
+    // ALOGI("%s %p", __func__, &vScnData);
 
-    power_msg(&vPowerData, (void **) &vpRspData);
+    power_msg(&vPowerData, (void**)&vpRspData);
 
-    //ALOGI("%s %p", __func__, vpRspData);
+    // ALOGI("%s %p", __func__, vpRspData);
 
     if (vpRspData) {
-        if(vpRspData->pBuf)
-            free(vpRspData->pBuf);
+        if (vpRspData->pBuf) free(vpRspData->pBuf);
         free(vpRspData);
     }
 
     return Void();
 }
 
-Return<void> Power::scnConfig_2_1(int32_t hdl, MtkPowerCmd_2_1 cmd, int32_t param1, int32_t param2, int32_t param3, int32_t param4) {
-    ALOGI("@Deprecated scnConfig_2_1 hdl:%d, cmd:%d, param1:%d, param2:%d, param3:%d, param4:%d", hdl, cmd, param1, param2, param3, param4);
+Return<void> Power::scnConfig_2_1(int32_t hdl, MtkPowerCmd_2_1 cmd, int32_t param1, int32_t param2,
+                                  int32_t param3, int32_t param4) {
+    ALOGI("@Deprecated scnConfig_2_1 hdl:%d, cmd:%d, param1:%d, param2:%d, param3:%d, param4:%d",
+          hdl, cmd, param1, param2, param3, param4);
 
     struct tPowerData vPowerData;
     struct tScnData vScnData;
-    struct tPowerData *vpRspData = NULL;
+    struct tPowerData* vpRspData = NULL;
 
     if ((int)cmd > (int32_t)MtkPowerCmd_2_1::CMD_SET_END_JUMP_2_1) {
         ALOGI("scnConfig err cmd:%d", (int)cmd);
@@ -459,31 +456,29 @@ Return<void> Power::scnConfig_2_1(int32_t hdl, MtkPowerCmd_2_1 cmd, int32_t para
     vScnData.param3 = param3;
     vScnData.param4 = param4;
     vScnData.timeout = 0;
-    vPowerData.msg  = POWER_MSG_SCN_CONFIG;
+    vPowerData.msg = POWER_MSG_SCN_CONFIG;
     vPowerData.pBuf = (void*)&vScnData;
 
-    //ALOGI("%s %p", __func__, &vScnData);
+    // ALOGI("%s %p", __func__, &vScnData);
 
-    power_msg(&vPowerData, (void **) &vpRspData);
+    power_msg(&vPowerData, (void**)&vpRspData);
 
-    //ALOGI("%s %p", __func__, vpRspData);
+    // ALOGI("%s %p", __func__, vpRspData);
 
     if (vpRspData) {
-        if(vpRspData->pBuf)
-            free(vpRspData->pBuf);
+        if (vpRspData->pBuf) free(vpRspData->pBuf);
         free(vpRspData);
     }
 
     return Void();
 }
 
-
 Return<void> Power::scnUnreg(int32_t hdl) {
     ALOGI("@Deprecated scnUnreg hdl:%d", hdl);
 
     struct tPowerData vPowerData;
     struct tScnData vScnData;
-    struct tPowerData *vpRspData = NULL;
+    struct tPowerData* vpRspData = NULL;
 
     vScnData.handle = hdl;
     vScnData.command = 0;
@@ -492,18 +487,17 @@ Return<void> Power::scnUnreg(int32_t hdl) {
     vScnData.param3 = 0;
     vScnData.param4 = 0;
     vScnData.timeout = 0;
-    vPowerData.msg  = POWER_MSG_SCN_UNREG;
+    vPowerData.msg = POWER_MSG_SCN_UNREG;
     vPowerData.pBuf = (void*)&vScnData;
 
-    //ALOGI("%s %p", __func__, &vScnData);
+    // ALOGI("%s %p", __func__, &vScnData);
 
-    power_msg(&vPowerData, (void **) &vpRspData);
+    power_msg(&vPowerData, (void**)&vpRspData);
 
-    //ALOGI("%s %p", __func__, vpRspData);
+    // ALOGI("%s %p", __func__, vpRspData);
 
     if (vpRspData) {
-        if(vpRspData->pBuf)
-            free(vpRspData->pBuf);
+        if (vpRspData->pBuf) free(vpRspData->pBuf);
         free(vpRspData);
     }
 
@@ -515,34 +509,35 @@ Return<void> Power::scnEnable(int32_t hdl, int32_t timeout) {
 
     struct tPowerData vPowerData;
     struct tScnData vScnData;
-    struct tPowerData *vpRspData = NULL;
+    struct tPowerData* vpRspData = NULL;
 
     vScnData.handle = hdl;
     vScnData.timeout = timeout;
-    vPowerData.msg  = POWER_MSG_SCN_ENABLE;
+    vPowerData.msg = POWER_MSG_SCN_ENABLE;
     vPowerData.pBuf = (void*)&vScnData;
 
-    //ALOGI("%s %p", __func__, &vScnData);
+    // ALOGI("%s %p", __func__, &vScnData);
 
-    power_msg(&vPowerData, (void **) &vpRspData);
+    power_msg(&vPowerData, (void**)&vpRspData);
 
-    //ALOGI("%s %p", __func__, vpRspData);
+    // ALOGI("%s %p", __func__, vpRspData);
 
     if (vpRspData) {
-        if(vpRspData->pBuf)
-            free(vpRspData->pBuf);
+        if (vpRspData->pBuf) free(vpRspData->pBuf);
         free(vpRspData);
     }
 
     return Void();
 }
 
-Return<void> Power::scnUltraCfg(int32_t hdl, int32_t ultracmd, int32_t param1, int32_t param2, int32_t param3, int32_t param4) {
-    ALOGD("@Deprecated scnUltaCfg hdl:%d, cmd:%d, param1:%d, param2:%d, param3:%d, param4:%d", hdl, ultracmd, param1, param2, param3, param4);
+Return<void> Power::scnUltraCfg(int32_t hdl, int32_t ultracmd, int32_t param1, int32_t param2,
+                                int32_t param3, int32_t param4) {
+    ALOGD("@Deprecated scnUltaCfg hdl:%d, cmd:%d, param1:%d, param2:%d, param3:%d, param4:%d", hdl,
+          ultracmd, param1, param2, param3, param4);
 
     struct tPowerData vPowerData;
     struct tScnData vScnData;
-    struct tPowerData *vpRspData = NULL;
+    struct tPowerData* vpRspData = NULL;
 
     if (ultracmd < (int32_t)MtkPowerCmd_2_1::CMD_SET_END_JUMP_2_1) {
         ALOGI("scnUltraCfg err cmd:%d", ultracmd);
@@ -556,18 +551,17 @@ Return<void> Power::scnUltraCfg(int32_t hdl, int32_t ultracmd, int32_t param1, i
     vScnData.param3 = param3;
     vScnData.param4 = param4;
     vScnData.timeout = 0;
-    vPowerData.msg  = POWER_MSG_SCN_ULTRA_CFG;
+    vPowerData.msg = POWER_MSG_SCN_ULTRA_CFG;
     vPowerData.pBuf = (void*)&vScnData;
 
-    //ALOGI("%s %p", __func__, &vScnData);
+    // ALOGI("%s %p", __func__, &vScnData);
 
-    power_msg(&vPowerData, (void **) &vpRspData);
+    power_msg(&vPowerData, (void**)&vpRspData);
 
-    //ALOGI("%s %p", __func__, vpRspData);
+    // ALOGI("%s %p", __func__, vpRspData);
 
     if (vpRspData) {
-        if(vpRspData->pBuf)
-            free(vpRspData->pBuf);
+        if (vpRspData->pBuf) free(vpRspData->pBuf);
         free(vpRspData);
     }
 
@@ -579,21 +573,20 @@ Return<void> Power::scnDisable(int32_t hdl) {
 
     struct tPowerData vPowerData;
     struct tScnData vScnData;
-    struct tPowerData *vpRspData = NULL;
+    struct tPowerData* vpRspData = NULL;
 
     vScnData.handle = hdl;
-    vPowerData.msg  = POWER_MSG_SCN_DISABLE;
+    vPowerData.msg = POWER_MSG_SCN_DISABLE;
     vPowerData.pBuf = (void*)&vScnData;
 
-    //ALOGI("%s %p", __func__, &vScnData);
+    // ALOGI("%s %p", __func__, &vScnData);
 
-    power_msg(&vPowerData, (void **) &vpRspData);
+    power_msg(&vPowerData, (void**)&vpRspData);
 
-    //ALOGI("%s %p", __func__, vpRspData);
+    // ALOGI("%s %p", __func__, vpRspData);
 
     if (vpRspData) {
-        if(vpRspData->pBuf)
-            free(vpRspData->pBuf);
+        if (vpRspData->pBuf) free(vpRspData->pBuf);
         free(vpRspData);
     }
 
@@ -605,11 +598,9 @@ Return<void> Power::setSysInfo(int32_t type, const hidl_string& data) {
     return Void();
 }
 
-IPower* HIDL_FETCH_IPower(const char* /* name */) {
-    return new Power();
-}
+IPower* HIDL_FETCH_IPower(const char* /* name */) { return new Power(); }
 
-} // namespace implementation
+}  // namespace implementation
 }  // namespace V2_1
 }  // namespace power
 }  // namespace hardware

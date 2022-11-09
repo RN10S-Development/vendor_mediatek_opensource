@@ -17,7 +17,7 @@
 #ifndef __CCCI_MDINIT_PLATFORM_H__
 #define __CCCI_MDINIT_PLATFORM_H__
 
-void store_md_statue(int md_id, char *buf, int len);
+void store_md_statue(int md_id, char* buf, int len);
 void delay_to_reset_md(int version);
 /*boot env: sbp */
 int get_md_sbp_code(int md_id, int version);
@@ -25,6 +25,5 @@ int get_md_sbp_code(int md_id, int version);
 int get_mdlog_boot_mode(int md_id);
 int get_md_dbg_dump_flag(int md_id);
 int get_sbp_subid_setting(void);
-
 
 #endif

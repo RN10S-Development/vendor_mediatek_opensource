@@ -19,24 +19,21 @@
 
 #include <Cta5File.h>
 
-namespace android
-{
-class Cta5FileFactory
-{
-public:
+namespace android {
+class Cta5FileFactory {
+  public:
     /**
      * Create a Cta5NormalFile or Cta5MultimediaFile base on the fd
      */
-    static Cta5File *createCta5File(int fd, String8 key);
+    static Cta5File* createCta5File(int fd, String8 key);
     /**
      * Create a Cta5NormalFile or Cta5MultimediaFile base on the mime
      */
-    static Cta5File *createCta5File(String8 mimeType,
-                uint64_t datatLen, String8 key);
-    static Cta5File *createCta5File(String8 mimeType,
-                uint64_t datatLen, String8 key, bool isDcfFile);
+    static Cta5File* createCta5File(String8 mimeType, uint64_t datatLen, String8 key);
+    static Cta5File* createCta5File(String8 mimeType, uint64_t datatLen, String8 key,
+                                    bool isDcfFile);
     static bool isMultiMedia(int fd, const String8& key);
     static bool isMultiMedia(String8 mime);
 };
-}
-#endif //__DRM_CTA5_FILE_FACTORY_H__
+}  // namespace android
+#endif  //__DRM_CTA5_FILE_FACTORY_H__

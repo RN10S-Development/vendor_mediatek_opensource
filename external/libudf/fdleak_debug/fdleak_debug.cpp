@@ -23,7 +23,6 @@
 #include <unwindstack/Unwinder.h>
 #include <android-base/stringprintf.h>
 
-
 #ifdef __cplusplus
 extern "C" {
 #endif
@@ -31,43 +30,43 @@ extern "C" {
 #define FDebug "FDebug --> "
 #define FD_NDEBUG
 
-void *gFDBtMspace = NULL;
+void* gFDBtMspace = NULL;
 
 //  fix logd deadlock
 pthread_key_t g_disable_flag;
 static bool DisableDebugCalls() {
-  if (pthread_getspecific(g_disable_flag) != nullptr) {
-    return true;
-  }
-  return false;
+    if (pthread_getspecific(g_disable_flag) != nullptr) {
+        return true;
+    }
+    return false;
 }
 
 static void SetDebugDisable(bool disable) {
-  if (disable) {
-    pthread_setspecific(g_disable_flag, reinterpret_cast<void*>(1));
-  } else {
-    pthread_setspecific(g_disable_flag, nullptr);
-  }
+    if (disable) {
+        pthread_setspecific(g_disable_flag, reinterpret_cast<void*>(1));
+    } else {
+        pthread_setspecific(g_disable_flag, nullptr);
+    }
 }
 
 class ScopedDisableDebug {
- public:
-  ScopedDisableDebug() : disabled_(DisableDebugCalls()) {
-    if (!disabled_) {
-      SetDebugDisable(true);
+  public:
+    ScopedDisableDebug() : disabled_(DisableDebugCalls()) {
+        if (!disabled_) {
+            SetDebugDisable(true);
+        }
     }
-  }
-  ~ScopedDisableDebug() {
-    if (!disabled_) {
-      SetDebugDisable(false);
+    ~ScopedDisableDebug() {
+        if (!disabled_) {
+            SetDebugDisable(false);
+        }
     }
-  }
 
- private:
-  bool disabled_;
+  private:
+    bool disabled_;
 
-  ScopedDisableDebug(const ScopedDisableDebug&) = delete;
-  void operator=(const ScopedDisableDebug&) = delete;
+    ScopedDisableDebug(const ScopedDisableDebug&) = delete;
+    void operator=(const ScopedDisableDebug&) = delete;
 };
 
 // =============================================================================
@@ -93,7 +92,7 @@ static FDDebugDup3 real_dup3 = NULL;
 static FDDebugFcntl real_fcntl = NULL;
 static FDDebugEventfd real_eventfd = NULL;
 static FDDebugEpoll_create1 real_epoll_create1 = NULL;
-static void *fdleak_libc_handle = NULL;
+static void* fdleak_libc_handle = NULL;
 
 static char fdleak_init_error_msg[128];
 static int fdleak_inti_flag = 0;
@@ -104,9 +103,8 @@ static void* lookupSymbol(void* handle, const char* symbol) {
     void* addr = NULL;
     char* errorDiagnostic = NULL;
 
-    if (handle == NULL || symbol == NULL)
-        return NULL;
-    dlerror(); // clear error
+    if (handle == NULL || symbol == NULL) return NULL;
+    dlerror();  // clear error
     addr = dlsym(handle, symbol);
     if (addr == NULL) {
         errorDiagnostic = dlerror();
@@ -120,7 +118,7 @@ static void* lookupSymbol(void* handle, const char* symbol) {
 static void fd_func_rehook(void) {
     if (fdleak_libc_handle == NULL) {
         dlerror();
-        fdleak_libc_handle = dlopen("libc.so", RTLD_NOW|RTLD_GLOBAL);
+        fdleak_libc_handle = dlopen("libc.so", RTLD_NOW | RTLD_GLOBAL);
         if (fdleak_libc_handle == NULL) {
             fprintf(stderr, FDebug "%s could not open libc.so: %s\n", __FUNCTION__, dlerror());
             return;
@@ -132,9 +130,10 @@ static void fd_func_rehook(void) {
     android log API to print log. This may cause Deadlock.
     */
     if (real_fdsanclose == NULL) {
-        real_fdsanclose = (FDDebugFdsanClose)dlsym(fdleak_libc_handle, "android_fdsan_close_with_tag");
+        real_fdsanclose =
+                (FDDebugFdsanClose)dlsym(fdleak_libc_handle, "android_fdsan_close_with_tag");
     }
-    if (real_socket== NULL) {
+    if (real_socket == NULL) {
         real_socket = (FDDebugSocket)dlsym(fdleak_libc_handle, "socket");
     }
 
@@ -179,7 +178,8 @@ static void fd_func_rehook(void) {
         real_eventfd = (FDDebugEventfd)lookupSymbol(fdleak_libc_handle, "eventfd");
     }
     if (real_epoll_create1 == NULL) {
-        real_epoll_create1 = (FDDebugEpoll_create1)lookupSymbol(fdleak_libc_handle, "epoll_create1");
+        real_epoll_create1 =
+                (FDDebugEpoll_create1)lookupSymbol(fdleak_libc_handle, "epoll_create1");
     }
 
     _fdlog("fd_func_rehook: end.");
@@ -189,8 +189,8 @@ static void fd_func_rehook(void) {
 // Global functions
 // =============================================================================
 
-FDLEAKDEBUG_EXPORT __attribute__((__weak__))
-int android_fdsan_close_with_tag(int fd, uint64_t tag) {
+FDLEAKDEBUG_EXPORT __attribute__((__weak__)) int android_fdsan_close_with_tag(int fd,
+                                                                              uint64_t tag) {
     //_fdlog("1 -- %s, fd= %d, tag= %" PRIx64, __func__, fd, tag);
 
     if (DisableDebugCalls()) {
@@ -208,21 +208,19 @@ int android_fdsan_close_with_tag(int fd, uint64_t tag) {
 #if defined(__LP64__)
 
 FDLEAKDEBUG_EXPORT
-int open(const char *pathname, int flags, ...) {
+int open(const char* pathname, int flags, ...) {
     mode_t mode = 0;
     int tmpfd = -1;
     //_fdlog("1 -- %s, pathname: %s", __func__, pathname);
 
     if (!real_open) fd_func_rehook();
-    if (flags & O_CREAT)
-    {
-        va_list  args;
+    if (flags & O_CREAT) {
+        va_list args;
         va_start(args, flags);
-        mode = (mode_t) va_arg(args, int);
+        mode = (mode_t)va_arg(args, int);
         va_end(args);
         tmpfd = real_open(pathname, flags, mode);
-    }
-    else {
+    } else {
         tmpfd = real_open(pathname, flags);
     }
 
@@ -239,8 +237,7 @@ int open(const char *pathname, int flags, ...) {
 StrongAlias(open64, open);
 
 FDLEAKDEBUG_EXPORT
-int __open_2(const char* pathname, int flags)
-{
+int __open_2(const char* pathname, int flags) {
     int tmpfd = -1;
 
     if (!real___open_2) fd_func_rehook();
@@ -253,25 +250,21 @@ int __open_2(const char* pathname, int flags)
 
     fdleak_record_backtrace(tmpfd);
     return tmpfd;
-
 }
 
 FDLEAKDEBUG_EXPORT
-int openat(int dirfd, const char *pathname, int flags, ...)
-{
+int openat(int dirfd, const char* pathname, int flags, ...) {
     mode_t mode = 0;
     int tmpfd = -1;
 
     if (!real_openat) fd_func_rehook();
-    if (flags & O_CREAT)
-    {
-        va_list  args;
+    if (flags & O_CREAT) {
+        va_list args;
         va_start(args, flags);
-        mode = (mode_t) va_arg(args, int);
+        mode = (mode_t)va_arg(args, int);
         va_end(args);
         tmpfd = real_openat(dirfd, pathname, flags, mode);
-    }
-    else {
+    } else {
         tmpfd = real_openat(dirfd, pathname, flags);
     }
 
@@ -286,8 +279,7 @@ int openat(int dirfd, const char *pathname, int flags, ...)
 StrongAlias(openat64, openat);
 
 FDLEAKDEBUG_EXPORT
-int __openat_2(int fd, const char* pathname, int flags)
-{
+int __openat_2(int fd, const char* pathname, int flags) {
     int tmpfd = -1;
 
     if (!real___openat_2) fd_func_rehook();
@@ -305,8 +297,7 @@ int __openat_2(int fd, const char* pathname, int flags)
 #else
 
 FDLEAKDEBUG_EXPORT
-int __openat(int fd, const char* pathname, int flags, int mode)
-{
+int __openat(int fd, const char* pathname, int flags, int mode) {
     int tmpfd = -1;
 
     if (!real___openat) fd_func_rehook();
@@ -324,7 +315,7 @@ int __openat(int fd, const char* pathname, int flags, int mode)
 #endif
 
 FDLEAKDEBUG_EXPORT
-int pipe2(int *pipefds, int flag) {
+int pipe2(int* pipefds, int flag) {
     int ret;
 
     if (!real_pipe2) fd_func_rehook();
@@ -358,7 +349,7 @@ int socket(int domain, int type, int protocol) {
 }
 
 FDLEAKDEBUG_EXPORT
-int accept4(int serverfd, struct sockaddr *addr, socklen_t *addrlen, int flags) {
+int accept4(int serverfd, struct sockaddr* addr, socklen_t* addrlen, int flags) {
     int fd;
 
     if (!real_accept4) fd_func_rehook();
@@ -385,7 +376,7 @@ int socketpair(int domain, int type, int protocal, int sv[2]) {
     }
     ScopedDisableDebug disable;
 
-    if (ret == 0){
+    if (ret == 0) {
         fdleak_record_backtrace(sv[0]);
         fdleak_record_backtrace(sv[1]);
     }
@@ -426,11 +417,10 @@ int dup3(int oldfd, int targetfd, int flags) {
 }
 
 FDLEAKDEBUG_EXPORT
-int fcntl(int fd, int cmd, ...)
-{
+int fcntl(int fd, int cmd, ...) {
     va_list args;
     va_start(args, cmd);
-    void *arg = va_arg(args, void *);
+    void* arg = va_arg(args, void*);
     va_end(args);
 
     if (!real_fcntl) fd_func_rehook();
@@ -447,8 +437,7 @@ int fcntl(int fd, int cmd, ...)
 }
 
 FDLEAKDEBUG_EXPORT
-int eventfd(unsigned int initval, int flags)
-{
+int eventfd(unsigned int initval, int flags) {
     int fd = -1;
 
     if (!real_eventfd) fd_func_rehook();
@@ -464,8 +453,7 @@ int eventfd(unsigned int initval, int flags)
 }
 
 FDLEAKDEBUG_EXPORT
-int epoll_create1(int flags)
-{
+int epoll_create1(int flags) {
     int fd = -1;
 
     if (!real_epoll_create1) fd_func_rehook();
@@ -480,12 +468,11 @@ int epoll_create1(int flags)
     return fd;
 }
 
-
 // =============================================================================
 // Global variables
 // =============================================================================
 static pthread_mutex_t gFDLeakMutex = PTHREAD_MUTEX_INITIALIZER;
-static PFDBACKTRACETable gPFDBACKTRACETable = NULL; // record fd backtrace
+static PFDBACKTRACETable gPFDBACKTRACETable = NULL;  // record fd backtrace
 static void* gFDMspace = NULL;
 static size_t gFDMspaceSize = 0;
 static volatile void* gFDMspaceBackup = NULL;
@@ -498,20 +485,20 @@ static PFDBACKTRACEHashTable gPFDBtEntryTable = NULL;
 
 #ifdef MTK_USE_RESERVED_EXT_MEM
 #define EXM_DEV "/dev/exm0"
-static void *gFDMspaceBuffer = MAP_FAILED;
+static void* gFDMspaceBuffer = MAP_FAILED;
 #endif
 
-//using pthread_atfork for fork deadlock scenario issue
+// using pthread_atfork for fork deadlock scenario issue
 static void fdleak_debug_prepare(void) {
     pthread_mutex_lock(&gFDLeakMutex);
 
     gFDMspaceBackup = gFDMspace;
-    gFDMspace = NULL; //force NULL to avoid fd backtrace record
+    gFDMspace = NULL;  // force NULL to avoid fd backtrace record
 
 #ifdef MTK_USE_RESERVED_EXT_MEM
     // create anon memory
-    gFDMspaceBuffer = mmap(NULL, gFDMspaceSize,
-                    PROT_READ|PROT_WRITE, MAP_PRIVATE|MAP_ANONYMOUS, -1, 0);
+    gFDMspaceBuffer =
+            mmap(NULL, gFDMspaceSize, PROT_READ | PROT_WRITE, MAP_PRIVATE | MAP_ANONYMOUS, -1, 0);
     if (gFDMspaceBuffer == MAP_FAILED) {
         ubrd_error_log("[FDLEAK_DEBUG]prepare: anon mem MAP_FAILED\n");
         return;
@@ -530,11 +517,10 @@ static void fdleak_debug_parent(void) {
 #ifdef MTK_USE_RESERVED_EXT_MEM
     // free anon memory mmap in pthread_atfork->prepare
     ubrd_debug_log("[FDLEAK_DEBUG]parent: free anon mem %p", gFDMspaceBuffer);
-    if (gFDMspaceBuffer != MAP_FAILED)
-        munmap(gFDMspaceBuffer, gFDMspaceSize);
+    if (gFDMspaceBuffer != MAP_FAILED) munmap(gFDMspaceBuffer, gFDMspaceSize);
 #endif
 
-    //restore for fd backtrace record
+    // restore for fd backtrace record
     gFDMspace = (void*)gFDMspaceBackup;
     pthread_mutex_unlock(&gFDLeakMutex);
     ubrd_debug_log("[FDLEAK_DEBUG]parent: restore gFDMspace:%p", gFDMspace);
@@ -544,10 +530,10 @@ static void fdleak_debug_child(void) {
     pthread_mutexattr_t attr;
 #ifdef MTK_USE_RESERVED_EXT_MEM
     int fd = -1;
-    void *gFDMspaceTmp = MAP_FAILED;
-    void *old_mmap_addr = (void*)gFDMspaceBackup;
+    void* gFDMspaceTmp = MAP_FAILED;
+    void* old_mmap_addr = (void*)gFDMspaceBackup;
 
-    if(gFDMspaceBuffer == MAP_FAILED) {
+    if (gFDMspaceBuffer == MAP_FAILED) {
         ubrd_error_log("[FDLEAK_DEBUG]child: gFDMspaceBuffer MAP_FAILED\n");
         return;
     }
@@ -557,22 +543,20 @@ static void fdleak_debug_child(void) {
     // create external memory with map_fixed
     fd = open(EXM_DEV, O_RDWR);
     if (fd >= 0) {
-        gFDMspaceTmp = mmap(old_mmap_addr, gFDMspaceSize,
-                             PROT_READ|PROT_WRITE, MAP_SHARED|MAP_FIXED, fd, 0);
-        if(gFDMspaceTmp == MAP_FAILED) {
+        gFDMspaceTmp = mmap(old_mmap_addr, gFDMspaceSize, PROT_READ | PROT_WRITE,
+                            MAP_SHARED | MAP_FIXED, fd, 0);
+        if (gFDMspaceTmp == MAP_FAILED) {
             ubrd_error_log("[FDLEAK_DEBUG]child: ext mem MAP_FAILED\n");
         }
         close(fd);
-    }
-    else {
+    } else {
         ubrd_error_log("[FDLEAK_DEBUG]child: open %s for ext mem, fail\n", EXM_DEV);
     }
 
     // use anon memory
     if (gFDMspaceTmp == MAP_FAILED) {
-        gFDMspaceTmp = mmap(old_mmap_addr, gFDMspaceSize,
-                             PROT_READ|PROT_WRITE,
-                             MAP_PRIVATE|MAP_ANONYMOUS|MAP_FIXED, -1, 0);
+        gFDMspaceTmp = mmap(old_mmap_addr, gFDMspaceSize, PROT_READ | PROT_WRITE,
+                            MAP_PRIVATE | MAP_ANONYMOUS | MAP_FIXED, -1, 0);
         if (gFDMspaceTmp == MAP_FAILED) {
             ubrd_error_log("[FDLEAK_DEBUG]child: anon mem MAP_FAILED\n");
             assert(0);
@@ -592,7 +576,7 @@ static void fdleak_debug_child(void) {
     munmap(gFDMspaceBuffer, gFDMspaceSize);
 #endif
 
-    //restore for fd backtrace record
+    // restore for fd backtrace record
     gFDMspace = (void*)gFDMspaceBackup;
 
     // reinit mutex for child
@@ -602,13 +586,13 @@ static void fdleak_debug_child(void) {
     ubrd_debug_log("[FDLEAK_DEBUG]child: restore gFDMspace:%p", gFDMspace);
 }
 
-//add to init section
+// add to init section
 FDLEAKDEBUG_EXPORT
 void fdleak_debug_initialize(void) {
     int fdleak_debug_enable = 0;
     char env[PROP_VALUE_MAX];
     char debug_program[PROP_VALUE_MAX];
-    const char *progname = NULL;
+    const char* progname = NULL;
     int fd = -1;
 
     fd_func_rehook();
@@ -622,7 +606,7 @@ void fdleak_debug_initialize(void) {
         fdleak_debug_enable = atoi(env);
     }
 
-    if(!fdleak_debug_enable) {
+    if (!fdleak_debug_enable) {
         return;
     }
 
@@ -638,13 +622,12 @@ void fdleak_debug_initialize(void) {
     if (__system_property_get("persist.vendor.debug.fdleak.program", debug_program)) {
         if (strstr(progname, debug_program)) {
             fdleak_debug_enable = 1;
-        }
-        else {
+        } else {
             fdleak_debug_enable = 0;
         }
     }
 
-    if(!fdleak_debug_enable) {
+    if (!fdleak_debug_enable) {
         return;
     }
 
@@ -658,16 +641,17 @@ void fdleak_debug_initialize(void) {
 
     gFDMspace = MAP_FAILED;
     // default FD 256~1000, 512 size maybe no problem
-    gFDMspaceSize = ALIGN_UP_TO_PAGE_SIZE((sizeof(FdBtEntry)+FD_BACKTRACE_SIZE*sizeof(size_t))*(FD_MAX_SIZE>>1));
+    gFDMspaceSize = ALIGN_UP_TO_PAGE_SIZE((sizeof(FdBtEntry) + FD_BACKTRACE_SIZE * sizeof(size_t)) *
+                                          (FD_MAX_SIZE >> 1));
 
 #ifdef MTK_USE_RESERVED_EXT_MEM
     fd = open(EXM_DEV, O_RDWR);
-    if(fd >= 0) {
-        gFDMspace = mmap(NULL, gFDMspaceSize,
-                         PROT_READ|PROT_WRITE, MAP_SHARED, fd, 0);
+    if (fd >= 0) {
+        gFDMspace = mmap(NULL, gFDMspaceSize, PROT_READ | PROT_WRITE, MAP_SHARED, fd, 0);
         if (gFDMspace == MAP_FAILED) {
             if (fdleak_inti_flag) {
-                snprintf(fdleak_init_error_msg, sizeof(fdleak_init_error_msg), "map ext mem fail!\n");
+                snprintf(fdleak_init_error_msg, sizeof(fdleak_init_error_msg),
+                         "map ext mem fail!\n");
             } else {
                 ubrd_error_log("map ext mem fail!\n");
             }
@@ -677,11 +661,12 @@ void fdleak_debug_initialize(void) {
     }
 #endif
     if (gFDMspace == MAP_FAILED) {
-        gFDMspace = mmap(NULL, gFDMspaceSize,
-                             PROT_READ|PROT_WRITE|PROT_MALLOCFROMBIONIC, MAP_PRIVATE|MAP_ANONYMOUS, fd, 0);
+        gFDMspace = mmap(NULL, gFDMspaceSize, PROT_READ | PROT_WRITE | PROT_MALLOCFROMBIONIC,
+                         MAP_PRIVATE | MAP_ANONYMOUS, fd, 0);
         if (gFDMspace == MAP_FAILED) {
             if (fdleak_inti_flag) {
-                snprintf(fdleak_init_error_msg, sizeof(fdleak_init_error_msg), "[FDLEAK_DEBUG] logd map anon mem fail!\n");
+                snprintf(fdleak_init_error_msg, sizeof(fdleak_init_error_msg),
+                         "[FDLEAK_DEBUG] logd map anon mem fail!\n");
             } else {
                 ubrd_error_log("[FDLEAK_DEBUG]%s map anon mem fail!\n", progname);
             }
@@ -693,20 +678,24 @@ void fdleak_debug_initialize(void) {
 
     memset(gFDMspace, 0x0, gFDMspaceSize);
     gFDBtMspace = create_mspace_with_base(gFDMspace, gFDMspaceSize, 0);
-    gPFDBACKTRACETable = (PFDBACKTRACETable)mspace_malloc(gFDBtMspace, FD_MAX_SIZE * sizeof(FDBACKTRACETable));
+    gPFDBACKTRACETable =
+            (PFDBACKTRACETable)mspace_malloc(gFDBtMspace, FD_MAX_SIZE * sizeof(FDBACKTRACETable));
     if (!gPFDBACKTRACETable) {
         if (fdleak_inti_flag) {
-            snprintf(fdleak_init_error_msg, sizeof(fdleak_init_error_msg), "[ERROR]gPFDBACKTRACETable mspace_malloc fails, entry\n");
+            snprintf(fdleak_init_error_msg, sizeof(fdleak_init_error_msg),
+                     "[ERROR]gPFDBACKTRACETable mspace_malloc fails, entry\n");
         } else {
             ubrd_error_log("[ERROR]gPFDBACKTRACETable mspace_malloc fails, entry\n");
         }
         return;
     }
 
-    gPFDBtEntryTable = (PFDBACKTRACEHashTable)mspace_malloc(gFDBtMspace, sizeof(FDBACKTRACEHashTable));
+    gPFDBtEntryTable =
+            (PFDBACKTRACEHashTable)mspace_malloc(gFDBtMspace, sizeof(FDBACKTRACEHashTable));
     if (!gPFDBtEntryTable) {
         if (fdleak_inti_flag) {
-            snprintf(fdleak_init_error_msg, sizeof(fdleak_init_error_msg), "[ERROR]gPFDBtEntryTable mspace_malloc fails, entry\n");
+            snprintf(fdleak_init_error_msg, sizeof(fdleak_init_error_msg),
+                     "[ERROR]gPFDBtEntryTable mspace_malloc fails, entry\n");
         } else {
             ubrd_error_log("[ERROR]gPFDBtEntryTable mspace_malloc fails, entry\n");
         }
@@ -714,15 +703,16 @@ void fdleak_debug_initialize(void) {
     }
     memset(gPFDBtEntryTable, 0x0, sizeof(FDBACKTRACEHashTable));
 
-    if(pthread_atfork(fdleak_debug_prepare, fdleak_debug_parent, fdleak_debug_child)) {
+    if (pthread_atfork(fdleak_debug_prepare, fdleak_debug_parent, fdleak_debug_child)) {
         if (fdleak_inti_flag) {
-            snprintf(fdleak_init_error_msg, sizeof(fdleak_init_error_msg), "[FDLEAK_DEBUG] logd pthread_atfork fail\n");
+            snprintf(fdleak_init_error_msg, sizeof(fdleak_init_error_msg),
+                     "[FDLEAK_DEBUG] logd pthread_atfork fail\n");
         } else {
             ubrd_error_log("[FDLEAK_DEBUG]%s: pthread_atfork fail\n", progname);
         }
     }
     ubrd_debug_log("[FDLEAK_DEBUG]mmap:%p-%x,FD_TABLE_SIZE:%d,backtrace max-depth:%d\n",
-                      (void *)gPFDBACKTRACETable, gFDMspaceSize, FD_TABLE_SIZE, FD_BACKTRACE_SIZE);
+                   (void*)gPFDBACKTRACETable, gFDMspaceSize, FD_TABLE_SIZE, FD_BACKTRACE_SIZE);
     int error = pthread_key_create(&g_disable_flag, nullptr);
     if (error != 0) {
         ubrd_error_log("[FDLEAK_DEBUG] pthread_key_create failed: %s", strerror(error));
@@ -732,18 +722,17 @@ void fdleak_debug_initialize(void) {
     return;
 }
 
-static void dump_bt2log(uintptr_t* backtrace, size_t numEntries, int fd, int alloc)
-{
+static void dump_bt2log(uintptr_t* backtrace, size_t numEntries, int fd, int alloc) {
     char buf[32];
-    char tmp[32*FD_BACKTRACE_SIZE];
+    char tmp[32 * FD_BACKTRACE_SIZE];
     size_t i;
 
-    tmp[0] = 0; // Need to initialize tmp[0] for the first strcat
-    for (i=0; i<numEntries; i++) {
-        snprintf(buf, sizeof buf, "%zu: %p\n", i, (void *)backtrace[i]);
+    tmp[0] = 0;  // Need to initialize tmp[0] for the first strcat
+    for (i = 0; i < numEntries; i++) {
+        snprintf(buf, sizeof buf, "%zu: %p\n", i, (void*)backtrace[i]);
         strlcat(tmp, buf, sizeof tmp);
     }
-    ubrd_info_log("%s fd %d call stack:\n%s", alloc==1?"alloc":"free", fd, tmp);
+    ubrd_info_log("%s fd %d call stack:\n%s", alloc == 1 ? "alloc" : "free", fd, tmp);
 }
 
 // =============================================================================
@@ -758,7 +747,7 @@ int unlink_entry(PFdBtEntry entry) {
     if (!bk) {  // head
         gPFDBtEntryTable->pbtentry_list[entry->slot] = fd;
         if (fd) fd->prev = NULL;  // not only one entry in the slot
-    } else if (!fd) {  // tail
+    } else if (!fd) {             // tail
         bk->next = NULL;
     } else {  // middle
         bk->next = fd;
@@ -782,11 +771,11 @@ int insert_entry(PFdBtEntry entry, size_t slot) {
     return 0;
 }
 
-static int descend_compare_bytes(unsigned char *e1, unsigned char *e2, size_t n) {
-    const unsigned char*  p1   = e1;
-    const unsigned char*  start1 = e1 - n + 1;
-    const unsigned char*  p2   = e2;
-    int                   d = 0;
+static int descend_compare_bytes(unsigned char* e1, unsigned char* e2, size_t n) {
+    const unsigned char* p1 = e1;
+    const unsigned char* start1 = e1 - n + 1;
+    const unsigned char* p2 = e2;
+    int d = 0;
 
     while (1) {
         if (d || p1 < start1) break;
@@ -809,13 +798,12 @@ static PFdBtEntry find_entry(uintptr_t* backtrace, size_t numEntries, size_t slo
     PFdBtEntry entry = gPFDBtEntryTable->pbtentry_list[slot];
     while (entry) {
         /*
-        * See if the entry matches exactly.
-        */
+         * See if the entry matches exactly.
+         */
         size_t cmp_bytes = numEntries * sizeof(intptr_t);
-        unsigned char* end1 = (unsigned char*)(backtrace)+cmp_bytes-1;
-        unsigned char* end2 = (unsigned char*)(entry->backtrace)+cmp_bytes-1;
-        if (!descend_compare_bytes(end1, end2, cmp_bytes))
-            return entry;
+        unsigned char* end1 = (unsigned char*)(backtrace) + cmp_bytes - 1;
+        unsigned char* end2 = (unsigned char*)(entry->backtrace) + cmp_bytes - 1;
+        if (!descend_compare_bytes(end1, end2, cmp_bytes)) return entry;
 
         entry = entry->next;
     }
@@ -828,17 +816,16 @@ static inline size_t get_hash(uintptr_t* backtrace, size_t numEntries) {
 
     size_t hash = 0;
     size_t i;
-    for (i = 0 ; i < numEntries ; i++) {
+    for (i = 0; i < numEntries; i++) {
         hash = (hash * 33) + (backtrace[i] >> 2);
     }
 
     return hash;
 }
 
-static inline void record_fd_info(uintptr_t* backtrace, size_t numEntries, int fd)
-{
-    //record fd_record_thd < fd < FD_TABLE_SIZE
-    PFDBACKTRACETable pfdbacktrace = gPFDBACKTRACETable+fd;
+static inline void record_fd_info(uintptr_t* backtrace, size_t numEntries, int fd) {
+    // record fd_record_thd < fd < FD_TABLE_SIZE
+    PFDBACKTRACETable pfdbacktrace = gPFDBACKTRACETable + fd;
     if (pfdbacktrace->flag && pfdbacktrace->pbtentry != NULL) {
         pfdbacktrace->pbtentry->allocations--;
         if (pfdbacktrace->pbtentry->allocations <= 0) {
@@ -856,7 +843,6 @@ static inline void record_fd_info(uintptr_t* backtrace, size_t numEntries, int f
         ubrd_warn_log("ubrd_get_backtrace fail for fd ( %d ).", fd);
         pfdbacktrace->pbtentry = NULL;
         return;
-
     }
 
     PFdBtEntry head, entry;
@@ -870,8 +856,8 @@ static inline void record_fd_info(uintptr_t* backtrace, size_t numEntries, int f
         if (entry->allocations >= 1024) {
             abort();
         }
-        entry->fd_bit |= 1 << (fd/32);
-        entry->fd_bit_map[(fd/32)] |= 1 << (fd % 32);
+        entry->fd_bit |= 1 << (fd / 32);
+        entry->fd_bit_map[(fd / 32)] |= 1 << (fd % 32);
         if (!(gPFDBtEntryTable->gPMaxFdBtEntry)) {
             gPFDBtEntryTable->gPMaxFdBtEntry = entry;
         } else {
@@ -884,7 +870,8 @@ static inline void record_fd_info(uintptr_t* backtrace, size_t numEntries, int f
             ubrd_error_log("[%s]gDebugMspace == NULL\n", __FUNCTION__);
             return;
         }
-        entry = (PFdBtEntry)mspace_malloc(gFDBtMspace, sizeof(FdBtEntry) + numEntries*sizeof(intptr_t));
+        entry = (PFdBtEntry)mspace_malloc(gFDBtMspace,
+                                          sizeof(FdBtEntry) + numEntries * sizeof(intptr_t));
         ubrd_debug_log("mspace_malloc bt_entry: %p", entry);
         if (!entry) {
             ubrd_error_log("[ERROR]mspace_malloc fails, entry\n");
@@ -897,7 +884,7 @@ static inline void record_fd_info(uintptr_t* backtrace, size_t numEntries, int f
         entry->fd_bit = 0;
         entry->fd_bit |= 1 << (fd / 32);
         memset(entry->fd_bit_map, 0, sizeof(entry->fd_bit_map));
-        entry->fd_bit_map[(fd/32)] |= 1 << (fd % 32);
+        entry->fd_bit_map[(fd / 32)] |= 1 << (fd % 32);
         entry->numEntries = numEntries;
         memcpy(entry->backtrace, backtrace, numEntries * sizeof(intptr_t));
 
@@ -913,9 +900,8 @@ static inline void record_fd_info(uintptr_t* backtrace, size_t numEntries, int f
 //      0 : success
 //     -1: fail
 // =============================================================================
-static inline void remove_fd_info(int fd)
-{
-    //remove fd_record_thd < fd < FD_TABLE_SIZE
+static inline void remove_fd_info(int fd) {
+    // remove fd_record_thd < fd < FD_TABLE_SIZE
 #if 0
     if(!gPFDBACKTRACETable[fd].flag) {
         uintptr_t backtrace[FD_BACKTRACE_SIZE];
@@ -933,9 +919,8 @@ static inline void remove_fd_info(int fd)
         gPFDBACKTRACETable[fd].flag = 0;
         PFdBtEntry entry = gPFDBACKTRACETable[fd].pbtentry;
         if (!entry) return;
-        entry->fd_bit_map[(fd/32)] &= ~(1 << (fd % 32));
-        if (entry->fd_bit_map[fd/32] == 0)
-            entry->fd_bit &= ~(1 << (fd/32));
+        entry->fd_bit_map[(fd / 32)] &= ~(1 << (fd % 32));
+        if (entry->fd_bit_map[fd / 32] == 0) entry->fd_bit &= ~(1 << (fd / 32));
         entry->allocations--;
         if (entry->allocations <= 0) {
             unlink_entry(entry);
@@ -950,8 +935,8 @@ static inline void remove_fd_info(int fd)
 }
 
 /* Macros for min/max. */
-#define MIN(a,b) (((a)<(b))?(a):(b))
-#define MAX(a,b) (((a)>(b))?(a):(b))
+#define MIN(a, b) (((a) < (b)) ? (a) : (b))
+#define MAX(a, b) (((a) > (b)) ? (a) : (b))
 #if 0
 static size_t get_backtrace_libunwindstack(uintptr_t* frames, size_t frame_count,std::string *strBacktrace)
 {
@@ -1000,9 +985,7 @@ void fdleak_record_backtrace(int fd) {
 #if defined(__LP64__)
         numEntries = ubrd_get_backtrace(backtrace, FD_BACKTRACE_SIZE, 1);
 #else
-        numEntries = ubrd_get_backtrace_common(NULL,
-                                               backtrace,
-                                               FD_BACKTRACE_SIZE,
+        numEntries = ubrd_get_backtrace_common(NULL, backtrace, FD_BACKTRACE_SIZE,
                                                UBRD_CORKSCREW_UNWIND_BACKTRACE);
 #endif
 
@@ -1015,19 +998,16 @@ void fdleak_record_backtrace(int fd) {
         pthread_mutex_lock(&gFDLeakMutex);
         record_fd_info(backtrace, numEntries, fd);
         pthread_mutex_unlock(&gFDLeakMutex);
-        if (fd_bt2log && numEntries > 0)
-            dump_bt2log(backtrace, numEntries, fd, 1);
+        if (fd_bt2log && numEntries > 0) dump_bt2log(backtrace, numEntries, fd, 1);
 
-    }
-    else if (gFDMspace && (fd >= FD_TABLE_SIZE)) {
+    } else if (gFDMspace && (fd >= FD_TABLE_SIZE)) {
         static struct rlimit r;
-        if(!rlimit_flag) {
-            if(!getrlimit(RLIMIT_NOFILE, &r)) {
+        if (!rlimit_flag) {
+            if (!getrlimit(RLIMIT_NOFILE, &r)) {
                 ubrd_debug_log("[FDLEAK_DEBUG]fd over FD_TABLE_SIZE:%d\n", FD_TABLE_SIZE);
                 rlimit_flag = 1;
             }
-        }
-        else if((fd >= 1024)) {
+        } else if ((fd >= 1024)) {
             ubrd_debug_log("[FDLEAK_DEBUG]fd over RLIMIT_NOFILE:%ld\n", r.rlim_cur);
 
             PFdBtEntry entry = gPFDBtEntryTable->gPMaxFdBtEntry;
@@ -1037,14 +1017,14 @@ void fdleak_record_backtrace(int fd) {
             }
 
             char buf[64];
-            char tmp[64*(FD_BACKTRACE_SIZE+1)];  // +1 for print max count
+            char tmp[64 * (FD_BACKTRACE_SIZE + 1)];  // +1 for print max count
             memset(tmp, 0, sizeof(tmp));
             uintptr_t relativ_pc = 0;
 
             unwindstack::LocalMaps maps;
             bool success = maps.Parse();
             std::shared_ptr<unwindstack::Memory> process_memory(
-                unwindstack::Memory::CreateProcessMemory(getpid()));
+                    unwindstack::Memory::CreateProcessMemory(getpid()));
 
             // print max count to exp_main
             snprintf(buf, sizeof(buf), "Max fd_bt backtrace use %zu fd\n", entry->allocations);
@@ -1060,7 +1040,8 @@ void fdleak_record_backtrace(int fd) {
                     std::shared_ptr<unwindstack::MapInfo> map_info = maps.Find(pc);
 
                     if (map_info) {
-                        unwindstack::Elf *elf = map_info->GetElf(process_memory, unwindstack::Regs::CurrentArch());
+                        unwindstack::Elf* elf =
+                                map_info->GetElf(process_memory, unwindstack::Regs::CurrentArch());
                         relativ_pc = elf->GetRelPc(pc, map_info.get());
                     } else {
                         relativ_pc = pc;
@@ -1069,7 +1050,8 @@ void fdleak_record_backtrace(int fd) {
                     relativ_pc = pc;
                 }
 
-                snprintf(buf, sizeof(buf), "  #0%zu fd %p %p\n", i, (void*)(entry->backtrace[i]), (void*)(relativ_pc));
+                snprintf(buf, sizeof(buf), "  #0%zu fd %p %p\n", i, (void*)(entry->backtrace[i]),
+                         (void*)(relativ_pc));
                 strlcat(tmp, buf, sizeof(tmp));
             }
         }
@@ -1078,7 +1060,7 @@ void fdleak_record_backtrace(int fd) {
 
 FDLEAKDEBUG_EXPORT
 void fdleak_remove_backtrace(int fd) {
-    //add for double close issue tracking
+    // add for double close issue tracking
     if (gFDMspace && (fd >= fd_record_thd) && (fd < FD_TABLE_SIZE)) {
         pthread_mutex_lock(&gFDLeakMutex);
         remove_fd_info(fd);
@@ -1086,16 +1068,13 @@ void fdleak_remove_backtrace(int fd) {
         if (fd_bt2log) {
             uintptr_t backtrace[FD_BACKTRACE_SIZE];
             size_t numEntries = 0;
-        #if defined(__LP64__)
+#if defined(__LP64__)
             numEntries = ubrd_get_backtrace(backtrace, FD_BACKTRACE_SIZE, 1);
-        #else
-            numEntries = ubrd_get_backtrace_common(NULL,
-                                               backtrace,
-                                               FD_BACKTRACE_SIZE,
-                                               UBRD_CORKSCREW_UNWIND_BACKTRACE);
-        #endif
-            if (numEntries > 0)
-                dump_bt2log(backtrace, numEntries, fd, 0);
+#else
+            numEntries = ubrd_get_backtrace_common(NULL, backtrace, FD_BACKTRACE_SIZE,
+                                                   UBRD_CORKSCREW_UNWIND_BACKTRACE);
+#endif
+            if (numEntries > 0) dump_bt2log(backtrace, numEntries, fd, 0);
         }
     }
 }
@@ -1108,10 +1087,10 @@ void _fdlog(const char* fmt, ...) {
     static bool checked = false;
     static bool ifPrint = false;
 
-    if (!checked && !ifPrint) { // todo: if progname is not fdleak, we should not check it again.
+    if (!checked && !ifPrint) {  // todo: if progname is not fdleak, we should not check it again.
         checked = true;
         progname = getprogname();
-        if (!progname){
+        if (!progname) {
             fprintf(stderr, FDebug " (%d) <-- getprogname fail\n", getpid());
             return;
         }
@@ -1121,7 +1100,7 @@ void _fdlog(const char* fmt, ...) {
         }
     }
     if (ifPrint == false) {
-        //fprintf(stderr, FDebug " (%d), --> progname: %s\n", getpid(), progname);
+        // fprintf(stderr, FDebug " (%d), --> progname: %s\n", getpid(), progname);
         return;
     }
 #ifdef TO_ANDROID_LOG
@@ -1145,7 +1124,7 @@ void _fdlog(const char* fmt, ...) {
     fprintf(stderr, "%s " FDebug " %s\n", prefix, msg);
 #endif
 }
-#endif // FD_NDEBUG
+#endif  // FD_NDEBUG
 
 #ifdef __cplusplus
 }

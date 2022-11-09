@@ -17,12 +17,12 @@
 #ifndef ANDROID_UTILITY_SYS_H
 #define ANDROID_UTILITY_SYS_H
 
-#define PATH_TASK_PREFER_CPU   "/sys/devices/system/cpu/sched/cpu_prefer"
+#define PATH_TASK_PREFER_CPU "/sys/devices/system/cpu/sched/cpu_prefer"
 
 extern int initTaskPreferCpu(int power_on);
-extern int setTaskPreferCpu_big(int tid, void *scn);
-extern int unsetTaskPreferCpu_big(int tid, void *scn);
-extern int setTaskPreferCpu_little(int tid, void *scn);
-extern int unsetTaskPreferCpu_little(int tid, void *scn);
+extern int setTaskPreferCpu_big(int tid, void* scn);
+extern int unsetTaskPreferCpu_big(int tid, void* scn);
+extern int setTaskPreferCpu_little(int tid, void* scn);
+extern int unsetTaskPreferCpu_little(int tid, void* scn);
 
-#endif // ANDROID_UTILITY_FPS_H
+#endif  // ANDROID_UTILITY_FPS_H

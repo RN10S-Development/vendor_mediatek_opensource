@@ -36,48 +36,50 @@
 extern "C" {
 #endif
 
-#define DEBUG15_EXPORT __attribute__ ((visibility("default")))
+#define DEBUG15_EXPORT __attribute__((visibility("default")))
 
 // #define LOCAL_DEBUG
 
 #ifdef LOCAL_DEBUG
 #ifdef O0
-#define debug_log(format, ...)  \
-  __libc_format_log(ANDROID_LOG_DEBUG, "malloc_debug_mtk", (format), ##__VA_ARGS__ )
+#define debug_log(format, ...) \
+    __libc_format_log(ANDROID_LOG_DEBUG, "malloc_debug_mtk", (format), ##__VA_ARGS__)
 #else
-#define debug_log(format, ...)  \
-  async_safe_format_log(ANDROID_LOG_DEBUG, "malloc_debug_mtk", (format), ##__VA_ARGS__ )
+#define debug_log(format, ...) \
+    async_safe_format_log(ANDROID_LOG_DEBUG, "malloc_debug_mtk", (format), ##__VA_ARGS__)
 #endif
 #else
-#define debug_log(format, ...)  do { } while(0)
+#define debug_log(format, ...) \
+    do {                       \
+    } while (0)
 #endif
 
 #ifdef O0
-#define error_log(format, ...)  \
-  __libc_format_log(ANDROID_LOG_ERROR, "malloc_debug_mtk", (format), ##__VA_ARGS__ )
-#define warn_log(format, ...)  \
-  __libc_format_log(ANDROID_LOG_WARN, "malloc_debug_mtk", (format), ##__VA_ARGS__ )
-#define info_log(format, ...)  \
-  __libc_format_log(ANDROID_LOG_INFO, "malloc_debug_mtk", (format), ##__VA_ARGS__ )
+#define error_log(format, ...) \
+    __libc_format_log(ANDROID_LOG_ERROR, "malloc_debug_mtk", (format), ##__VA_ARGS__)
+#define warn_log(format, ...) \
+    __libc_format_log(ANDROID_LOG_WARN, "malloc_debug_mtk", (format), ##__VA_ARGS__)
+#define info_log(format, ...) \
+    __libc_format_log(ANDROID_LOG_INFO, "malloc_debug_mtk", (format), ##__VA_ARGS__)
 #else
-#define error_log(format, ...)  \
-  async_safe_format_log(ANDROID_LOG_ERROR, "malloc_debug_mtk", (format), ##__VA_ARGS__ )
-#define warn_log(format, ...)  \
-  async_safe_format_log(ANDROID_LOG_WARN, "malloc_debug_mtk", (format), ##__VA_ARGS__ )
-#define info_log(format, ...)  \
-  async_safe_format_log(ANDROID_LOG_INFO, "malloc_debug_mtk", (format), ##__VA_ARGS__ )
+#define error_log(format, ...) \
+    async_safe_format_log(ANDROID_LOG_ERROR, "malloc_debug_mtk", (format), ##__VA_ARGS__)
+#define warn_log(format, ...) \
+    async_safe_format_log(ANDROID_LOG_WARN, "malloc_debug_mtk", (format), ##__VA_ARGS__)
+#define info_log(format, ...) \
+    async_safe_format_log(ANDROID_LOG_INFO, "malloc_debug_mtk", (format), ##__VA_ARGS__)
 #endif
 
 /* flag definitions, currently sharing storage with "size" */
 
-#define MAX_SIZE_T           (~(size_t)0)
+#define MAX_SIZE_T (~(size_t)0)
 
 #ifndef MALLOC_ALIGNMENT
-#define MALLOC_ALIGNMENT ((size_t)(2 * sizeof(void *)))
+#define MALLOC_ALIGNMENT ((size_t)(2 * sizeof(void*)))
 #endif
-#define GUARD               0x48151642
+#define GUARD 0x48151642
 
-#define DEBUG_MSPACE_SIZE_UNIT (1024*1024)
+#define DEBUG_MSPACE_SIZE_UNIT (1024 * 1024)
 #define HISTORICAL_BUFFER_SIZE_UNIT (1024)
 #define BT_DEPTH_UNIT (2)
 
@@ -85,13 +87,13 @@ extern "C" {
 // default config values
 //
 #ifdef MTK_USE_RESERVED_EXT_MEM
-#define DEFAULT_DEBUG_MSPACE_SIZE (4*1024*1024)
+#define DEFAULT_DEBUG_MSPACE_SIZE (4 * 1024 * 1024)
 #define DEFAULT_DEBUG_MSPACE_SOURCE EXTERNAL_MEM
 
-void mtk_malloc_debug_read_config(char *filename);
-int mtk_malloc_debug_set_config(const char *name);
+void mtk_malloc_debug_read_config(char* filename);
+int mtk_malloc_debug_set_config(const char* name);
 #else
-#define DEFAULT_DEBUG_MSPACE_SIZE (32*1024*1024)
+#define DEFAULT_DEBUG_MSPACE_SIZE (32 * 1024 * 1024)
 #define DEFAULT_DEBUG_MSPACE_SOURCE INTERNAL_MEM
 #endif
 #define DEFAULT_HISTORICAL_ALLOC_SIZE (2046)
@@ -179,20 +181,12 @@ Example D: enable debug 15, and use external memory as debug mspace source.
 // =================================================================
 // Alignment
 // =================================================================
-#define SYSTEM_PAGE_SIZE        4096
-#define ALIGN_UP_TO_PAGE_SIZE(p) \
-    (((size_t)(p) + (SYSTEM_PAGE_SIZE - 1)) & ~(SYSTEM_PAGE_SIZE - 1))
+#define SYSTEM_PAGE_SIZE 4096
+#define ALIGN_UP_TO_PAGE_SIZE(p) (((size_t)(p) + (SYSTEM_PAGE_SIZE - 1)) & ~(SYSTEM_PAGE_SIZE - 1))
 
-typedef enum{
-    FP_BACKTRACE,
-    GCC_UNWIND_BACKTRACE,
-    CORKSCREW_UNWIND_BACKTRACE
-} BACKTRACE_METHOD;
+typedef enum { FP_BACKTRACE, GCC_UNWIND_BACKTRACE, CORKSCREW_UNWIND_BACKTRACE } BACKTRACE_METHOD;
 
-typedef enum{
-    INTERNAL_MEM,
-    EXTERNAL_MEM
-} DEBUG_MSPACE_SOURCE;
+typedef enum { INTERNAL_MEM, EXTERNAL_MEM } DEBUG_MSPACE_SOURCE;
 
 typedef struct DebugConfig {
     uint32_t mDebugMspaceSize;
@@ -203,14 +197,13 @@ typedef struct DebugConfig {
     uint8_t mDebugMspaceSource;
 } DebugConfig, *PDebugConfig;
 
-#define DEFAULT_DEBUG_CONFIG {                              \
-    .mDebugMspaceSize = DEFAULT_DEBUG_MSPACE_SIZE,          \
-    .mHistoricalBufferSize = DEFAULT_HISTORICAL_ALLOC_SIZE, \
-    .mMaxBtDepth = DEFAULT_MAX_BACKTRACE_DEPTH,             \
-    .mSig = 0, /* signal handler is disable */              \
-    .mBtMethod = FP_BACKTRACE,                              \
-    .mDebugMspaceSource = DEFAULT_DEBUG_MSPACE_SOURCE       \
-}
+#define DEFAULT_DEBUG_CONFIG                                                                   \
+    {                                                                                          \
+        .mDebugMspaceSize = DEFAULT_DEBUG_MSPACE_SIZE,                                         \
+        .mHistoricalBufferSize = DEFAULT_HISTORICAL_ALLOC_SIZE,                                \
+        .mMaxBtDepth = DEFAULT_MAX_BACKTRACE_DEPTH, .mSig = 0, /* signal handler is disable */ \
+                .mBtMethod = FP_BACKTRACE, .mDebugMspaceSource = DEFAULT_DEBUG_MSPACE_SOURCE   \
+    }
 
 extern DebugConfig gDebugConfig;
 extern void* gDebugMspaceBase;
@@ -220,30 +213,28 @@ int init_recorder(void);
 
 #ifdef DEBUG15_GUARD_CHECK
 
-#define BIONIC_ALIGN(value, alignment) \
-  (((value) + (alignment) - 1) & ~((alignment) - 1))
+#define BIONIC_ALIGN(value, alignment) (((value) + (alignment)-1) & ~((alignment)-1))
 
-#define BIONIC_ROUND_UP_POWER_OF_2(value) \
-  (sizeof(value) == 8) \
-    ? (1UL << (64 - __builtin_clzl((unsigned long)(value)))) \
-    : (1UL << (32 - __builtin_clz((unsigned int)(value))))
+#define BIONIC_ROUND_UP_POWER_OF_2(value)                                         \
+    (sizeof(value) == 8) ? (1UL << (64 - __builtin_clzl((unsigned long)(value)))) \
+                         : (1UL << (32 - __builtin_clz((unsigned int)(value))))
 
-#define FRONT_GUARD_MALLOC         0xa1
-#define FRONT_GUARD_MALLOC_FREE    0xb1
-#define FRONT_GUARD_MEMALIGN         0xa2
-#define FRONT_GUARD_MEMALIGN_FREE    0xb2
+#define FRONT_GUARD_MALLOC 0xa1
+#define FRONT_GUARD_MALLOC_FREE 0xb1
+#define FRONT_GUARD_MEMALIGN 0xa2
+#define FRONT_GUARD_MEMALIGN_FREE 0xb2
 
-#define REAR_GUARD          0xbb
-#define POISON_FREE_FILL    0xef
-#define POISON_FREE_LEN     (sizeof(size_t) << 1)
+#define REAR_GUARD 0xbb
+#define POISON_FREE_FILL 0xef
+#define POISON_FREE_LEN (sizeof(size_t) << 1)
 #if defined(__LP64__)
-#define FRONT_GUARD_LEN     (1<<3)
-#define REAR_GUARD_LEN      (1<<3)
-#define MEMALIGN_MAGIC_NO   0xcececececececece
+#define FRONT_GUARD_LEN (1 << 3)
+#define REAR_GUARD_LEN (1 << 3)
+#define MEMALIGN_MAGIC_NO 0xcececececececece
 #else
-#define FRONT_GUARD_LEN     (1<<2)
-#define REAR_GUARD_LEN      (1<<2)
-#define MEMALIGN_MAGIC_NO   0xcececece
+#define FRONT_GUARD_LEN (1 << 2)
+#define REAR_GUARD_LEN (1 << 2)
+#define MEMALIGN_MAGIC_NO 0xcececece
 #endif
 
 struct MTK_HDR_MALLOC {
@@ -252,14 +243,14 @@ struct MTK_HDR_MALLOC {
 };
 typedef struct MTK_HDR_MALLOC mtk_hdr_malloc;
 
-struct MTK_HDR_MEMALIGN_REAR{
+struct MTK_HDR_MEMALIGN_REAR {
     void* base;  // Always points to the memory allocated using malloc.
     size_t size;
     char front_guard_memalign[FRONT_GUARD_LEN];
 };
 typedef struct MTK_HDR_MEMALIGN_REAR mtk_hdr_memalign_rear;
 
-struct MTK_FTR_T{
+struct MTK_FTR_T {
     char rear_guard[REAR_GUARD_LEN];
 } __attribute__((packed));
 typedef struct MTK_FTR_T mtk_ftr_t;
@@ -273,7 +264,7 @@ int val_in_debug15_mspace(size_t value);
 #endif
 
 #ifdef __cplusplus
-};  /* end of extern "C" */
+}; /* end of extern "C" */
 #endif
 
 #endif  // MALLOC_DEBUG_MTK_H

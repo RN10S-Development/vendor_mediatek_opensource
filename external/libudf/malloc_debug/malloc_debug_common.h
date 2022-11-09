@@ -29,13 +29,13 @@ extern "C" {
 #include <stdlib.h>
 #include <private/bionic_config.h>  // bionic/libc
 
-#define HASHTABLE_SIZE      1543
-#define BACKTRACE_SIZE      32
+#define HASHTABLE_SIZE 1543
+#define BACKTRACE_SIZE 32
 /* flag definitions, currently sharing storage with "size" */
-#define SIZE_FLAG_ZYGOTE_CHILD  (1<<31)
-#define SIZE_FLAG_MASK          (SIZE_FLAG_ZYGOTE_CHILD)
+#define SIZE_FLAG_ZYGOTE_CHILD (1 << 31)
+#define SIZE_FLAG_MASK (SIZE_FLAG_ZYGOTE_CHILD)
 
-#define MAX_SIZE_T           (~(size_t)0)
+#define MAX_SIZE_T (~(size_t)0)
 
 // =============================================================================
 // Structures
@@ -63,18 +63,19 @@ struct HashTable {
 #ifndef STRUCT_MALLINFO_DECLARED
 #define STRUCT_MALLINFO_DECLARED 1
 struct mallinfo {
-  size_t arena;    /* Total number of non-mmapped bytes currently allocated from OS. */
-  size_t ordblks;  /* Number of free chunks. */
-  size_t smblks;   /* (Unused.) */
-  size_t hblks;    /* (Unused.) */
-  size_t hblkhd;   /* Total number of bytes in mmapped regions. */
-  size_t usmblks;  /* Maximum total allocated space; greater than total if trimming has occurred. */
-  size_t fsmblks;  /* (Unused.) */
-  size_t uordblks; /* Total allocated space (normal or mmapped.) */
-  size_t fordblks; /* Total free space. */
-  size_t keepcost; /* Upper bound on number of bytes releasable by malloc_trim. */
+    size_t arena;    /* Total number of non-mmapped bytes currently allocated from OS. */
+    size_t ordblks;  /* Number of free chunks. */
+    size_t smblks;   /* (Unused.) */
+    size_t hblks;    /* (Unused.) */
+    size_t hblkhd;   /* Total number of bytes in mmapped regions. */
+    size_t usmblks;  /* Maximum total allocated space; greater than total if trimming has occurred.
+                      */
+    size_t fsmblks;  /* (Unused.) */
+    size_t uordblks; /* Total allocated space (normal or mmapped.) */
+    size_t fordblks; /* Total free space. */
+    size_t keepcost; /* Upper bound on number of bytes releasable by malloc_trim. */
 };
-#endif  /* STRUCT_MALLINFO_DECLARED */
+#endif /* STRUCT_MALLINFO_DECLARED */
 
 typedef void* (*MallocDebugCalloc)(size_t, size_t);
 typedef void (*MallocDebugFree)(void*);
@@ -90,33 +91,31 @@ typedef void* (*MallocDebugRealloc)(void*, size_t);
 #if defined(HAVE_DEPRECATED_MALLOC_FUNCS)
 typedef void* (*MallocDebugValloc)(size_t);
 #endif
-typedef int (*MallocIterate)(uintptr_t, size_t,
-             void (*)(uintptr_t, size_t, void*), void*);
+typedef int (*MallocIterate)(uintptr_t, size_t, void (*)(uintptr_t, size_t, void*), void*);
 typedef void (*MallocDisable)(void);
 typedef void (*MallocEnable)(void);
 
 struct MallocDebug {
-  MallocDebugCalloc calloc;
-  MallocDebugFree free;
-  MallocDebugMallinfo mallinfo;
-  MallocDebugMalloc malloc;
-  MallocDebugMallocUsableSize malloc_usable_size;
-  MallocDebugMemalign memalign;
-  MallocDebugPosixMemalign posix_memalign;
+    MallocDebugCalloc calloc;
+    MallocDebugFree free;
+    MallocDebugMallinfo mallinfo;
+    MallocDebugMalloc malloc;
+    MallocDebugMallocUsableSize malloc_usable_size;
+    MallocDebugMemalign memalign;
+    MallocDebugPosixMemalign posix_memalign;
 #if defined(HAVE_DEPRECATED_MALLOC_FUNCS)
-  MallocDebugPvalloc pvalloc;
+    MallocDebugPvalloc pvalloc;
 #endif
-  MallocDebugRealloc realloc;
+    MallocDebugRealloc realloc;
 #if defined(HAVE_DEPRECATED_MALLOC_FUNCS)
-  MallocDebugValloc valloc;
+    MallocDebugValloc valloc;
 #endif
-  MallocIterate malloc_iterate;
-  MallocDisable malloc_disable;
-  MallocEnable malloc_enable;
+    MallocIterate malloc_iterate;
+    MallocDisable malloc_disable;
+    MallocEnable malloc_enable;
 };
 
 typedef struct MallocDebug MallocDebug;
-
 
 /* Malloc debugging initialization routine.
  * This routine must be implemented in .so modules that implement malloc
@@ -126,10 +125,10 @@ typedef struct MallocDebug MallocDebug;
  * Return:
  *  0 on success, -1 on failure.
  */
-//typedef int (*MallocDebugInit)(void);
+// typedef int (*MallocDebugInit)(void);
 
 #ifdef __cplusplus
-};  /* end of extern "C" */
+}; /* end of extern "C" */
 #endif
 
 #endif  // MALLOC_DEBUG_COMMON_H

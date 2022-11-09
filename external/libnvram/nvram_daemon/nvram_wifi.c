@@ -32,30 +32,30 @@
 extern int iFileWIFILID;
 extern int iFileCustomWIFILID;
 
-
 /* Just tell NVRAM to create wifi default record */
 void* NVRAM_WIFI(void* arg) {
-	F_ID wifi_nvram_fd, wifi_custom_nvram_fd;
-	int rec_size = 0;
-	int rec_num = 0;
+    F_ID wifi_nvram_fd, wifi_custom_nvram_fd;
+    int rec_size = 0;
+    int rec_num = 0;
 
-	//NVRAM_LOG("[NVRAM Daemon]wifi lid %d ++\n",AP_CFG_RDEB_FILE_WIFI_LID);
-	NVRAM_LOG("[NVRAM Daemon]wifi lid %d ++\n", iFileWIFILID);
-	//wifi_nvram_fd = NVM_GetFileDesc(AP_CFG_RDEB_FILE_WIFI_LID, &rec_size, &rec_num, true);
-	wifi_nvram_fd = NVM_GetFileDesc(iFileWIFILID, &rec_size, &rec_num, true);
-	NVRAM_LOG("[wifi] wifi FD %d rec_size %d rec_num %d\n", wifi_nvram_fd.iFileDesc, rec_size, rec_num);
-	NVM_CloseFileDesc(wifi_nvram_fd);
+    // NVRAM_LOG("[NVRAM Daemon]wifi lid %d ++\n",AP_CFG_RDEB_FILE_WIFI_LID);
+    NVRAM_LOG("[NVRAM Daemon]wifi lid %d ++\n", iFileWIFILID);
+    // wifi_nvram_fd = NVM_GetFileDesc(AP_CFG_RDEB_FILE_WIFI_LID, &rec_size, &rec_num, true);
+    wifi_nvram_fd = NVM_GetFileDesc(iFileWIFILID, &rec_size, &rec_num, true);
+    NVRAM_LOG("[wifi] wifi FD %d rec_size %d rec_num %d\n", wifi_nvram_fd.iFileDesc, rec_size,
+              rec_num);
+    NVM_CloseFileDesc(wifi_nvram_fd);
 
-	rec_size = 0;
-	rec_num = 0;
-	//NVRAM_LOG("[NVRAM Daemon]wifi custom lid %d ++\n",AP_CFG_RDEB_WIFI_CUSTOM_LID);
-	NVRAM_LOG("[NVRAM Daemon]wifi custom lid %d ++\n", iFileCustomWIFILID);
-	//wifi_custom_nvram_fd = NVM_GetFileDesc(AP_CFG_RDEB_WIFI_CUSTOM_LID, &rec_size, &rec_num, true);
-	wifi_custom_nvram_fd = NVM_GetFileDesc(iFileCustomWIFILID, &rec_size, &rec_num,
-	                                       true);
-	NVRAM_LOG("[wifi] wifi custom FD %d rec_size %d rec_num %d\n",
-	          wifi_custom_nvram_fd.iFileDesc, rec_size, rec_num);
-	NVM_CloseFileDesc(wifi_custom_nvram_fd);
-	pthread_exit(NULL);
-	return NULL;
+    rec_size = 0;
+    rec_num = 0;
+    // NVRAM_LOG("[NVRAM Daemon]wifi custom lid %d ++\n",AP_CFG_RDEB_WIFI_CUSTOM_LID);
+    NVRAM_LOG("[NVRAM Daemon]wifi custom lid %d ++\n", iFileCustomWIFILID);
+    // wifi_custom_nvram_fd = NVM_GetFileDesc(AP_CFG_RDEB_WIFI_CUSTOM_LID, &rec_size, &rec_num,
+    // true);
+    wifi_custom_nvram_fd = NVM_GetFileDesc(iFileCustomWIFILID, &rec_size, &rec_num, true);
+    NVRAM_LOG("[wifi] wifi custom FD %d rec_size %d rec_num %d\n", wifi_custom_nvram_fd.iFileDesc,
+              rec_size, rec_num);
+    NVM_CloseFileDesc(wifi_custom_nvram_fd);
+    pthread_exit(NULL);
+    return NULL;
 }

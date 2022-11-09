@@ -27,8 +27,7 @@
 
 using namespace android;
 
-Entry::Entry()
-{
+Entry::Entry() {
     next = 0xFF;
     type = DrmDef::CONSTRAINT_UNINIT;
     used_count = 0;
@@ -40,22 +39,16 @@ Entry::Entry()
     end_intv = 0;
 }
 
-void Entry::dump()
-{
+void Entry::dump() {
     // get String8 for type  ---->
     String8 typeStr("");
-    for (int i = DrmDef::CONSTRAINT_COUNT; i <= DrmDef::CONSTRAINT_NONE; i = i << 1)
-    {
-        if (0 != (type & i))
-        {
+    for (int i = DrmDef::CONSTRAINT_COUNT; i <= DrmDef::CONSTRAINT_NONE; i = i << 1) {
+        if (0 != (type & i)) {
             typeStr += DrmDef::getConstraintStr(i);
-        }
-        else
-        {
+        } else {
             typeStr += "_";
         }
-        if (i != DrmDef::CONSTRAINT_NONE)
-        {
+        if (i != DrmDef::CONSTRAINT_NONE) {
             typeStr += "|";
         }
     }
@@ -77,47 +70,42 @@ void Entry::dump()
     conStr = conStr + "start_intv[" + StrUtil::toString(start_intv) + "]" + start_intv_str + " ";
     conStr = conStr + "end_intv[" + StrUtil::toString(end_intv) + "]" + end_intv_str + " ";
     // get String8 for constraints <----
-    if (DrmUtil::sVDebug) ALOGV("        next[%s] type[%s] %s", StrUtil::toString(next), typeStr.string(), conStr.string());
+    if (DrmUtil::sVDebug)
+        ALOGV("        next[%s] type[%s] %s", StrUtil::toString(next), typeStr.string(),
+              conStr.string());
 }
 
-Rights::Rights()
-{
+Rights::Rights() {
     memset(key, NULL, DrmDef::DRM_MAX_KEY_LENGTH);
 
     permission = DrmDef::PERMISSION_NONE;
     entryPtr = NULL;
-    for (int i = 0, count = DrmDef::PERMISSION_TOTAL_INDEX; i < count; i++)
-    {
+    for (int i = 0, count = DrmDef::PERMISSION_TOTAL_INDEX; i < count; i++) {
         best[i] = 0xFF;
         num[i] = 0;
     }
 }
 
-Rights::~Rights()
-{
-    if (entryPtr != NULL)
-    {
+Rights::~Rights() {
+    if (entryPtr != NULL) {
         delete[] entryPtr;
         entryPtr = NULL;
     }
 }
 
-void Rights::dump()
-{
+void Rights::dump() {
     if (DrmUtil::sVDebug) ALOGV("Rights ---->");
     if (DrmUtil::sVDebug) ALOGV("%s", getGeneralStr().string());
 
     // print constraint by permission ---->
-    for (int i = DrmDef::PERMISSION_PLAY_INDEX; i <= DrmDef::PERMISSION_PRINT_INDEX; i++)
-    {
+    for (int i = DrmDef::PERMISSION_PLAY_INDEX; i <= DrmDef::PERMISSION_PRINT_INDEX; i++) {
         String8 pStr = DrmDef::getPermissionStr(i);
         if (DrmUtil::sVDebug) ALOGV("[%s] ---->", pStr.string());
         // print constraint list ---->
-        if (best[i] != 0xFF) // have constraint for the permission
+        if (best[i] != 0xFF)  // have constraint for the permission
         {
             int entryIndex = best[i];
-            while (entryIndex != 0xFF)
-            {
+            while (entryIndex != 0xFF) {
                 Entry* entry = &entryPtr[entryIndex];
                 // print entry ---->
                 if (DrmUtil::sVDebug) ALOGV("    entry[%d] ---->", entryIndex);
@@ -134,27 +122,21 @@ void Rights::dump()
     if (DrmUtil::sVDebug) ALOGV("Rights <----");
 }
 
-String8 Rights::getGeneralStr()
-{
+String8 Rights::getGeneralStr() {
     String8 permissionStr("");
     String8 numStr("");
     String8 bestStr("");
-    for (int i = DrmDef::PERMISSION_PLAY_INDEX; i <= DrmDef::PERMISSION_PRINT_INDEX; i++)
-    {
+    for (int i = DrmDef::PERMISSION_PLAY_INDEX; i <= DrmDef::PERMISSION_PRINT_INDEX; i++) {
         int p = DrmDef::getPermission(i);
         String8 pStr = DrmDef::getPermissionStr(i);
         numStr += StrUtil::toString(num[i]);
         bestStr += StrUtil::toString(best[i]);
-        if (permission & p)
-        {
+        if (permission & p) {
             permissionStr += pStr;
-        }
-        else
-        {
+        } else {
             permissionStr += "_";
         }
-        if (i != DrmDef::PERMISSION_PRINT_INDEX)
-        {
+        if (i != DrmDef::PERMISSION_PRINT_INDEX) {
             permissionStr += "|";
             numStr += "|";
             bestStr += "|";
@@ -172,8 +154,7 @@ String8 Rights::getGeneralStr()
     return allStr;
 }
 
-void RO::dump()
-{
+void RO::dump() {
     if (DrmUtil::sVDebug) ALOGV("RO ---->");
     rights.dump();
     if (DrmUtil::sVDebug) ALOGV("RO <----");

@@ -29,16 +29,16 @@ extern "C" {
 /* Custom extra data we stuff into map_info_t structures as part
  * of our ptrace_context_t. */
 typedef struct {
-//#ifdef __arm__
+    //#ifdef __arm__
     uintptr_t exidx_start;
     size_t exidx_size;
-//#elif __i386__
-//    uintptr_t eh_frame_hdr;
-//#endif
+    //#elif __i386__
+    //    uintptr_t eh_frame_hdr;
+    //#endif
 } map_info_data_t;
 
 #ifdef __cplusplus
 }
 #endif
 
-#endif // _CORKSCREW_PTRACE_ARCH_H
+#endif  // _CORKSCREW_PTRACE_ARCH_H

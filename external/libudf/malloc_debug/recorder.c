@@ -10,18 +10,18 @@
 #define ONLY_MSPACES 1
 #define USE_LOCKS 1
 #define USE_SPIN_LOCKS 0
-#define DLMALLOC_EXPORT __attribute__((visibility ("hidden")))
+#define DLMALLOC_EXPORT __attribute__((visibility("hidden")))
 
 #include "malloc.c"  // dlmalloc
 
-#define BIONIC_PR_SET_VMA               0x53564d41
-#define BIONIC_PR_SET_VMA_ANON_NAME     0
+#define BIONIC_PR_SET_VMA 0x53564d41
+#define BIONIC_PR_SET_VMA_ANON_NAME 0
 
 #define MSPACE_OVER_DEFALUT 1
 
 #if MSPACE_OVER_DEFALUT
 #define mtk_mspace_malloc mspace_malloc
-#define mtk_mspace_free   mspace_free
+#define mtk_mspace_free mspace_free
 #endif
 
 static pthread_mutex_t gChunkMutex = PTHREAD_MUTEX_INITIALIZER;
@@ -40,21 +40,16 @@ void multi_mutex_unlock() {
     pthread_mutex_unlock(&gChunkMutex);
 }
 
-void chunk_mutex_lock() {
-    pthread_mutex_lock(&gChunkMutex);
-}
+void chunk_mutex_lock() { pthread_mutex_lock(&gChunkMutex); }
 
-void chunk_mutex_unlock() {
-    pthread_mutex_unlock(&gChunkMutex);
-}
-
+void chunk_mutex_unlock() { pthread_mutex_unlock(&gChunkMutex); }
 
 //
 // Hash Table functions
 //
 BtTable gBtTable;
-ChunkHashTable gChunkHashTable; // current allocations
-HistoricalAllocTable gHistoricalAllocTable; // historical allocations
+ChunkHashTable gChunkHashTable;              // current allocations
+HistoricalAllocTable gHistoricalAllocTable;  // historical allocations
 
 //
 // create debug mspace from different source.
@@ -62,13 +57,12 @@ HistoricalAllocTable gHistoricalAllocTable; // historical allocations
 // others: fail
 //
 int init_debug_mspace() {
-    if (gDebugMspaceBase && gDebugMspaceBase != MAP_FAILED)
-        return 0;
+    if (gDebugMspaceBase && gDebugMspaceBase != MAP_FAILED) return 0;
 
- //
- // mmap,
- // and create an locked dlmalloc mspace to store back trace and chunk info
- //
+        //
+        // mmap,
+        // and create an locked dlmalloc mspace to store back trace and chunk info
+        //
 #ifdef MTK_USE_RESERVED_EXT_MEM
     if (gDebugConfig.mDebugMspaceSource == EXTERNAL_MEM) {
         int fd = open(EXM_DEV, O_RDWR);
@@ -80,9 +74,10 @@ int init_debug_mspace() {
             return -1;
 #endif
         } else {
-            gDebugMspaceBase = mmap(NULL, gDebugConfig.mDebugMspaceSize,
-                     PROT_READ | PROT_WRITE |PROT_MALLOCFROMBIONIC, MAP_SHARED, fd, 0);
-            //info_log("mmap EXTERNAL base:%p\n", gDebugMspaceBase);
+            gDebugMspaceBase =
+                    mmap(NULL, gDebugConfig.mDebugMspaceSize,
+                         PROT_READ | PROT_WRITE | PROT_MALLOCFROMBIONIC, MAP_SHARED, fd, 0);
+            // info_log("mmap EXTERNAL base:%p\n", gDebugMspaceBase);
             close(fd);
             fd = -1;
             if (gDebugMspaceBase == MAP_FAILED) {
@@ -105,21 +100,21 @@ int init_debug_mspace() {
         int prctlResult = 0;
 
         gDebugMspaceBase = mmap(NULL, gDebugConfig.mDebugMspaceSize,
-                PROT_READ | PROT_WRITE | PROT_MALLOCFROMBIONIC, MAP_PRIVATE | MAP_ANONYMOUS, /*fd*/-1, 0);
-        debug_log("mmap INTERNAL base:%p, DebugMspaceSize:%x\n", gDebugMspaceBase, gDebugConfig.mDebugMspaceSize);
+                                PROT_READ | PROT_WRITE | PROT_MALLOCFROMBIONIC,
+                                MAP_PRIVATE | MAP_ANONYMOUS, /*fd*/ -1, 0);
+        debug_log("mmap INTERNAL base:%p, DebugMspaceSize:%x\n", gDebugMspaceBase,
+                  gDebugConfig.mDebugMspaceSize);
         if (gDebugMspaceBase == MAP_FAILED) {
             error_log("Internal mem MAP_FAILED, errno: %d\n", errno);
-            return -1; // #define MAP_FAILED ((void *)-1) in mman.h
+            return -1;  // #define MAP_FAILED ((void *)-1) in mman.h
         }
 
-        prctlResult = prctl(BIONIC_PR_SET_VMA, BIONIC_PR_SET_VMA_ANON_NAME,
-                      gDebugMspaceBase, gDebugConfig.mDebugMspaceSize, "malloc debug");
-        if (prctlResult == -1)
-            error_log("set malloc debug mspace name: failed\n");
+        prctlResult = prctl(BIONIC_PR_SET_VMA, BIONIC_PR_SET_VMA_ANON_NAME, gDebugMspaceBase,
+                            gDebugConfig.mDebugMspaceSize, "malloc debug");
+        if (prctlResult == -1) error_log("set malloc debug mspace name: failed\n");
     }
 
-    gDebugMspace = create_mspace_with_base(gDebugMspaceBase,
-    gDebugConfig.mDebugMspaceSize, 1);
+    gDebugMspace = create_mspace_with_base(gDebugMspaceBase, gDebugConfig.mDebugMspaceSize, 1);
     if (!gDebugMspace) {
         error_log("create_mspace_with_base: failed\n");
         return -1;
@@ -156,13 +151,13 @@ int init_recorder() { /*ring buffer*/
     size_t historical_buf_size = sizeof(PChunkHashEntry) * gDebugConfig.mHistoricalBufferSize;
 
     gChunkHashTable.chunk_hash_table =
-        (PChunkHashEntry *)mtk_mspace_malloc(gDebugMspace, chunk_hash_table_size);
+            (PChunkHashEntry*)mtk_mspace_malloc(gDebugMspace, chunk_hash_table_size);
     gHistoricalAllocTable.historical_alloc_table =
-        (PChunkHashEntry *)mtk_mspace_malloc(gDebugMspace, historical_buf_size);
+            (PChunkHashEntry*)mtk_mspace_malloc(gDebugMspace, historical_buf_size);
 
     /* memset is a must? */
-    if (gChunkHashTable.chunk_hash_table != NULL
-        && gHistoricalAllocTable.historical_alloc_table != NULL) {
+    if (gChunkHashTable.chunk_hash_table != NULL &&
+        gHistoricalAllocTable.historical_alloc_table != NULL) {
         gHistoricalAllocTable.head = 0;
         gChunkHashTable.table_size = CHUNK_HASH_TABLE_SIZE;
         memset(gChunkHashTable.chunk_hash_table, 0, chunk_hash_table_size);
@@ -171,17 +166,15 @@ int init_recorder() { /*ring buffer*/
     }
 
     error_log("init_recorder fails, chunk_hash_table:%p, historical_alloc_table:%p\n",
-              gChunkHashTable.chunk_hash_table,
-              gHistoricalAllocTable.historical_alloc_table);
+              gChunkHashTable.chunk_hash_table, gHistoricalAllocTable.historical_alloc_table);
     return -1;
 }
 
-static int descend_memcmp(unsigned char *e1, unsigned char *e2, size_t n)
-{
-    const unsigned char*  p1   = e1;
-    const unsigned char*  start1 = e1 - n + 1;
-    const unsigned char*  p2   = e2;
-    int                   d = 0;
+static int descend_memcmp(unsigned char* e1, unsigned char* e2, size_t n) {
+    const unsigned char* p1 = e1;
+    const unsigned char* start1 = e1 - n + 1;
+    const unsigned char* p2 = e2;
+    int d = 0;
 
     for (;;) {
         if (d || p1 < start1) break;
@@ -200,9 +193,8 @@ static int descend_memcmp(unsigned char *e1, unsigned char *e2, size_t n)
     return d;
 }
 
-static BtEntry* find_entry(BtTable* table, int slot,
-        intptr_t* backtrace, size_t numEntries, size_t size)
-{
+static BtEntry* find_entry(BtTable* table, int slot, intptr_t* backtrace, size_t numEntries,
+                           size_t size) {
     BtEntry* next_entry;
     BtEntry* entry = table->slots[slot];
     while (entry != NULL) {
@@ -214,17 +206,17 @@ static BtEntry* find_entry(BtTable* table, int slot,
 
         if (entry->size == size && entry->numEntries == numEntries) {
             size_t cmp_bytes = numEntries * sizeof(intptr_t);
-            unsigned char* end1 = (unsigned char*)(backtrace)+cmp_bytes-1;
-            unsigned char* end2 = (unsigned char*)(entry->backtrace)+cmp_bytes-1;
-            if (!descend_memcmp(end1, end2, cmp_bytes))
-                return entry;
+            unsigned char* end1 = (unsigned char*)(backtrace) + cmp_bytes - 1;
+            unsigned char* end2 = (unsigned char*)(entry->backtrace) + cmp_bytes - 1;
+            if (!descend_memcmp(end1, end2, cmp_bytes)) return entry;
         }
 
         next_entry = entry->next;
         if (next_entry && ((size_t)next_entry < (size_t)gDebugMspaceBase ||
-            (size_t)next_entry >= ((size_t)gDebugMspaceBase + (size_t)gDebugConfig.mDebugMspaceSize))) {
+                           (size_t)next_entry >= ((size_t)gDebugMspaceBase +
+                                                  (size_t)gDebugConfig.mDebugMspaceSize))) {
             error_log("%s, entry 0x%p next invalid slot %d\n", __FUNCTION__, entry, slot);
-            *((volatile size_t *)0)= 0xdead1515; // trigger NE
+            *((volatile size_t*)0) = 0xdead1515;  // trigger NE
         }
 
         entry = next_entry;
@@ -233,15 +225,14 @@ static BtEntry* find_entry(BtTable* table, int slot,
     return NULL;
 }
 
-//extern int gMallocLeakZygoteChild;
-BtEntry* record_backtrace(intptr_t* backtrace, size_t numEntries, size_t size)
-{
+// extern int gMallocLeakZygoteChild;
+BtEntry* record_backtrace(intptr_t* backtrace, size_t numEntries, size_t size) {
     size_t hash = get_hash(backtrace, numEntries);
     size_t slot = hash % BT_HASH_TABLE_SIZE;
 
     if (size & SIZE_FLAG_MASK) {
         error_log("malloc_debug: allocation %zx exceeds bit width\n", size);
-        *((volatile size_t *)0)= 0xdead1515; // trigger NE
+        *((volatile size_t*)0) = 0xdead1515;  // trigger NE
     }
 
     pthread_mutex_lock(&gBtMutex);
@@ -252,7 +243,8 @@ BtEntry* record_backtrace(intptr_t* backtrace, size_t numEntries, size_t size)
         debug_log("%s find entry: %p\n", __FUNCTION__, entry);
         entry->allocations++;
     } else {
-        entry = (BtEntry*)mtk_mspace_malloc(gDebugMspace, sizeof(BtEntry) + numEntries*sizeof(intptr_t));
+        entry = (BtEntry*)mtk_mspace_malloc(gDebugMspace,
+                                            sizeof(BtEntry) + numEntries * sizeof(intptr_t));
         if (!entry) {
             error_log("%s, mtk_mspace_malloc fails\n", __FUNCTION__);
             pthread_mutex_unlock(&gBtMutex);
@@ -284,8 +276,7 @@ BtEntry* record_backtrace(intptr_t* backtrace, size_t numEntries, size_t size)
     return entry;
 }
 
-static void remove_entry(BtEntry* entry)
-{
+static void remove_entry(BtEntry* entry) {
     BtEntry* prev = entry->prev;
     BtEntry* next = entry->next;
 
@@ -301,15 +292,16 @@ static void remove_entry(BtEntry* entry)
     gBtTable.count--;
 }
 
-ChunkHashEntry *record_chunk_info(BtEntry* bt_entry, void* buffer, size_t bytes, unsigned int flag)
-{
+ChunkHashEntry* record_chunk_info(BtEntry* bt_entry, void* buffer, size_t bytes,
+                                  unsigned int flag) {
     // calculate the hash value
     // size_t hash = get_chunk_hash(bt_entry->backtrace, bt_entry->numEntries, buffer);
     size_t hash = hash_32((size_t)buffer, CHUNK_HASH_BITS);
     size_t slot = hash % CHUNK_HASH_TABLE_SIZE;
 
     pthread_mutex_lock(&gChunkMutex);
-    PChunkHashEntry entry = (PChunkHashEntry)mtk_mspace_malloc(gDebugMspace, sizeof(ChunkHashEntry));
+    PChunkHashEntry entry =
+            (PChunkHashEntry)mtk_mspace_malloc(gDebugMspace, sizeof(ChunkHashEntry));
     if (!entry) {
         error_log("%s, mtk_mspace_malloc ChunkHashEntry fails\n", __FUNCTION__);
         pthread_mutex_unlock(&gChunkMutex);
@@ -334,32 +326,31 @@ ChunkHashEntry *record_chunk_info(BtEntry* bt_entry, void* buffer, size_t bytes,
     gChunkHashTable.chunk_hash_table[slot] = entry;
     gChunkHashTable.count++;
 
-    debug_log("%s entry:%p, buffer:%p, bytes:%zu, "
-              "bt_entry:%p, allocations:%zu, free_referenced:%zu\n",
-              __FUNCTION__, entry, buffer, bytes, bt_entry,
-              bt_entry->allocations, bt_entry->free_referenced);
+    debug_log(
+            "%s entry:%p, buffer:%p, bytes:%zu, "
+            "bt_entry:%p, allocations:%zu, free_referenced:%zu\n",
+            __FUNCTION__, entry, buffer, bytes, bt_entry, bt_entry->allocations,
+            bt_entry->free_referenced);
 
     pthread_mutex_unlock(&gChunkMutex);
 
     return entry;
 }
 
-ChunkHashEntry *find_and_delete_current_entry(void *buffer)
-{
-
+ChunkHashEntry* find_and_delete_current_entry(void* buffer) {
     if (!buffer || debug15_mspace_full) return NULL;
 
-    ChunkHashEntry *entry = NULL;
+    ChunkHashEntry* entry = NULL;
     size_t hash = hash_32((size_t)buffer, CHUNK_HASH_BITS);
     size_t slot = hash % CHUNK_HASH_TABLE_SIZE;
 
     pthread_mutex_lock(&gChunkMutex);
     debug_log("try to find entry for addr: %p\n", buffer);
 #ifdef DEBUG15_GUARD_CHECK
-    mtk_hdr_malloc *hdr = (mtk_hdr_malloc *)buffer - 1;
+    mtk_hdr_malloc* hdr = (mtk_hdr_malloc*)buffer - 1;
     size_t hdr_size = hdr->size;
     if (val_in_debug15_mspace(hdr_size)) {
-        entry = (ChunkHashEntry *)hdr_size;  // find entry from hdr_size
+        entry = (ChunkHashEntry*)hdr_size;  // find entry from hdr_size
         debug_log("find entry: %p from hdr_size\n", entry);
         hdr->size = entry->bytes;  // restore actual size
     }
@@ -382,9 +373,9 @@ ChunkHashEntry *find_and_delete_current_entry(void *buffer)
         debug_log("try to delete entry: %p\n", entry);
         if (entry->prev == NULL) {  // head
             gChunkHashTable.chunk_hash_table[slot] = entry->next;
-            if (gChunkHashTable.chunk_hash_table[slot] != NULL) // not only one entry in the slot
+            if (gChunkHashTable.chunk_hash_table[slot] != NULL)  // not only one entry in the slot
                 gChunkHashTable.chunk_hash_table[slot]->prev = NULL;
-        } else if(entry->next == NULL) {  // tail
+        } else if (entry->next == NULL) {  // tail
             entry->prev->next = NULL;
         } else {  // middle
             entry->next->prev = entry->prev;
@@ -406,29 +397,28 @@ ChunkHashEntry *find_and_delete_current_entry(void *buffer)
 // -1: fail
 // 0: sucess
 // 1: warning
-int move_to_historical(ChunkHashEntry *entry, intptr_t *backtrace, size_t numEntries)
-{
+int move_to_historical(ChunkHashEntry* entry, intptr_t* backtrace, size_t numEntries) {
     PBtEntry bt_entry = NULL;
 
     pthread_mutex_lock(&gBtMutex);
     bt_entry = entry->bt_entry;
     if (bt_entry) {
         bt_entry->free_referenced++;
-        if (bt_entry->allocations > 0)
-            bt_entry->allocations--;
+        if (bt_entry->allocations > 0) bt_entry->allocations--;
     } else {
         error_log("%s, entry %p bt_entry NULL\n", __FUNCTION__, entry);
-        *((volatile size_t *)0)= 0xdead1515; // trigger NE
+        *((volatile size_t*)0) = 0xdead1515;  // trigger NE
     }
 
-    debug_log("%s entry:%p, buffer:%p, bytes:%zu, "
-              "bt_entry:%p, allocations:%zu, free_referenced:%zu\n",
-              __FUNCTION__, entry, entry->chunk_start, entry->bytes, bt_entry,
-              bt_entry->allocations, bt_entry->free_referenced);
+    debug_log(
+            "%s entry:%p, buffer:%p, bytes:%zu, "
+            "bt_entry:%p, allocations:%zu, free_referenced:%zu\n",
+            __FUNCTION__, entry, entry->chunk_start, entry->bytes, bt_entry, bt_entry->allocations,
+            bt_entry->free_referenced);
 
     // create free bt
-    PBT free_bt = (PBT)mtk_mspace_malloc(gDebugMspace, sizeof(BT) + numEntries*sizeof(intptr_t));
-    if (free_bt){
+    PBT free_bt = (PBT)mtk_mspace_malloc(gDebugMspace, sizeof(BT) + numEntries * sizeof(intptr_t));
+    if (free_bt) {
         memcpy(free_bt->backtrace, backtrace, numEntries * sizeof(intptr_t));
         free_bt->numEntries = numEntries;
         entry->free_bt = free_bt;
@@ -442,7 +432,8 @@ int move_to_historical(ChunkHashEntry *entry, intptr_t *backtrace, size_t numEnt
 
     // insert new entry to historical table
     pthread_mutex_lock(&gHistoryMutex);
-    PChunkHashEntry old_entry = gHistoricalAllocTable.historical_alloc_table[gHistoricalAllocTable.head];
+    PChunkHashEntry old_entry =
+            gHistoricalAllocTable.historical_alloc_table[gHistoricalAllocTable.head];
     gHistoricalAllocTable.historical_alloc_table[gHistoricalAllocTable.head++] = entry;
     if (gHistoricalAllocTable.head >= gDebugConfig.mHistoricalBufferSize) {
         gHistoricalAllocTable.head = 0;
@@ -461,10 +452,9 @@ int move_to_historical(ChunkHashEntry *entry, intptr_t *backtrace, size_t numEnt
         // deal with bt entry for current allocation
         if ((size_t)bt_entry_t > (size_t)gDebugMspace) {
             bt_entry_t->free_referenced--;
-            debug_log("bt_entry: %p, allocations:%zu, free_referenced:%zu\n",
-                       bt_entry_t, bt_entry_t->allocations, bt_entry_t->free_referenced);
-            if (bt_entry_t->allocations <= 0 &&
-                bt_entry_t->free_referenced <= 0) {
+            debug_log("bt_entry: %p, allocations:%zu, free_referenced:%zu\n", bt_entry_t,
+                      bt_entry_t->allocations, bt_entry_t->free_referenced);
+            if (bt_entry_t->allocations <= 0 && bt_entry_t->free_referenced <= 0) {
                 debug_log("remove bt_entry: %p\n", bt_entry_t);
                 remove_entry(bt_entry_t);
                 mtk_mspace_free(gDebugMspace, bt_entry_t);

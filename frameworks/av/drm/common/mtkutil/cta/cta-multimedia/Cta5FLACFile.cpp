@@ -26,23 +26,20 @@
 
 using namespace android;
 
-Cta5FLACFile::Cta5FLACFile(int fd, String8 key) : Cta5CommonMultimediaFile(fd, key)
-{
+Cta5FLACFile::Cta5FLACFile(int fd, String8 key) : Cta5CommonMultimediaFile(fd, key) {
     ALOGD("Cta5APEFile(fd, key)");
 }
 
-//This constructor is useful when you want to get a Cta5 file format
-//To convert a normal file to a CTA5 file, you may need this version
-Cta5FLACFile::Cta5FLACFile(String8 mimeType, String8 cid, String8 dcfFlHeaders,
-        uint64_t datatLen, String8 key) :
-        Cta5CommonMultimediaFile(mimeType, cid, dcfFlHeaders, datatLen, key)
-{
+// This constructor is useful when you want to get a Cta5 file format
+// To convert a normal file to a CTA5 file, you may need this version
+Cta5FLACFile::Cta5FLACFile(String8 mimeType, String8 cid, String8 dcfFlHeaders, uint64_t datatLen,
+                           String8 key)
+    : Cta5CommonMultimediaFile(mimeType, cid, dcfFlHeaders, datatLen, key) {
     ALOGD("Cta5FLACFile(mimeType, cid, dcfFlHeaders, datatLen, key)");
 }
 
-Cta5FLACFile::Cta5FLACFile(String8 mimeType, uint64_t datatLen, String8 key) :
-        Cta5CommonMultimediaFile(mimeType, datatLen, key)
-{
+Cta5FLACFile::Cta5FLACFile(String8 mimeType, uint64_t datatLen, String8 key)
+    : Cta5CommonMultimediaFile(mimeType, datatLen, key) {
     ALOGD("Cta5FLACFile(mimeType, datatLen, key)");
 }
 
@@ -52,8 +49,7 @@ bool Cta5FLACFile::parseHeaders(int fd) {
 
     // flac
     uint8_t magic[4];
-    if (DrmCtaMultiMediaUtil::readAt(
-                fd, 0, magic, sizeof(magic)) < (ssize_t)sizeof(magic)) {
+    if (DrmCtaMultiMediaUtil::readAt(fd, 0, magic, sizeof(magic)) < (ssize_t)sizeof(magic)) {
         ALOGE("[ERROR][CTA5]read magic fail");
         return false;
     }
@@ -64,8 +60,8 @@ bool Cta5FLACFile::parseHeaders(int fd) {
 
     // streaminfo
     uint8_t block_header[4];
-    if (DrmCtaMultiMediaUtil::readAt(
-                fd, 4, block_header, sizeof(block_header)) < (ssize_t)sizeof(block_header)) {
+    if (DrmCtaMultiMediaUtil::readAt(fd, 4, block_header, sizeof(block_header)) <
+        (ssize_t)sizeof(block_header)) {
         ALOGE("[ERROR][CTA5]read block header fail");
         return false;
     }
@@ -81,10 +77,11 @@ bool Cta5FLACFile::parseHeaders(int fd) {
 
     off64_t flac_header_offset = 0ll;
     off64_t flac_header_size = header_size + sizeof(magic) + sizeof(block_header);
-    ALOGD("found flac header, offset[%ld], size[%ld]", (long) flac_header_offset, (long) flac_header_size);
+    ALOGD("found flac header, offset[%ld], size[%ld]", (long)flac_header_offset,
+          (long)flac_header_size);
 
     // stored header information into Vector<header>
-    Header * flac_header = new Header();
+    Header* flac_header = new Header();
     flac_header->clear_header_offset = flac_header_offset;
     flac_header->clear_header_size = flac_header_size;
 

@@ -37,9 +37,11 @@
  * Public Function Declaration
  *******************************************************************************/
 
-kal_bool ApplyFFT256(kal_uint32 samplerate,short *pData, kal_uint16 u2DataStart, kal_uint32* u4FreqData, kal_uint32* u4MaxData);
+kal_bool ApplyFFT256(kal_uint32 samplerate, short* pData, kal_uint16 u2DataStart,
+                     kal_uint32* u4FreqData, kal_uint32* u4MaxData);
 kal_bool FreqCheck(kal_uint32 u4TargetFreq, kal_uint32 u4FreqData);
 kal_bool MagnitudeCheck(kal_uint32 u4LboundMag, kal_uint32 u4UboundMag, kal_uint32* u4MagData);
-kal_bool ApplyFFT(kal_uint32 samplerate,short *pData, kal_uint16 u2DataStart, Complex *pComData, kal_uint32 *u4FreqData, kal_uint32 *u4MaxData);
-int comp_divs(Complex *rst, const Complex z, const float eps);
+kal_bool ApplyFFT(kal_uint32 samplerate, short* pData, kal_uint16 u2DataStart, Complex* pComData,
+                  kal_uint32* u4FreqData, kal_uint32* u4MaxData);
+int comp_divs(Complex* rst, const Complex z, const float eps);
 #endif /*AUDIO_FFT_H*/

@@ -1,12 +1,11 @@
 #include "sighandler.h"
 #include "../include/recorder.h"
 
-
-static void dumpBtTable(PUBRD pUBRD){
+static void dumpBtTable(PUBRD pUBRD) {
     size_t i, j;
     size_t numEntries;
-    uintptr_t *backtrace;
-    char *module_name = pUBRD->mConfig.module_name;
+    uintptr_t* backtrace;
+    char* module_name = pUBRD->mConfig.module_name;
     PUBRD_BtTable pBtTable = &pUBRD->mBtTable;
     PUBRD_BtEntry pBtEntry;
 
@@ -16,19 +15,21 @@ static void dumpBtTable(PUBRD pUBRD){
         while (pBtEntry) {
             numEntries = pBtEntry->numEntries;
             backtrace = pBtEntry->backtrace;
-            ubrd_info_log("[%s] pBtEntry:%p, size:%zu, allocations:%zu, free_refereced:%zu, backtrace\n",
-                module_name, pBtEntry, pBtEntry->size, pBtEntry->allocations, pBtEntry->free_referenced);
+            ubrd_info_log(
+                    "[%s] pBtEntry:%p, size:%zu, allocations:%zu, free_refereced:%zu, backtrace\n",
+                    module_name, pBtEntry, pBtEntry->size, pBtEntry->allocations,
+                    pBtEntry->free_referenced);
             for (j = 0; j < numEntries; j++) {
-                ubrd_info_log("[%s] bt:%p\n", module_name, (void *)pBtEntry->backtrace[j]);
+                ubrd_info_log("[%s] bt:%p\n", module_name, (void*)pBtEntry->backtrace[j]);
             }
             pBtEntry = pBtEntry->next;
         }
     }
 }
 
-static void dumpHashTable(PUBRD pUBRD){
+static void dumpHashTable(PUBRD pUBRD) {
     int i = 0;
-    char *module_name = pUBRD->mConfig.module_name;
+    char* module_name = pUBRD->mConfig.module_name;
     PUBRD_HashTable pHashTable = &pUBRD->mHashTable;
     PUBRD_HashEntry pHashEntry;
     PUBRD_EntryInfo pEntryInfo;
@@ -39,11 +40,12 @@ static void dumpHashTable(PUBRD pUBRD){
             pHashEntry = pHashTable->mBase[i];
             while (pHashEntry) {
                 pEntryInfo = pHashEntry->mPEntryInfo;
-                ubrd_info_log("[%s] pHashEntry:%p, addr:%p, size:%zu, pBtEntry:%p\n",
-                    module_name, pHashEntry, pEntryInfo->mAddr, pEntryInfo->mBytes, pHashEntry->mPBtEntry);
+                ubrd_info_log("[%s] pHashEntry:%p, addr:%p, size:%zu, pBtEntry:%p\n", module_name,
+                              pHashEntry, pEntryInfo->mAddr, pEntryInfo->mBytes,
+                              pHashEntry->mPBtEntry);
                 if (pEntryInfo->mExtraInfoLen && pEntryInfo->mExtraInfo) {
-                    ubrd_info_log("[%s] mExtraInfoLen:%zu, mExtraInfo:%s\n",
-                        module_name, pEntryInfo->mExtraInfoLen, (char *)pEntryInfo->mExtraInfo);
+                    ubrd_info_log("[%s] mExtraInfoLen:%zu, mExtraInfo:%s\n", module_name,
+                                  pEntryInfo->mExtraInfoLen, (char*)pEntryInfo->mExtraInfo);
                 }
                 pHashEntry = pHashEntry->next;
             }
@@ -54,8 +56,8 @@ static void dumpHashTable(PUBRD pUBRD){
 static void dumpRingBuffer(PUBRD pUBRD) {
     size_t i, j;
     size_t numEntries;
-    uintptr_t *backtrace;
-    char *module_name = pUBRD->mConfig.module_name;
+    uintptr_t* backtrace;
+    char* module_name = pUBRD->mConfig.module_name;
     PUBRD_HashEntry pHashEntry;
     PUBRD_EntryInfo pEntryInfo;
     PUBRD_BtEntry pBtEntry;
@@ -68,11 +70,12 @@ static void dumpRingBuffer(PUBRD pUBRD) {
             pHashEntry = pUBRD->mRingBuffer.mBase[i];
             if (pHashEntry) {
                 pEntryInfo = pHashEntry->mPEntryInfo;
-                ubrd_info_log("[%s] pHashEntry:%p, addr:%p, size:%zu, pBtEntry:%p\n",
-                    module_name, pHashEntry, pEntryInfo->mAddr, pEntryInfo->mBytes, pHashEntry->mPBtEntry);
+                ubrd_info_log("[%s] pHashEntry:%p, addr:%p, size:%zu, pBtEntry:%p\n", module_name,
+                              pHashEntry, pEntryInfo->mAddr, pEntryInfo->mBytes,
+                              pHashEntry->mPBtEntry);
                 if (pEntryInfo->mExtraInfoLen && pEntryInfo->mExtraInfo) {
-                    ubrd_info_log("[%s] mExtraInfoLen:%zu, mExtraInfo:%s\n",
-                        module_name, pEntryInfo->mExtraInfoLen, (char *)pEntryInfo->mExtraInfo);
+                    ubrd_info_log("[%s] mExtraInfoLen:%zu, mExtraInfo:%s\n", module_name,
+                                  pEntryInfo->mExtraInfoLen, (char*)pEntryInfo->mExtraInfo);
                 }
                 pBtEntry = pHashEntry->mPBtEntry;
                 if (pBtEntry) {
@@ -80,7 +83,7 @@ static void dumpRingBuffer(PUBRD pUBRD) {
                     numEntries = pBtEntry->numEntries;
                     backtrace = pBtEntry->backtrace;
                     for (j = 0; j < numEntries; j++) {
-                        ubrd_info_log("[%s] bt:%p\n", module_name, (void *)backtrace[j]);
+                        ubrd_info_log("[%s] bt:%p\n", module_name, (void*)backtrace[j]);
                     }
                 }
 
@@ -90,7 +93,7 @@ static void dumpRingBuffer(PUBRD pUBRD) {
                     numEntries = pHashEntry->mBt->numEntries;
                     backtrace = pHashEntry->mBt->backtrace;
                     for (j = 0; j < numEntries; j++) {
-                        ubrd_info_log("[%s] bt:%p\n", module_name, (void *)backtrace[j]);
+                        ubrd_info_log("[%s] bt:%p\n", module_name, (void*)backtrace[j]);
                     }
                 }
             }
@@ -99,10 +102,12 @@ static void dumpRingBuffer(PUBRD pUBRD) {
 }
 
 void dumpUBRD(PUBRD pUBRD) {
-    char *module_name = pUBRD->mConfig.module_name;
+    char* module_name = pUBRD->mConfig.module_name;
     ubrd_info_log("[%s] pUBRD->mMspace: %p\n", module_name, pUBRD->mMspace);
-    ubrd_info_log("[%s] pUBRD->mConfig.mDebugMspaceSize: 0x%x\n", module_name, pUBRD->mConfig.mDebugMspaceSize);
-    ubrd_info_log("[%s] pUBRD->mConfig.mHisBufferSize: 0x%x\n", module_name, pUBRD->mConfig.mRingBufferSize);
+    ubrd_info_log("[%s] pUBRD->mConfig.mDebugMspaceSize: 0x%x\n", module_name,
+                  pUBRD->mConfig.mDebugMspaceSize);
+    ubrd_info_log("[%s] pUBRD->mConfig.mHisBufferSize: 0x%x\n", module_name,
+                  pUBRD->mConfig.mRingBufferSize);
 
     dumpBtTable(pUBRD);
     dumpHashTable(pUBRD);

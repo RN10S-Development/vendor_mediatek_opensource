@@ -38,9 +38,7 @@ using namespace android;
 String8 parse(const char* inputLine, const String8& token);
 
 // note that the media type, type, and sub type are all CASE-SENSITIVE!
-ContentType::ContentType(const char* inputLine) :
-    type(""), subType(""), mediaType("") {
-
+ContentType::ContentType(const char* inputLine) : type(""), subType(""), mediaType("") {
     if (NULL == inputLine || 0 >= strlen(inputLine)) {
         ALOGE("ContentType: invalid input for Content-Type header");
         return;
@@ -61,10 +59,10 @@ ContentType::ContentType(const char* inputLine) :
     }
     ALOGV("ContentType: token index [%d]", index);
 
-    index = input.find(":"); // we assume that ':' can always be found.
+    index = input.find(":");  // we assume that ':' can always be found.
     pos = index + 1;
 
-    input.setTo(inputLine); // resume upper case & lower case.
+    input.setTo(inputLine);  // resume upper case & lower case.
 
     input.setTo(&input.string()[pos], input.length() - (size_t)pos);
     ALOGV("ContentType: token value position [%d], token value [%s]", pos, input.string());
@@ -73,7 +71,7 @@ ContentType::ContentType(const char* inputLine) :
     // and we currently just ignore parameters.
     String8 result(input);
     ssize_t index_para = input.find(";");
-    if (index_para > 0) { // have some parameters
+    if (index_para > 0) {  // have some parameters
         result.setTo(result.string(), (size_t)index_para);
     }
     result = StrUtil::trimLRSpace(result);
@@ -100,39 +98,29 @@ bool ContentType::IsValid() {
 ////////////////////////////////////////////////////////////////////////////////
 // the Content-Transfer-Encoding is NOT CASE-SENSITIVE
 // so we change it to lower-case finally
-ContentTransferEncoding::ContentTransferEncoding(const char* inputLine) :
-    mechanism("") {
+ContentTransferEncoding::ContentTransferEncoding(const char* inputLine) : mechanism("") {
     mechanism = parse(inputLine, DrmDef::HEADER_TOKEN_ENCODING);
     mechanism.toLower();
 }
 
-bool ContentTransferEncoding::IsValid() {
-    return !mechanism.isEmpty();
-}
+bool ContentTransferEncoding::IsValid() { return !mechanism.isEmpty(); }
 
 ////////////////////////////////////////////////////////////////////////////////
-ContentId::ContentId(const char* inputLine) :
-    id("") {
+ContentId::ContentId(const char* inputLine) : id("") {
     id = parse(inputLine, DrmDef::HEADER_TOKEN_ID);
 }
 
-bool ContentId::IsValid() {
-    return !id.isEmpty();
-}
+bool ContentId::IsValid() { return !id.isEmpty(); }
 
 ////////////////////////////////////////////////////////////////////////////////
-ContentDescription::ContentDescription(const char* inputLine) :
-    description("") {
+ContentDescription::ContentDescription(const char* inputLine) : description("") {
     description = parse(inputLine, DrmDef::HEADER_TOKEN_DESCRIPTION);
 }
 
-bool ContentDescription::IsValid() {
-    return !description.isEmpty();
-}
+bool ContentDescription::IsValid() { return !description.isEmpty(); }
 
 ////////////////////////////////////////////////////////////////////////////////
 String8 parse(const char* inputLine, const String8& token) {
-
     if (NULL == inputLine || 0 >= strlen(inputLine)) {
         ALOGE("parse: invalid input for MIME header [%s]", token.string());
         return String8("");
@@ -149,18 +137,19 @@ String8 parse(const char* inputLine, const String8& token) {
     ssize_t index = input.find(tk);
     if (index < 0) {
         ALOGE("parse: failed to find token, invalid MIME header format with string [%s]",
-                inputLine);
+              inputLine);
         return String8("");
     }
     if (DEBUG_LOG) ALOGD("parse: >>> token index [%d]", index);
 
-    index = input.find(":"); // we assume that ':' can always be found.
+    index = input.find(":");  // we assume that ':' can always be found.
     ssize_t pos = index + 1;
 
-    input.setTo(inputLine); // resume upper case & lower case.
+    input.setTo(inputLine);  // resume upper case & lower case.
 
     input.setTo(&input.string()[pos], input.length() - (size_t)pos);
-    if (DEBUG_LOG) ALOGD("parse: >>> token value position [%d], token value [%s]", pos, input.string());
+    if (DEBUG_LOG)
+        ALOGD("parse: >>> token value position [%d], token value [%s]", pos, input.string());
 
     String8 result(input);
     result = StrUtil::trimLRSpace(result);

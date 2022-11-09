@@ -24,17 +24,14 @@
 #include "Custom_NvRam_LID.h"
 
 #ifdef __cplusplus
-extern "C"
-{
+extern "C" {
 #endif
 
 int my_callback(void);
 int init_callback(void);
 
-
 #ifdef __cplusplus
 }
 #endif
 
-
-#endif //__NVRAM_LIB_H
+#endif  //__NVRAM_LIB_H

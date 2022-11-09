@@ -23,15 +23,13 @@
 
 #define RPC_WAKE_LOCK_NAME "ccci_rpc"
 
-void rpc_com_wakelock(int lock)
-{
+void rpc_com_wakelock(int lock) {
     if (lock)
-    	acquire_wake_lock(PARTIAL_WAKE_LOCK, RPC_WAKE_LOCK_NAME);
+        acquire_wake_lock(PARTIAL_WAKE_LOCK, RPC_WAKE_LOCK_NAME);
     else
-    	release_wake_lock(RPC_WAKE_LOCK_NAME);
+        release_wake_lock(RPC_WAKE_LOCK_NAME);
 }
 
-int mtk_property_get(char *property_name, char *property_val, char *default_val)
-{
+int mtk_property_get(char* property_name, char* property_val, char* default_val) {
     return property_get(property_name, property_val, default_val);
 }

@@ -23,13 +23,14 @@ namespace android {
 
 // the syntax of Content-Type header is defined in RFC 2045 chapter 5.1
 class ContentType {
-public:
+  public:
     explicit ContentType(const char* inputLine);
-private:
+
+  private:
     ContentType(const ContentType& copy);
     ContentType& operator=(const ContentType& other);
 
-public:
+  public:
     bool IsValid();
     String8 type;
     String8 subType;
@@ -38,41 +39,44 @@ public:
 
 // the syntax of Content-Transfer-Encoding header is defined in RFC 2045 chapter 6.1
 class ContentTransferEncoding {
-public:
+  public:
     explicit ContentTransferEncoding(const char* inputLine);
-private:
+
+  private:
     ContentTransferEncoding(const ContentTransferEncoding& copy);
     ContentTransferEncoding& operator=(const ContentTransferEncoding& other);
 
-public:
+  public:
     bool IsValid();
     String8 mechanism;
 };
 
 class ContentId {
-public:
+  public:
     explicit ContentId(const char* inputLine);
-private:
+
+  private:
     ContentId(const ContentId& copy);
     ContentId& operator=(const ContentId& other);
 
-public:
+  public:
     bool IsValid();
     String8 id;
 };
 
 class ContentDescription {
-public:
+  public:
     explicit ContentDescription(const char* inputLine);
-private:
+
+  private:
     ContentDescription(const ContentDescription& copy);
     ContentDescription& operator=(const ContentDescription& other);
 
-public:
+  public:
     bool IsValid();
     String8 description;
 };
 
-} // namespace android
+}  // namespace android
 
-#endif // DRM_MESSAGE_PARSER_H_
+#endif  // DRM_MESSAGE_PARSER_H_

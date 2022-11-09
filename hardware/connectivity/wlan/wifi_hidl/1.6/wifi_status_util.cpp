@@ -55,9 +55,7 @@ WifiStatus createWifiStatus(WifiStatusCode code, const std::string& description)
     return {code, description};
 }
 
-WifiStatus createWifiStatus(WifiStatusCode code) {
-    return createWifiStatus(code, "");
-}
+WifiStatus createWifiStatus(WifiStatusCode code) { return createWifiStatus(code, ""); }
 
 WifiStatus createWifiStatusFromLegacyError(legacy_hal::wifi_error error, const std::string& desc) {
     switch (error) {

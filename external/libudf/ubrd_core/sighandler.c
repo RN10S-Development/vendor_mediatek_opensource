@@ -12,8 +12,7 @@ static void ubrd_signal_handler(int n, siginfo_t* info, void* unused) {
     (void)info;
     (void)unused;
     ubrd_info_log("ubrd_signal_handler\n");
-    if (pDUMPUBRD)
-        dumpUBRD(pDUMPUBRD);
+    if (pDUMPUBRD) dumpUBRD(pDUMPUBRD);
 }
 
 void ubrd_install_signal(PUBRD pUBRD) {

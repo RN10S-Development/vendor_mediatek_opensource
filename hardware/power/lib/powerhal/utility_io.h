@@ -17,6 +17,6 @@
 #ifndef ANDROID_UTILITY_IO_H
 #define ANDROID_UTILITY_IO_H
 
-extern int setBlkDev_readAhead(int value, void *scn);
+extern int setBlkDev_readAhead(int value, void* scn);
 
-#endif // ANDROID_UTILITY_IO_H
+#endif  // ANDROID_UTILITY_IO_H

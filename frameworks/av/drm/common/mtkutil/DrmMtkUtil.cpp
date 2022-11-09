@@ -464,26 +464,19 @@ String8 DrmMtkUtil::getDcfMime(const String8& path) {
 #endif
 typedef struct {
     const char* mime;
-    const char* cmMime; // common mime
+    const char* cmMime;  // common mime
 } MimeMap;
 
 String8 DrmMtkUtil::toCommonMime(const char* mime) {
-    MimeMap mimeMaps [] = {
-        {"audio/mp3", "audio/mpeg"},
-        {"audio/m4a", "audio/mp4"},
-        {"audio/3gpp2", "audio/mp4"},
-        {"audio/iMelody", "audio/midi"},
-        {"audio/imy", "audio/imelody"},
-        {"audio/mid", "audio/midi"},
-        {"audio/rtx", "audio/midi"},
-        {"audio/smf", "audio/midi"},
-        {"audio/xmf", "audio/midi"},
-        {"audio/mobile-xmf", "audio/midi"},
-        {"image/bmp", "image/x-ms-bmp"},
-        {"image/wbmp", "image/vnd.wap.wbmp"},
-        {"image/jpg", "image/jpeg"},
-        {"video/m4v", "video/mp4"},
-        {"video/3gp", "video/3gpp"},
+    MimeMap mimeMaps[] = {
+            {"audio/mp3", "audio/mpeg"},     {"audio/m4a", "audio/mp4"},
+            {"audio/3gpp2", "audio/mp4"},    {"audio/iMelody", "audio/midi"},
+            {"audio/imy", "audio/imelody"},  {"audio/mid", "audio/midi"},
+            {"audio/rtx", "audio/midi"},     {"audio/smf", "audio/midi"},
+            {"audio/xmf", "audio/midi"},     {"audio/mobile-xmf", "audio/midi"},
+            {"image/bmp", "image/x-ms-bmp"}, {"image/wbmp", "image/vnd.wap.wbmp"},
+            {"image/jpg", "image/jpeg"},     {"video/m4v", "video/mp4"},
+            {"video/3gp", "video/3gpp"},
     };
 
     const char* cmMime = NULL;
@@ -495,7 +488,7 @@ String8 DrmMtkUtil::toCommonMime(const char* mime) {
     }
 
     if (cmMime == NULL) {
-        return String8(mime); // no match, not converted
+        return String8(mime);  // no match, not converted
     } else {
         if (DrmUtil::sDDebug) ALOGD("toCommonMime() : convert mime: [%s]->[%s]", mime, cmMime);
         return String8(cmMime);
@@ -505,7 +498,7 @@ String8 DrmMtkUtil::toCommonMime(const char* mime) {
 String8 DrmMtkUtil::getProcessName(pid_t pid) {
     // get the proc name by pid, via reading /proc/<pid>/cmdline file
     char path[30];
-    #if 0
+#if 0
     bzero(path, sizeof(path));
     strcat(path, "/proc/");
 
@@ -515,7 +508,7 @@ String8 DrmMtkUtil::getProcessName(pid_t pid) {
     strcat(path, proc_id);
 
     strcat(path, "/cmdline");
-    #endif
+#endif
     snprintf(path, sizeof(path), "/proc/%d/cmdline", pid);
     ALOGD("getProcessName() : path : [%s]", path);
     String8 result("unknown process name");
@@ -532,14 +525,15 @@ String8 DrmMtkUtil::getProcessName(pid_t pid) {
                 path, strerror(errno));
     } */
 
-    if (DrmUtil::sDDebug) ALOGD("getProcessName() : pid to process: [%s]->[%s]", path, result.string());
+    if (DrmUtil::sDDebug)
+        ALOGD("getProcessName() : pid to process: [%s]->[%s]", path, result.string());
     return result;
 }
 
 bool DrmMtkUtil::isTrustedClient(const String8& procName) {
     return DrmMtkDefender::isDrmTrustedClient(procName);
 }
-//this function should be remove
+// this function should be remove
 bool DrmMtkUtil::isTrustedVideoClient(const String8& procName) {
     return DrmTrustedVideoApp::IsDrmTrustedVideoApp(procName);
 }
@@ -552,19 +546,16 @@ bool DrmMtkUtil::markAsConsumeInAppClient(const String8& procName, const String8
     return DrmMtkDefender::markAsConsumeInAppClient(procName, cid);
 }
 
-bool DrmMtkUtil::isNeedConsume(const String8& cid) {
-    return DrmMtkDefender::isNeedConsume(cid);
-}
+bool DrmMtkUtil::isNeedConsume(const String8& cid) { return DrmMtkDefender::isNeedConsume(cid); }
 
-long DrmMtkUtil::getContentSize(DecryptHandle* handle) {
-    return getContentLength(handle, NULL);
-}
+long DrmMtkUtil::getContentSize(DecryptHandle* handle) { return getContentLength(handle, NULL); }
 
 long DrmMtkUtil::getContentLength(DecryptHandle* handle,
                                   DrmManagerClient* client __attribute__((unused))) {
     if (NULL != handle && NULL != handle->decryptInfo) {
-        if (DrmUtil::sDDebug) ALOGD("getContentLength: return encrypted length: %d",
-                handle->decryptInfo->decryptBufferLength);
+        if (DrmUtil::sDDebug)
+            ALOGD("getContentLength: return encrypted length: %d",
+                  handle->decryptInfo->decryptBufferLength);
         return handle->decryptInfo->decryptBufferLength;
     } else {
         if (DrmUtil::sDDebug) ALOGD("getContentLength: return 0 instead.");

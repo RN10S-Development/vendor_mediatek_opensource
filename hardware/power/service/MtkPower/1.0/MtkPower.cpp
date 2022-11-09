@@ -39,123 +39,120 @@ namespace mtkpower {
 namespace V1_0 {
 namespace implementation {
 
-MtkPower::MtkPower() {
-}
+MtkPower::MtkPower() {}
 
-MtkPower::~MtkPower() {
-}
+MtkPower::~MtkPower() {}
 
-Return<void> MtkPower::mtkPowerHint(int32_t hint, int32_t data)  {
+Return<void> MtkPower::mtkPowerHint(int32_t hint, int32_t data) {
     ALOGD("mtkPowerHint hint:%d, data:%d", hint, data);
 
     struct tPowerData vPowerData;
-    struct tHintData  vHintData;
-    struct tPowerData *vpRspData = NULL;
+    struct tHintData vHintData;
+    struct tPowerData* vpRspData = NULL;
 
-    if(hint < MTKPOWER_HINT_BASE || hint >= MTKPOWER_HINT_NUM) {
+    if (hint < MTKPOWER_HINT_BASE || hint >= MTKPOWER_HINT_NUM) {
         ALOGI("mtkPowerHint unsupport hint:%d", hint);
         return Void();
     }
 
     vHintData.hint = (int)hint;
     vHintData.data = data;
-    vPowerData.msg  = POWER_MSG_MTK_HINT;
+    vPowerData.msg = POWER_MSG_MTK_HINT;
     vPowerData.pBuf = (void*)&vHintData;
 
-    //ALOGI("%s %p", __func__, &vPowerData);
+    // ALOGI("%s %p", __func__, &vPowerData);
 
-    power_msg(&vPowerData, (void **) &vpRspData);
+    power_msg(&vPowerData, (void**)&vpRspData);
 
-    //ALOGI("%s %p", __func__, vpRspData);
+    // ALOGI("%s %p", __func__, vpRspData);
     if (vpRspData) {
-        if(vpRspData->pBuf)
-            free(vpRspData->pBuf);
+        if (vpRspData->pBuf) free(vpRspData->pBuf);
         free(vpRspData);
     }
 
     return Void();
 }
 
-Return<void> MtkPower::mtkCusPowerHint(int32_t hint, int32_t data)  {
+Return<void> MtkPower::mtkCusPowerHint(int32_t hint, int32_t data) {
     ALOGD("mtkCusPowerHint hint:%d, data:%d", hint, data);
 
     struct tPowerData vPowerData;
-    struct tHintData  vHintData;
-    struct tPowerData *vpRspData = NULL;
+    struct tHintData vHintData;
+    struct tPowerData* vpRspData = NULL;
 
-    //if(hint >= (int32_t)MtkCusPowerHintInternal::MTK_CUS_HINT_NUM)
-    //    return Void();
+    // if(hint >= (int32_t)MtkCusPowerHintInternal::MTK_CUS_HINT_NUM)
+    //     return Void();
 
     vHintData.hint = (int)hint;
     vHintData.data = data;
-    vPowerData.msg  = POWER_MSG_MTK_CUS_HINT;
+    vPowerData.msg = POWER_MSG_MTK_CUS_HINT;
     vPowerData.pBuf = (void*)&vHintData;
 
-    //ALOGI("%s %p", __func__, &vPowerData);
+    // ALOGI("%s %p", __func__, &vPowerData);
 
-    power_msg(&vPowerData, (void **) &vpRspData);
+    power_msg(&vPowerData, (void**)&vpRspData);
 
-    //ALOGI("%s %p", __func__, vpRspData);
+    // ALOGI("%s %p", __func__, vpRspData);
     if (vpRspData) {
-        if(vpRspData->pBuf)
-            free(vpRspData->pBuf);
+        if (vpRspData->pBuf) free(vpRspData->pBuf);
         free(vpRspData);
     }
 
     return Void();
 }
 
-Return<void> MtkPower::notifyAppState(const hidl_string& packName, const hidl_string& actName, int32_t pid, int32_t state, int32_t uid) {
-    ALOGD("notifyAppState pack:%s, act:%s, pid:%d, state:%d, uid:%d", packName.c_str(), actName.c_str(), pid, state, uid);
+Return<void> MtkPower::notifyAppState(const hidl_string& packName, const hidl_string& actName,
+                                      int32_t pid, int32_t state, int32_t uid) {
+    ALOGD("notifyAppState pack:%s, act:%s, pid:%d, state:%d, uid:%d", packName.c_str(),
+          actName.c_str(), pid, state, uid);
 
     struct tPowerData vPowerData;
     struct tAppStateData vStateData;
-    struct tPowerData *vpRspData = NULL;
+    struct tPowerData* vpRspData = NULL;
 
     strncpy(vStateData.pack, packName.c_str(), (MAX_NAME_LEN - 1));
-    vStateData.pack[(MAX_NAME_LEN-1)] = '\0';
+    vStateData.pack[(MAX_NAME_LEN - 1)] = '\0';
     strncpy(vStateData.activity, actName.c_str(), (MAX_NAME_LEN - 1));
-    vStateData.activity[(MAX_NAME_LEN-1)] = '\0';
+    vStateData.activity[(MAX_NAME_LEN - 1)] = '\0';
     vStateData.pid = pid;
     vStateData.uid = uid;
     vStateData.state = (int)state;
-    vPowerData.msg  = POWER_MSG_NOTIFY_STATE;
+    vPowerData.msg = POWER_MSG_NOTIFY_STATE;
     vPowerData.pBuf = (void*)&vStateData;
 
-    //ALOGI("%s %p", __func__, &vScnData);
+    // ALOGI("%s %p", __func__, &vScnData);
 
-    power_msg(&vPowerData, (void **) &vpRspData);
+    power_msg(&vPowerData, (void**)&vpRspData);
 
-    //ALOGI("%s %p", __func__, vpRspData);
+    // ALOGI("%s %p", __func__, vpRspData);
 
     if (vpRspData) {
-        if(vpRspData->pBuf)
-            free(vpRspData->pBuf);
+        if (vpRspData->pBuf) free(vpRspData->pBuf);
         free(vpRspData);
     }
 
     return Void();
 }
 
-Return<int32_t> MtkPower::querySysInfo(int32_t cmd, int32_t param)  {
+Return<int32_t> MtkPower::querySysInfo(int32_t cmd, int32_t param) {
     ALOGD("querySysInfo cmd:%d, param:%d", (int)cmd, param);
 
     struct tPowerData vPowerData;
-    struct tPowerData *vpRspData = NULL;
+    struct tPowerData* vpRspData = NULL;
     struct tQueryInfoData vQueryData;
 
     vQueryData.cmd = (int)cmd;
     vQueryData.param = param;
-    vPowerData.msg  = POWER_MSG_QUERY_INFO;
+    vPowerData.msg = POWER_MSG_QUERY_INFO;
     vPowerData.pBuf = (void*)&vQueryData;
 
-    //ALOGI("%s %p", __func__, &vPowerData);
+    // ALOGI("%s %p", __func__, &vPowerData);
     vQueryData.value = -1;
-    power_msg(&vPowerData, (void **) &vpRspData);
+    power_msg(&vPowerData, (void**)&vpRspData);
 
-    //ALOGI("%s %p", __func__, vpRspData);
+    // ALOGI("%s %p", __func__, vpRspData);
     if (vpRspData) {
-        if(vpRspData->pBuf) {
+        if (vpRspData->pBuf) {
             vQueryData.value = ((tQueryInfoData*)(vpRspData->pBuf))->value;
             free(vpRspData->pBuf);
         }
@@ -163,7 +160,7 @@ Return<int32_t> MtkPower::querySysInfo(int32_t cmd, int32_t param)  {
     }
 
     return vQueryData.value;
-    //return 0;
+    // return 0;
 }
 
 Return<int32_t> MtkPower::setSysInfo(int32_t type, const hidl_string& data) {
@@ -171,18 +168,18 @@ Return<int32_t> MtkPower::setSysInfo(int32_t type, const hidl_string& data) {
 
     struct tPowerData vPowerData;
     struct tSysInfoData vSysInfoData;
-    struct tPowerData *vpRspData = NULL;
+    struct tPowerData* vpRspData = NULL;
 
     vSysInfoData.type = type;
     strncpy(vSysInfoData.data, data.c_str(), (MAX_SYSINFO_LEN - 1));
-    vSysInfoData.data[(MAX_SYSINFO_LEN-1)] = '\0';
-    vPowerData.msg  = POWER_MSG_SET_SYSINFO;
+    vSysInfoData.data[(MAX_SYSINFO_LEN - 1)] = '\0';
+    vPowerData.msg = POWER_MSG_SET_SYSINFO;
     vPowerData.pBuf = (void*)&vSysInfoData;
 
-    power_msg(&vPowerData, (void **) &vpRspData);
+    power_msg(&vPowerData, (void**)&vpRspData);
 
     if (vpRspData) {
-        if(vpRspData->pBuf) {
+        if (vpRspData->pBuf) {
             vSysInfoData.ret = ((tSysInfoData*)(vpRspData->pBuf))->ret;
             free(vpRspData->pBuf);
         }
@@ -197,19 +194,18 @@ Return<void> MtkPower::setSysInfoAsync(int32_t type, const hidl_string& data) {
 
     struct tPowerData vPowerData;
     struct tSysInfoData vSysInfoData;
-    struct tPowerData *vpRspData = NULL;
+    struct tPowerData* vpRspData = NULL;
 
     vSysInfoData.type = type;
     strncpy(vSysInfoData.data, data.c_str(), (MAX_SYSINFO_LEN - 1));
-    vSysInfoData.data[(MAX_SYSINFO_LEN-1)] = '\0';
-    vPowerData.msg  = POWER_MSG_SET_SYSINFO;
+    vSysInfoData.data[(MAX_SYSINFO_LEN - 1)] = '\0';
+    vPowerData.msg = POWER_MSG_SET_SYSINFO;
     vPowerData.pBuf = (void*)&vSysInfoData;
 
-    power_msg(&vPowerData, (void **) &vpRspData);
+    power_msg(&vPowerData, (void**)&vpRspData);
 
     if (vpRspData) {
-        if(vpRspData->pBuf)
-            free(vpRspData->pBuf);
+        if (vpRspData->pBuf) free(vpRspData->pBuf);
         free(vpRspData);
     }
 
@@ -221,7 +217,7 @@ IMtkPower* HIDL_FETCH_IMtkPower(const char* /* name */) {
     return new MtkPower();
 }
 
-} // namespace implementation
+}  // namespace implementation
 }  // namespace V1_0
 }  // namespace mtkpower
 }  // namespace hardware

@@ -25,51 +25,41 @@ namespace wifi {
 namespace supplicant {
 namespace V2_1 {
 namespace implementation {
-using android::hardware::wifi::supplicant::V1_3::implementation::hidl_return_util::validateAndCall;
 using android::hardware::wifi::supplicant::V1_0::SupplicantStatus;
 using android::hardware::wifi::supplicant::V1_0::SupplicantStatusCode;
+using android::hardware::wifi::supplicant::V1_3::implementation::hidl_return_util::validateAndCall;
 
 Supplicant::Supplicant(struct wpa_global* global) : wpa_global_(global) {}
-bool Supplicant::isValid()
-{
+bool Supplicant::isValid() {
     // This top level object cannot be invalidated.
     return true;
 }
 
 Return<void> Supplicant::getInterface(
-    const android::hardware::wifi::supplicant::V1_0::ISupplicant::IfaceInfo& iface_info, getInterface_cb _hidl_cb)
-{
-    return validateAndCall(
-        this, SupplicantStatusCode::FAILURE_IFACE_INVALID,
-        &Supplicant::getInterfaceInternal, _hidl_cb, iface_info);
+        const android::hardware::wifi::supplicant::V1_0::ISupplicant::IfaceInfo& iface_info,
+        getInterface_cb _hidl_cb) {
+    return validateAndCall(this, SupplicantStatusCode::FAILURE_IFACE_INVALID,
+                           &Supplicant::getInterfaceInternal, _hidl_cb, iface_info);
 }
 
-Return<void> Supplicant::registerCallback(
-    const sp<ISupplicantCallback>& callback, registerCallback_cb _hidl_cb)
-{
-    return validateAndCall(
-        this, SupplicantStatusCode::FAILURE_IFACE_INVALID,
-        &Supplicant::registerCallbackInternal, _hidl_cb, callback);
+Return<void> Supplicant::registerCallback(const sp<ISupplicantCallback>& callback,
+                                          registerCallback_cb _hidl_cb) {
+    return validateAndCall(this, SupplicantStatusCode::FAILURE_IFACE_INVALID,
+                           &Supplicant::registerCallbackInternal, _hidl_cb, callback);
 }
 
-std::pair<SupplicantStatus, sp<ISupplicantIface>>
-Supplicant::getInterfaceInternal(const android::hardware::wifi::supplicant::V1_0::ISupplicant::IfaceInfo& iface_info)
-{
-    struct wpa_supplicant* wpa_s =
-        wpa_supplicant_get_iface(wpa_global_, iface_info.name.c_str());
+std::pair<SupplicantStatus, sp<ISupplicantIface>> Supplicant::getInterfaceInternal(
+        const android::hardware::wifi::supplicant::V1_0::ISupplicant::IfaceInfo& iface_info) {
+    struct wpa_supplicant* wpa_s = wpa_supplicant_get_iface(wpa_global_, iface_info.name.c_str());
     if (!wpa_s) {
-        return {{SupplicantStatusCode::FAILURE_IFACE_UNKNOWN, ""},
-            nullptr};
+        return {{SupplicantStatusCode::FAILURE_IFACE_UNKNOWN, ""}, nullptr};
     }
     HidlManager* hidl_manager = HidlManager::getInstance();
 #if CONFIG_P2P_HIDL
     if (iface_info.type == IfaceType::P2P) {
         android::sp<ISupplicantP2pIface> iface;
-        if (!hidl_manager ||
-            hidl_manager->getP2pIfaceHidlObjectByIfname(
-            wpa_s->ifname, &iface)) {
-            return {{SupplicantStatusCode::FAILURE_UNKNOWN, ""},
-                iface};
+        if (!hidl_manager || hidl_manager->getP2pIfaceHidlObjectByIfname(wpa_s->ifname, &iface)) {
+            return {{SupplicantStatusCode::FAILURE_UNKNOWN, ""}, iface};
         }
         // Set this flag true here, since there is no HIDL initialize method for the p2p
         // config, and the supplicant interface is not ready when the p2p iface is created.
@@ -78,11 +68,8 @@ Supplicant::getInterfaceInternal(const android::hardware::wifi::supplicant::V1_0
     } else {
 #endif
         android::sp<ISupplicantStaIface> iface;
-        if (!hidl_manager ||
-            hidl_manager->getStaIfaceHidlObjectByIfname(
-            wpa_s->ifname, &iface)) {
-            return {{SupplicantStatusCode::FAILURE_UNKNOWN, ""},
-                iface};
+        if (!hidl_manager || hidl_manager->getStaIfaceHidlObjectByIfname(wpa_s->ifname, &iface)) {
+            return {{SupplicantStatusCode::FAILURE_UNKNOWN, ""}, iface};
         }
         return {{SupplicantStatusCode::SUCCESS, ""}, iface};
 #if CONFIG_P2P_HIDL
@@ -90,20 +77,17 @@ Supplicant::getInterfaceInternal(const android::hardware::wifi::supplicant::V1_0
 #endif
 }
 
-SupplicantStatus Supplicant::registerCallbackInternal(
-    const sp<ISupplicantCallback>& callback)
-{
+SupplicantStatus Supplicant::registerCallbackInternal(const sp<ISupplicantCallback>& callback) {
     HidlManager* hidl_manager = HidlManager::getInstance();
-    if (!hidl_manager ||
-        hidl_manager->addSupplicantCallbackHidlObject(callback)) {
+    if (!hidl_manager || hidl_manager->addSupplicantCallbackHidlObject(callback)) {
         return {SupplicantStatusCode::FAILURE_UNKNOWN, ""};
     }
     return {SupplicantStatusCode::SUCCESS, ""};
 }
 }  // namespace implementation
 }  // namespace V2_1
-}  // namespace wifi
 }  // namespace supplicant
+}  // namespace wifi
 }  // namespace hardware
-}  //namespace mediatek
+}  // namespace mediatek
 }  // namespace vendor

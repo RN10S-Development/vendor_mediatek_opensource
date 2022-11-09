@@ -17,8 +17,8 @@
 #ifndef ANDROID_UTILITY_CONSYS_H
 #define ANDROID_UTILITY_CONSYS_H
 
-extern int wifi_low_latency(int enable, void *scn);
-extern int wifi_smart_predict(int enable, void *scn);
+extern int wifi_low_latency(int enable, void* scn);
+extern int wifi_smart_predict(int enable, void* scn);
 extern int wifi_reset(int power_on_init);
 
-#endif // ANDROID_UTILITY_H
+#endif  // ANDROID_UTILITY_H

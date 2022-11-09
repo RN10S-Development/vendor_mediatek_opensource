@@ -18,15 +18,14 @@
 #define __ION_ULIT_H
 
 #ifdef __cplusplus
-extern "C"  {
+extern "C" {
 #endif
 
 #define _MTK_ION_DUMP_CS
-void dumping_callstack(const char *func_name, int ion_fd, int share_fd);
+void dumping_callstack(const char* func_name, int ion_fd, int share_fd);
 
 #ifdef __cplusplus
 }
 #endif
-
 
 #endif /* __MTK_ION_H */

@@ -17,6 +17,6 @@
 #ifndef __CFG_SMARTPA_CALIB_DEFAULT_H
 #define __CFG_SMARTPA_CALIB_DEFAULT_H
 ap_nvram_smartpa_calib_config_struct smartpa_calib_ConfigDefault = {
-    0,
+        0,
 };
 #endif /* __CFG_SMARTPA_CALIB_DEFAULT_H */

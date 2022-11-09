@@ -21,8 +21,8 @@ typedef struct {
     unsigned int calib_dcr_val;
 } ap_nvram_smartpa_calib_config_struct;
 
-//the record size and number of bt nvram file
-#define CFG_FILE_SMARTPA_CALIB_CONFIG_SIZE    sizeof(ap_nvram_smartpa_calib_config_struct)
-#define CFG_FILE_SMARTPA_CALIB_CONFIG_TOTAL   (1)
+// the record size and number of bt nvram file
+#define CFG_FILE_SMARTPA_CALIB_CONFIG_SIZE sizeof(ap_nvram_smartpa_calib_config_struct)
+#define CFG_FILE_SMARTPA_CALIB_CONFIG_TOTAL (1)
 
 #endif /* __CFG_SMARTPA_CALIB_FILE_H */

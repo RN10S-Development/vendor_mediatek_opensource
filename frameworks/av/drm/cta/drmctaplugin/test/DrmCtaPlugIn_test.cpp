@@ -39,10 +39,10 @@ using namespace android;
 using namespace std;
 using namespace testing;
 
-typedef void (*destroy_t)(IDrmEngine *);
-typedef IDrmEngine *(*create_t)();
+typedef void (*destroy_t)(IDrmEngine*);
+typedef IDrmEngine* (*create_t)();
 
-//static const int TYPE_SET_DRM_INFO = 2021;
+// static const int TYPE_SET_DRM_INFO = 2021;
 
 const String8 ACTION_CTA5_ENCRYPT("CTA5Encrypt");
 const String8 ACTION_CTA5_DECRYPT("CTA5Decrypt");
@@ -62,11 +62,8 @@ String8 testDecryptPath("/sdcard/testdecrypt.txt");
 String8 PWD("123456");
 String8 NEWPWD("654321");
 
-
-class DrmCtaPlugInTest: public Test
-{
-protected:
-
+class DrmCtaPlugInTest : public Test {
+  protected:
     static void SetUpTestCase();
     static void TearDownTestCase();
     static void setKey();
@@ -76,16 +73,17 @@ protected:
     static void compareFile(int fd1, int fd2);
     virtual void SetUp();
     virtual void TearDown();
-protected:
-    static void *handle;
+
+  protected:
+    static void* handle;
     static create_t sCreator;
     static destroy_t sDestroyer;
-    static IDrmEngine *sPlugin;
+    static IDrmEngine* sPlugin;
     static int sUniqeId;
 };
 
 class CTAMultimediaTestListener : public IDrmEngine::OnInfoListener {
-public:
+  public:
     virtual void onInfo(const DrmInfoEvent& event);
     void reset();
 
@@ -108,7 +106,7 @@ bool CTAMultimediaTestListener::isReachedCancelCondition(const String8 message) 
     char data_s[32] = {0};
     char cnt_s[32] = {0};
     float data = 0.0f, cnt = 0.0f;
-    while((found = message.find(spliter, pos)) != -1) {
+    while ((found = message.find(spliter, pos)) != -1) {
         bzero(temp, sizeof(temp));
         bzero(data_s, sizeof(data_s));
         bzero(cnt_s, sizeof(cnt_s));
@@ -117,32 +115,29 @@ bool CTAMultimediaTestListener::isReachedCancelCondition(const String8 message) 
         pos = found + strlen(spliter);
 
         wanted_pos = item.find("data_s:", 0);
-        if(-1 != wanted_pos) {
+        if (-1 != wanted_pos) {
             strcpy(data_s, item.string() + wanted_pos + 7);
             data = atof(data_s);
             continue;
         }
 
         wanted_pos = item.find("cnt_s:", 0);
-        if(-1 != wanted_pos) {
+        if (-1 != wanted_pos) {
             strcpy(cnt_s, item.string() + wanted_pos + 6);
             cnt = atof(cnt_s);
             continue;
         }
-
     }
     // get last item
     strcpy(temp, message.string() + pos);
 
-    if(cnt / data > 0.3) {
+    if (cnt / data > 0.3) {
         printf("progress reached 30%\n");
         return true;
     } else {
         return false;
     }
-
 }
-
 
 void CTAMultimediaTestListener::onInfo(const DrmInfoEvent& event) {
     String8 message = event.getMessage();
@@ -150,37 +145,38 @@ void CTAMultimediaTestListener::onInfo(const DrmInfoEvent& event) {
     position = position + 7;
     char result[32] = {0};
     strcpy(result, message.string() + position);
-    if(0 == strcmp(result, DrmDef::CTA5_MULTI_MEDIA_ENCRYPT_DONE.string())) {
+    if (0 == strcmp(result, DrmDef::CTA5_MULTI_MEDIA_ENCRYPT_DONE.string())) {
         printf("CTATestListener - onInfo -> message: %s, result: %s\n", message.string(), result);
         done = true;
         hasError = false;
-    } else if(0 == strcmp(result, DrmDef::CTA5_MULTI_MEDIA_DECRYPT_DONE.string())) {
+    } else if (0 == strcmp(result, DrmDef::CTA5_MULTI_MEDIA_DECRYPT_DONE.string())) {
         printf("CTATestListener - onInfo -> message: %s, result: %s\n", message.string(), result);
         done = true;
         hasError = false;
-    } else if(0 == strcmp(result, DrmDef::CTA5_CANCEL_DONE.string())) {
+    } else if (0 == strcmp(result, DrmDef::CTA5_CANCEL_DONE.string())) {
         printf("CTATestListener - onInfo -> message: %s, result: %s\n", message.string(), result);
         done = true;
         cancelDone = true;
         hasError = false;
-    } else if(0 == strcmp(result, DrmDef::CTA5_ERROR.string())) {
+    } else if (0 == strcmp(result, DrmDef::CTA5_ERROR.string())) {
         printf("CTATestListener - onInfo -> message: %s, result: %s\n", message.string(), result);
         done = true;
         hasError = true;
-    } else if(0 == strcmp(result, DrmDef::CTA5_CANCEL_ERROR.string())) {
+    } else if (0 == strcmp(result, DrmDef::CTA5_CANCEL_ERROR.string())) {
         printf("CTATestListener - onInfo -> message: %s, result: %s\n", message.string(), result);
         done = true;
         hasError = true;
         cancelDone = false;
-    } else if(0 == strcmp(result, DrmDef::CTA5_UPDATING.string())) {
-        //printf("CTATestListener - onInfo -> message: %s, result: %s\n", message.string(), result);
-        // check progress
+    } else if (0 == strcmp(result, DrmDef::CTA5_UPDATING.string())) {
+        // printf("CTATestListener - onInfo -> message: %s, result: %s\n", message.string(),
+        // result);
+        //  check progress
         cancelDone = false;
         hasError = false;
-        if(inCancelCase && !needCancel) {
+        if (inCancelCase && !needCancel) {
             needCancel = isReachedCancelCondition(message);
         }
-    } else if(0 == strcmp(result, DrmDef::CTA5_DONE.string())) {
+    } else if (0 == strcmp(result, DrmDef::CTA5_DONE.string())) {
         printf("CTATestListener - onInfo -> message: %s, result: %s\n", message.string(), result);
         cancelDone = false;
         done = true;
@@ -191,61 +187,53 @@ void CTAMultimediaTestListener::onInfo(const DrmInfoEvent& event) {
 void CTAMultimediaTestListener::reset() {
     printf("CTATestListener - reset...");
     done = false;
-    hasError =  false;
+    hasError = false;
     needCancel = false;
     cancelDone = false;
 }
 
-void *DrmCtaPlugInTest::handle = NULL;
+void* DrmCtaPlugInTest::handle = NULL;
 create_t DrmCtaPlugInTest::sCreator = NULL;
 destroy_t DrmCtaPlugInTest::sDestroyer = NULL;
-IDrmEngine *DrmCtaPlugInTest::sPlugin = NULL;
+IDrmEngine* DrmCtaPlugInTest::sPlugin = NULL;
 int DrmCtaPlugInTest::sUniqeId = 0;
 
-void DrmCtaPlugInTest::SetUpTestCase()
-{
-    //cout<<"DrmCtaPlugInTest::SetUpTestCase"<<endl;
-    const char *path = "drm/libdrmctaplugin.so";
+void DrmCtaPlugInTest::SetUpTestCase() {
+    // cout<<"DrmCtaPlugInTest::SetUpTestCase"<<endl;
+    const char* path = "drm/libdrmctaplugin.so";
     handle = dlopen(path, RTLD_NOW);
-    if (handle == NULL)
-    {
+    if (handle == NULL) {
         fprintf(stderr, "Can't open plugin: %s %s\n", path, dlerror());
         exit(-1);
     }
-    sCreator = (create_t) dlsym(handle, "create");
-    if (!sCreator)
-    {
+    sCreator = (create_t)dlsym(handle, "create");
+    if (!sCreator) {
         fprintf(stderr, "Can't find create method\n");
         exit(-1);
     }
 
-    sDestroyer = (destroy_t) dlsym(handle, "destroy");
-    if (!sDestroyer)
-    {
+    sDestroyer = (destroy_t)dlsym(handle, "destroy");
+    if (!sDestroyer) {
         fprintf(stderr, "Can't find destroy method\n");
         exit(-1);
     }
-
 }
 
-void DrmCtaPlugInTest::TearDownTestCase()
-{
-    //cout<<"DrmCtaPlugInTest::TearDownTestCase"<<endl;
-    if(handle)
-    {
+void DrmCtaPlugInTest::TearDownTestCase() {
+    // cout<<"DrmCtaPlugInTest::TearDownTestCase"<<endl;
+    if (handle) {
         dlclose(handle);
         handle = NULL;
     }
 }
 
-void DrmCtaPlugInTest::setKey()
-{
+void DrmCtaPlugInTest::setKey() {
     DrmInfoRequest drmInfoReq(DrmRequestType::TYPE_SET_DRM_INFO, DrmDef::MIME_CTA5_MESSAGE);
     drmInfoReq.put(DrmRequestType::KEY_ACTION, DrmRequestType::ACTION_CTA5_SETKEY);
     drmInfoReq.put(DrmRequestType::KEY_CTA5_KEY, PWD);
 
-    DrmInfo *info = sPlugin->acquireDrmInfo(sUniqeId, &drmInfoReq);
-    cout <<"set key done" << endl;
+    DrmInfo* info = sPlugin->acquireDrmInfo(sUniqeId, &drmInfoReq);
+    cout << "set key done" << endl;
     ASSERT_TRUE(info != NULL);
     delete info;
 }
@@ -265,7 +253,7 @@ void DrmCtaPlugInTest::compareFile(int fd1, int fd2) {
     uint8_t read2[BUFF_LEN] = {0};
     int bytesRead = 0;
     int totalRead = 0;
-    while(totalRead < size1) {
+    while (totalRead < size1) {
         bytesRead = totalRead + BUFF_LEN <= size1 ? BUFF_LEN : size1 - totalRead;
         bytesRead = read(fd1, read1, bytesRead);
         bytesRead = read(fd2, read2, bytesRead);
@@ -276,33 +264,27 @@ void DrmCtaPlugInTest::compareFile(int fd1, int fd2) {
     printf("compare file sucess.\n");
 }
 
-void DrmCtaPlugInTest::SetUp()
-{
-    //cout<<"DrmCtaPlugInTest::SetUp()"<<endl;
-    if(sCreator == NULL)
-    {
-        cout<<"SetUp fail - sCreator is NULL"<<endl;
-        return ;
+void DrmCtaPlugInTest::SetUp() {
+    // cout<<"DrmCtaPlugInTest::SetUp()"<<endl;
+    if (sCreator == NULL) {
+        cout << "SetUp fail - sCreator is NULL" << endl;
+        return;
     }
     sPlugin = (*sCreator)();
-    if (sPlugin == NULL)
-    {
+    if (sPlugin == NULL) {
         cout << "SetUp fail - sPlugin is NULL" << endl;
         return;
     }
     sUniqeId = 0;
-    if (sPlugin->initialize(sUniqeId) != DRM_NO_ERROR)
-    {
-        cout<<"onInitialize failed!"<<endl;
+    if (sPlugin->initialize(sUniqeId) != DRM_NO_ERROR) {
+        cout << "onInitialize failed!" << endl;
         return;
     }
 }
 
-void DrmCtaPlugInTest::TearDown()
-{
-    //cout<<"DrmCtaPlugInTest::TearDown()"<<endl;
-    if(sDestroyer == NULL || sPlugin == NULL)
-    {
+void DrmCtaPlugInTest::TearDown() {
+    // cout<<"DrmCtaPlugInTest::TearDown()"<<endl;
+    if (sDestroyer == NULL || sPlugin == NULL) {
         cout << "TearDown failed!" << endl;
         return;
     }
@@ -311,85 +293,81 @@ void DrmCtaPlugInTest::TearDown()
     sPlugin = NULL;
 }
 
-
-//Create two files with the same content
-//Encrypt a file and decrypt it, then compare the decrypt file and the created content
-//Normal cta5 file case and multi media file case
-TEST_F(DrmCtaPlugInTest, Encrypt)
-{
-    //step 0. write random content to clear file
+// Create two files with the same content
+// Encrypt a file and decrypt it, then compare the decrypt file and the created content
+// Normal cta5 file case and multi media file case
+TEST_F(DrmCtaPlugInTest, Encrypt) {
+    // step 0. write random content to clear file
     cout << "start write to file" << endl;
     int writeLen = writeToFile();
     cout << "end write to file" << endl;
 
-    //step 1. encrypt the clear file to cipher file
+    // step 1. encrypt the clear file to cipher file
     bool result = false;
     setKey();
     // set listener
     CTAMultimediaTestListener* listener = new CTAMultimediaTestListener();
     sPlugin->setOnInfoListener(sUniqeId, listener);
-    cout <<"start encrypt-------"<<endl;
-    //step 1.1 get clear file fd
+    cout << "start encrypt-------" << endl;
+    // step 1.1 get clear file fd
     int enclearFd = -1;
     enclearFd = open(clearPath, O_RDWR, "0666");
     ASSERT_TRUE(enclearFd != -1) << "open clear file failed" << endl;
     String8 enclearFd_str;
     enclearFd_str.appendFormat("%d", enclearFd);
-    //step 1.2 get cipher file fd
+    // step 1.2 get cipher file fd
     int encipherFd = -1;
     encipherFd = open(cipherPath, O_RDWR | O_TRUNC, "0666");
     ASSERT_TRUE(encipherFd != -1) << "open cipherFd file failed" << endl;
     String8 encipherFd_str;
     encipherFd_str.appendFormat("%d", encipherFd);
 
-    //step 1.3 do encrypt
+    // step 1.3 do encrypt
     DrmInfoRequest endrmInfoReq(DrmRequestType::TYPE_SET_DRM_INFO, DrmDef::MIME_CTA5_MESSAGE);
     endrmInfoReq.put(DrmRequestType::KEY_ACTION, DrmRequestType::ACTION_CTA5_ENCRYPT);
     endrmInfoReq.put(DrmRequestType::KEY_CTA5_CLEAR_FD, enclearFd_str);
     endrmInfoReq.put(DrmRequestType::KEY_CTA5_CIPHER_FD, encipherFd_str);
 
-    DrmInfo *eninfo = sPlugin->acquireDrmInfo(sUniqeId, &endrmInfoReq);
+    DrmInfo* eninfo = sPlugin->acquireDrmInfo(sUniqeId, &endrmInfoReq);
     ASSERT_TRUE(eninfo != NULL) << "encrypt return value is fail" << endl;
     delete eninfo;
 
-    //step 1.4. wait the encrypt for cancel
-    while (!listener->done)
-    {
+    // step 1.4. wait the encrypt for cancel
+    while (!listener->done) {
         sleep(1);
     }
-    cout <<"encrypt done-------"<<endl;
+    cout << "encrypt done-------" << endl;
     close(enclearFd);
     close(encipherFd);
     ASSERT_FALSE(listener->hasError) << "encrypt return value is fail" << endl;
     listener->reset();
-    cout <<"start decrypt-------"<<endl;
-    //step 2. using password to decrypt the file
-    //step 2.1 get cipher file fd
+    cout << "start decrypt-------" << endl;
+    // step 2. using password to decrypt the file
+    // step 2.1 get cipher file fd
     setKey();
     int cipherFd = -1;
     cipherFd = open(cipherPath, O_RDWR, "0666");
     ASSERT_TRUE(cipherFd != -1) << "open cipher failed" << endl;
     String8 cipherFd_str;
-    cipherFd_str.appendFormat("%d",cipherFd);
-    //step 2.2 get decrypt target file fd
+    cipherFd_str.appendFormat("%d", cipherFd);
+    // step 2.2 get decrypt target file fd
     int decyptFd = -1;
     decyptFd = open(decryptPath, O_RDWR | O_TRUNC, "0666");
     ASSERT_TRUE(decyptFd != -1) << "open decyptFd failed" << endl;
     String8 decypt_str;
-    decypt_str.appendFormat("%d",decyptFd);
-    //step 2.3 decrypt
+    decypt_str.appendFormat("%d", decyptFd);
+    // step 2.3 decrypt
     DrmInfoRequest drmInfoReqDecrypt(DrmRequestType::TYPE_SET_DRM_INFO, DrmDef::MIME_CTA5_MESSAGE);
     drmInfoReqDecrypt.put(DrmRequestType::KEY_ACTION, DrmRequestType::ACTION_CTA5_DECRYPT);
     drmInfoReqDecrypt.put(DrmRequestType::KEY_CTA5_CLEAR_FD, decypt_str);
     drmInfoReqDecrypt.put(DrmRequestType::KEY_CTA5_CIPHER_FD, cipherFd_str);
-    DrmInfo *infoDecrypt = sPlugin->acquireDrmInfo(sUniqeId, &drmInfoReqDecrypt);
+    DrmInfo* infoDecrypt = sPlugin->acquireDrmInfo(sUniqeId, &drmInfoReqDecrypt);
 
-    ASSERT_TRUE(infoDecrypt != NULL)<< "encrypt return value is fail"<<endl;
+    ASSERT_TRUE(infoDecrypt != NULL) << "encrypt return value is fail" << endl;
     delete infoDecrypt;
 
-    //step 2.4. wait for decypt done
-    while (!listener->done)
-    {
+    // step 2.4. wait for decypt done
+    while (!listener->done) {
         sleep(1);
     }
     close(cipherFd);
@@ -398,99 +376,96 @@ TEST_F(DrmCtaPlugInTest, Encrypt)
     listener->reset();
     cout << "decrypt done" << endl;
 
-    //step 3. compare the oringal clear file and decypted file
-    cout << "file compare start "<<endl;
+    // step 3. compare the oringal clear file and decypted file
+    cout << "file compare start " << endl;
     result = isFileEquals(clearPath, decryptPath);
-    cout << "file compare result :"<< result <<endl;
+    cout << "file compare result :" << result << endl;
     ASSERT_TRUE(result) << "file not the same fail----------" << endl;
 }
 
-//Check the return value in setKey
-TEST_F(DrmCtaPlugInTest, SetKey)
-{
-    //setKey();
+// Check the return value in setKey
+TEST_F(DrmCtaPlugInTest, SetKey) {
+    // setKey();
     DrmInfoRequest drmInfoReq(DrmRequestType::TYPE_SET_DRM_INFO, DrmDef::MIME_CTA5_MESSAGE);
     drmInfoReq.put(DrmRequestType::KEY_ACTION, DrmRequestType::ACTION_CTA5_SETKEY);
     drmInfoReq.put(DrmRequestType::KEY_CTA5_KEY, PWD);
 
-    DrmInfo *info = sPlugin->acquireDrmInfo(sUniqeId, &drmInfoReq);
-    cout <<"set key done" << endl;
+    DrmInfo* info = sPlugin->acquireDrmInfo(sUniqeId, &drmInfoReq);
+    cout << "set key done" << endl;
     ASSERT_TRUE(info != NULL);
     delete info;
 
-    cout <<"test key start" << endl;
+    cout << "test key start" << endl;
     int fd_in = open(cipherPath, O_RDONLY);
-    ASSERT_TRUE(fd_in != -1) << "open clear file failed"<<endl;
-    Cta5File *pCta5File = Cta5FileFactory::createCta5File(fd_in, PWD);
+    ASSERT_TRUE(fd_in != -1) << "open clear file failed" << endl;
+    Cta5File* pCta5File = Cta5FileFactory::createCta5File(fd_in, PWD);
     bool result = pCta5File->isKeyValid(PWD);
-    cout << "pass word:"<<PWD.string() <<endl;
+    cout << "pass word:" << PWD.string() << endl;
     bool result2 = pCta5File->isKeyValid(String8("333"));
     delete pCta5File;
     pCta5File = NULL;
     close(fd_in);
-    ASSERT_TRUE(result) << "password 1 is wrong"<<endl;
-    ASSERT_FALSE(result2) << "password 2 is wrong"<<endl;
+    ASSERT_TRUE(result) << "password 1 is wrong" << endl;
+    ASSERT_FALSE(result2) << "password 2 is wrong" << endl;
 }
 
-//After password change, using the new password to decrypt
-//Normal cta5 file case and multi media file case
-//need be executed after encrypt
-TEST_F(DrmCtaPlugInTest, ChangePassword)
-{
-    //step 0. write random content to clear file
+// After password change, using the new password to decrypt
+// Normal cta5 file case and multi media file case
+// need be executed after encrypt
+TEST_F(DrmCtaPlugInTest, ChangePassword) {
+    // step 0. write random content to clear file
     cout << "start write to file" << endl;
     int writeLen = writeToFile();
     cout << "end write to file" << endl;
 
-    //step 1. encrypt the clear file to cipher file
+    // step 1. encrypt the clear file to cipher file
     bool result = false;
     setKey();
     // set listener
     CTAMultimediaTestListener* listener = new CTAMultimediaTestListener();
     sPlugin->setOnInfoListener(sUniqeId, listener);
 
-    //step 1.1 get clear file fd
+    // step 1.1 get clear file fd
     cout << "start encrypt" << endl;
     int enclearFd = -1;
     enclearFd = open(clearPath, O_RDWR, "0666");
     ASSERT_TRUE(enclearFd != -1) << "open clear file failed" << endl;
     String8 enclearFd_str;
     enclearFd_str.appendFormat("%d", enclearFd);
-    //step 1.2 get cipher file fd
+    // step 1.2 get cipher file fd
     int encipherFd = -1;
     encipherFd = open(cipherPath, O_RDWR | O_TRUNC, "0666");
     ASSERT_TRUE(encipherFd != -1) << "open cipherFd file failed" << endl;
     String8 encipherFd_str;
     encipherFd_str.appendFormat("%d", encipherFd);
 
-    //step 1.3 do encrypt
+    // step 1.3 do encrypt
     DrmInfoRequest endrmInfoReq(DrmRequestType::TYPE_SET_DRM_INFO, DrmDef::MIME_CTA5_MESSAGE);
     endrmInfoReq.put(DrmRequestType::KEY_ACTION, DrmRequestType::ACTION_CTA5_ENCRYPT);
     endrmInfoReq.put(DrmRequestType::KEY_CTA5_CLEAR_FD, enclearFd_str);
     endrmInfoReq.put(DrmRequestType::KEY_CTA5_CIPHER_FD, encipherFd_str);
 
-    DrmInfo *eninfo = sPlugin->acquireDrmInfo(sUniqeId, &endrmInfoReq);
+    DrmInfo* eninfo = sPlugin->acquireDrmInfo(sUniqeId, &endrmInfoReq);
     ASSERT_TRUE(eninfo != NULL) << "encrypt return value is fail" << endl;
     delete eninfo;
 
-    //step 1.4. wait the encrypt for cancel
-    while (!listener->done)
-    {
+    // step 1.4. wait the encrypt for cancel
+    while (!listener->done) {
         sleep(1);
     }
-    cout <<"encrypt done"<<endl;
+    cout << "encrypt done" << endl;
     close(enclearFd);
     close(encipherFd);
     ASSERT_FALSE(listener->hasError) << "decrypt return value is fail" << endl;
     listener->reset();
 
-    //step 2. change cipher file password
+    // step 2. change cipher file password
     cout << "start change password" << endl;
     int cipher = -1;
     cipher = open(cipherPath, O_RDWR, "0666");
     ASSERT_TRUE(cipher != -1) << "open cipher failed" << endl;
     String8 cipher_str;
-    cipher_str.appendFormat("%d",cipher);
+    cipher_str.appendFormat("%d", cipher);
 
     DrmInfoRequest drmInfoReq(DrmRequestType::TYPE_SET_DRM_INFO, DrmDef::MIME_CTA5_MESSAGE);
     drmInfoReq.put(DrmRequestType::KEY_ACTION, DrmRequestType::ACTION_CTA5_CHANGEPASSWORD);
@@ -498,7 +473,7 @@ TEST_F(DrmCtaPlugInTest, ChangePassword)
     drmInfoReq.put(DrmRequestType::KEY_CTA5_NEWKEY, NEWPWD);
     drmInfoReq.put(DrmRequestType::KEY_CTA5_FD, cipher_str);
 
-    DrmInfo *info = sPlugin->acquireDrmInfo(sUniqeId, &drmInfoReq);
+    DrmInfo* info = sPlugin->acquireDrmInfo(sUniqeId, &drmInfoReq);
     ASSERT_TRUE(info != NULL);
     result = checkDrmInfoResult(info, String8("success"));
     ASSERT_TRUE(result) << "changepassword result is false" << endl;
@@ -508,33 +483,32 @@ TEST_F(DrmCtaPlugInTest, ChangePassword)
     listener->reset();
     cout << "change password done" << endl;
 
-    //step 3. using new password to decrypt the file
-    //step 3.1 get cipher file fd
+    // step 3. using new password to decrypt the file
+    // step 3.1 get cipher file fd
     cout << "start decrypt" << endl;
     int cipherFd = -1;
     cipherFd = open(cipherPath, O_RDWR, "0666");
     ASSERT_TRUE(cipherFd != -1) << "open cipher failed" << endl;
     String8 cipherFd_str;
-    cipherFd_str.appendFormat("%d",cipherFd);
-    //step 3.2 get decrypt target file fd
+    cipherFd_str.appendFormat("%d", cipherFd);
+    // step 3.2 get decrypt target file fd
     int decyptFd = -1;
     decyptFd = open(decryptPath, O_RDWR | O_TRUNC, "0666");
     ASSERT_TRUE(decyptFd != -1) << "open decyptFd failed" << endl;
     String8 decypt_str;
-    decypt_str.appendFormat("%d",decyptFd);
-    //step 3.3 decrypt
+    decypt_str.appendFormat("%d", decyptFd);
+    // step 3.3 decrypt
     DrmInfoRequest drmInfoReqDecrypt(DrmRequestType::TYPE_SET_DRM_INFO, DrmDef::MIME_CTA5_MESSAGE);
     drmInfoReqDecrypt.put(DrmRequestType::KEY_ACTION, DrmRequestType::ACTION_CTA5_DECRYPT);
     drmInfoReqDecrypt.put(DrmRequestType::KEY_CTA5_CLEAR_FD, decypt_str);
     drmInfoReqDecrypt.put(DrmRequestType::KEY_CTA5_CIPHER_FD, cipherFd_str);
-    DrmInfo *infoDecrypt = sPlugin->acquireDrmInfo(sUniqeId, &drmInfoReqDecrypt);
+    DrmInfo* infoDecrypt = sPlugin->acquireDrmInfo(sUniqeId, &drmInfoReqDecrypt);
 
-    ASSERT_TRUE(infoDecrypt != NULL)<< "encrypt return value is fail"<<endl;
+    ASSERT_TRUE(infoDecrypt != NULL) << "encrypt return value is fail" << endl;
     delete infoDecrypt;
 
-    //step 3.4. wait for decypt done
-    while (!listener->done)
-    {
+    // step 3.4. wait for decypt done
+    while (!listener->done) {
         sleep(1);
     }
     close(cipherFd);
@@ -543,62 +517,60 @@ TEST_F(DrmCtaPlugInTest, ChangePassword)
     listener->reset();
     cout << "decrypt done" << endl;
 
-    //step 4. compare the oringal clear file and decypted file
-    cout << "file compare start "<<endl;
+    // step 4. compare the oringal clear file and decypted file
+    cout << "file compare start " << endl;
     result = isFileEquals(clearPath, decryptPath);
-    cout << "file compare result :"<< result <<endl;
+    cout << "file compare result :" << result << endl;
     ASSERT_TRUE(result) << "file not the same fail----------" << endl;
     delete listener;
 }
 
-//Check cancel a task which is done
-//Check cancel a task which is doing
-//Normal cta5 file case and multi media file case
-TEST_F(DrmCtaPlugInTest, Cancel)
-{
-    //step 1. write random content to clear file
+// Check cancel a task which is done
+// Check cancel a task which is doing
+// Normal cta5 file case and multi media file case
+TEST_F(DrmCtaPlugInTest, Cancel) {
+    // step 1. write random content to clear file
     cout << "start write to file" << endl;
     int writeLen = writeToFile();
     cout << "end write to file" << endl;
-    //step 2. encrypt the clear file to cipher file
+    // step 2. encrypt the clear file to cipher file
     setKey();
     // set listener
     CTAMultimediaTestListener* listener = new CTAMultimediaTestListener();
     listener->inCancelCase = true;
     sPlugin->setOnInfoListener(sUniqeId, listener);
-    //step 2.1 get clear file fd
+    // step 2.1 get clear file fd
     int clearFd = -1;
     clearFd = open(clearPath, O_RDWR, "0666");
     ASSERT_TRUE(clearFd != -1) << "open clear file failed" << endl;
     String8 clearFd_str;
     clearFd_str.appendFormat("%d", clearFd);
-    //step 2.2 get cipher file fd
+    // step 2.2 get cipher file fd
     int cipherFd = -1;
     cipherFd = open(cipherPath, O_RDWR | O_TRUNC, "0666");
     ASSERT_TRUE(cipherFd != -1) << "open cipherFd file failed" << endl;
     String8 cipherFd_str;
     cipherFd_str.appendFormat("%d", cipherFd);
 
-    //step 2.3 do encrypt
+    // step 2.3 do encrypt
     DrmInfoRequest drmInfoReq(DrmRequestType::TYPE_SET_DRM_INFO, DrmDef::MIME_CTA5_MESSAGE);
     drmInfoReq.put(DrmRequestType::KEY_ACTION, DrmRequestType::ACTION_CTA5_ENCRYPT);
     drmInfoReq.put(DrmRequestType::KEY_CTA5_CLEAR_FD, clearFd_str);
     drmInfoReq.put(DrmRequestType::KEY_CTA5_CIPHER_FD, cipherFd_str);
 
-    DrmInfo *info = sPlugin->acquireDrmInfo(sUniqeId, &drmInfoReq);
+    DrmInfo* info = sPlugin->acquireDrmInfo(sUniqeId, &drmInfoReq);
     ASSERT_TRUE(info != NULL) << "encrypt return value is fail" << endl;
     delete info;
 
-    //step 2.4. wait the encrypt for cancel
-    while (!listener->done)
-    {
-        if (listener->needCancel)
-        {
+    // step 2.4. wait the encrypt for cancel
+    while (!listener->done) {
+        if (listener->needCancel) {
             cout << "need cancel" << endl;
-            DrmInfoRequest drmInfoReq2(DrmRequestType::TYPE_SET_DRM_INFO, DrmDef::MIME_CTA5_MESSAGE);
+            DrmInfoRequest drmInfoReq2(DrmRequestType::TYPE_SET_DRM_INFO,
+                                       DrmDef::MIME_CTA5_MESSAGE);
             drmInfoReq2.put(DrmRequestType::KEY_ACTION, DrmRequestType::ACTION_CTA5_CANCEL);
             drmInfoReq2.put(DrmRequestType::KEY_CTA5_FD, clearFd_str);
-            DrmInfo *info2 = sPlugin->acquireDrmInfo(sUniqeId, &drmInfoReq2);
+            DrmInfo* info2 = sPlugin->acquireDrmInfo(sUniqeId, &drmInfoReq2);
             ASSERT_TRUE(info2 != NULL) << "encrypt return value is fail" << endl;
             delete info2;
         }
@@ -606,15 +578,15 @@ TEST_F(DrmCtaPlugInTest, Cancel)
     }
     sleep(1);
     ASSERT_TRUE(listener->cancelDone) << "cancel fail" << endl;
-    cout <<"cancel encrypt done-------"<<endl;
+    cout << "cancel encrypt done-------" << endl;
     close(clearFd);
     close(cipherFd);
     ASSERT_FALSE(listener->hasError) << "decrypt return value is fail" << endl;
     listener->reset();
 
-    //step 3. decypt the file
+    // step 3. decypt the file
     setKey();
-    //step 3.1 get cipher file fd
+    // step 3.1 get cipher file fd
     listener->inCancelCase = true;
     sPlugin->setOnInfoListener(sUniqeId, listener);
 
@@ -623,33 +595,32 @@ TEST_F(DrmCtaPlugInTest, Cancel)
     ASSERT_TRUE(cipher != -1) << "open cipher failed" << endl;
     String8 cipher_str;
     cipher_str.appendFormat("%d", cipher);
-    //step 3.2 get decrypt target file fd
+    // step 3.2 get decrypt target file fd
     int decyptFd = -1;
     decyptFd = open(decryptPath, O_RDWR | O_TRUNC, "0666");
     ASSERT_TRUE(decyptFd != -1) << "open decyptFd failed" << endl;
     String8 decypt_str;
     decypt_str.appendFormat("%d", decyptFd);
 
-    //step 3.3 do decrypt
+    // step 3.3 do decrypt
     DrmInfoRequest drmInfoReqDecrypt(DrmRequestType::TYPE_SET_DRM_INFO, DrmDef::MIME_CTA5_MESSAGE);
     drmInfoReqDecrypt.put(DrmRequestType::KEY_ACTION, DrmRequestType::ACTION_CTA5_DECRYPT);
     drmInfoReqDecrypt.put(DrmRequestType::KEY_CTA5_CLEAR_FD, decypt_str);
     drmInfoReqDecrypt.put(DrmRequestType::KEY_CTA5_CIPHER_FD, cipher_str);
-    DrmInfo *infoDecrypt = sPlugin->acquireDrmInfo(sUniqeId, &drmInfoReqDecrypt);
+    DrmInfo* infoDecrypt = sPlugin->acquireDrmInfo(sUniqeId, &drmInfoReqDecrypt);
 
     ASSERT_TRUE(infoDecrypt != NULL) << "encrypt return value is fail" << endl;
     delete infoDecrypt;
 
-    //step 3.4. wait the decrypt for cancel
-    while (!listener->done)
-    {
-        if (listener->needCancel)
-        {
+    // step 3.4. wait the decrypt for cancel
+    while (!listener->done) {
+        if (listener->needCancel) {
             cout << "need cancel" << endl;
-            DrmInfoRequest drmInfoReqDecrypt2(DrmRequestType::TYPE_SET_DRM_INFO, DrmDef::MIME_CTA5_MESSAGE);
+            DrmInfoRequest drmInfoReqDecrypt2(DrmRequestType::TYPE_SET_DRM_INFO,
+                                              DrmDef::MIME_CTA5_MESSAGE);
             drmInfoReqDecrypt2.put(DrmRequestType::KEY_ACTION, DrmRequestType::ACTION_CTA5_CANCEL);
             drmInfoReqDecrypt2.put(DrmRequestType::KEY_CTA5_FD, cipher_str);
-            DrmInfo *infoDecrypt2 = sPlugin->acquireDrmInfo(sUniqeId, &drmInfoReqDecrypt2);
+            DrmInfo* infoDecrypt2 = sPlugin->acquireDrmInfo(sUniqeId, &drmInfoReqDecrypt2);
             ASSERT_TRUE(infoDecrypt2 != NULL) << "encrypt return value is fail" << endl;
             delete infoDecrypt2;
         }
@@ -657,7 +628,7 @@ TEST_F(DrmCtaPlugInTest, Cancel)
     }
     sleep(1);
     ASSERT_TRUE(listener->cancelDone) << "cancel fail" << endl;
-    cout <<"cancel decrypt done-------"<<endl;
+    cout << "cancel decrypt done-------" << endl;
     close(cipher);
     close(decyptFd);
     ASSERT_FALSE(listener->hasError) << "decrypt return value is fail" << endl;
@@ -665,57 +636,54 @@ TEST_F(DrmCtaPlugInTest, Cancel)
     delete listener;
 }
 
-
-//Check a normal file , a normal cta5 file and a multi media cta5 file
-TEST_F(DrmCtaPlugInTest, IsCtaFile)
-{
-    //step 0. write random content to clear file
+// Check a normal file , a normal cta5 file and a multi media cta5 file
+TEST_F(DrmCtaPlugInTest, IsCtaFile) {
+    // step 0. write random content to clear file
     bool result = false;
     cout << "start write to file" << endl;
     int writeLen = writeToFile();
     cout << "end write to file" << endl;
-    //step 1. encrypt the clear file to cipher file
+    // step 1. encrypt the clear file to cipher file
     setKey();
     // set listener
     CTAMultimediaTestListener* listener = new CTAMultimediaTestListener();
     sPlugin->setOnInfoListener(sUniqeId, listener);
 
-    //step 1.1 get clear file fd
+    // step 1.1 get clear file fd
     cout << "start encrypt" << endl;
     int enclearFd = -1;
     enclearFd = open(clearPath, O_RDWR, "0666");
     ASSERT_TRUE(enclearFd != -1) << "open clear file failed" << endl;
     String8 enclearFd_str;
     enclearFd_str.appendFormat("%d", enclearFd);
-    //step 1.2 get cipher file fd
+    // step 1.2 get cipher file fd
     int encipherFd = -1;
     encipherFd = open(cipherPath, O_RDWR | O_TRUNC, "0666");
     ASSERT_TRUE(encipherFd != -1) << "open cipherFd file failed" << endl;
     String8 encipherFd_str;
     encipherFd_str.appendFormat("%d", encipherFd);
 
-    //step 1.3 do encrypt
+    // step 1.3 do encrypt
     DrmInfoRequest endrmInfoReq(DrmRequestType::TYPE_SET_DRM_INFO, DrmDef::MIME_CTA5_MESSAGE);
     endrmInfoReq.put(DrmRequestType::KEY_ACTION, DrmRequestType::ACTION_CTA5_ENCRYPT);
     endrmInfoReq.put(DrmRequestType::KEY_CTA5_CLEAR_FD, enclearFd_str);
     endrmInfoReq.put(DrmRequestType::KEY_CTA5_CIPHER_FD, encipherFd_str);
 
-    DrmInfo *eninfo = sPlugin->acquireDrmInfo(sUniqeId, &endrmInfoReq);
+    DrmInfo* eninfo = sPlugin->acquireDrmInfo(sUniqeId, &endrmInfoReq);
     ASSERT_TRUE(eninfo != NULL) << "encrypt return value is fail" << endl;
     delete eninfo;
 
-    //step 1.4. wait the encrypt done
-    while (!listener->done)
-    {
+    // step 1.4. wait the encrypt done
+    while (!listener->done) {
         sleep(1);
     }
-    cout <<"encrypt done"<<endl;
+    cout << "encrypt done" << endl;
     close(enclearFd);
     close(encipherFd);
     ASSERT_FALSE(listener->hasError) << "decrypt return value is fail" << endl;
     listener->reset();
 
-    //step 2. check cta5 file is a cta5 file
+    // step 2. check cta5 file is a cta5 file
     cout << "start check cta5 file is valid" << endl;
     setKey();
     int cipherFd = -1;
@@ -728,8 +696,8 @@ TEST_F(DrmCtaPlugInTest, IsCtaFile)
     drmInfoReq.put(DrmRequestType::KEY_ACTION, DrmRequestType::ACTION_CTA5_ISCTAFILE);
     drmInfoReq.put(DrmRequestType::KEY_CTA5_FD, cipherFd_str);
 
-    DrmInfo *info = sPlugin->acquireDrmInfo(sUniqeId, &drmInfoReq);
-    ASSERT_TRUE(info != NULL)<<"cquireDrmInfo failed - info is NULL"<<endl;
+    DrmInfo* info = sPlugin->acquireDrmInfo(sUniqeId, &drmInfoReq);
+    ASSERT_TRUE(info != NULL) << "cquireDrmInfo failed - info is NULL" << endl;
 
     result = checkDrmInfoResult(info, String8("success"));
     ASSERT_TRUE(result) << "result is not success" << endl;
@@ -737,7 +705,7 @@ TEST_F(DrmCtaPlugInTest, IsCtaFile)
     delete info;
     cout << "end check cta5 file is valid" << endl;
 
-    //step 3. check clear file is a cta5 file
+    // step 3. check clear file is a cta5 file
     cout << "start check clear file is valid" << endl;
     int clearFd = -1;
     clearFd = open(clearPath, O_RDWR, "0666");
@@ -749,7 +717,7 @@ TEST_F(DrmCtaPlugInTest, IsCtaFile)
     cdrmInfoReq.put(DrmRequestType::KEY_ACTION, DrmRequestType::ACTION_CTA5_ISCTAFILE);
     cdrmInfoReq.put(DrmRequestType::KEY_CTA5_FD, cipherFd_str);
 
-    DrmInfo *cinfo = sPlugin->acquireDrmInfo(sUniqeId, &cdrmInfoReq);
+    DrmInfo* cinfo = sPlugin->acquireDrmInfo(sUniqeId, &cdrmInfoReq);
     ASSERT_TRUE(cinfo != NULL) << "cquireDrmInfo failed - info is NULL" << endl;
 
     result = checkDrmInfoResult(cinfo, String8("failure"));
@@ -832,7 +800,6 @@ TEST_F(DrmCtaPlugInTest, CheckToken)
     delete backChar3;
 }*/
 
-
 // Create two files with the same content
 // Encrypt a file and decrypt it, then compare the decrypt file and the created content
 // multi media file case
@@ -841,8 +808,7 @@ TEST_F(DrmCtaPlugInTest, CheckToken)
 // 2. encrypt multimedia file
 // 3. decrypt cta file
 // 4. compare decrypted file with backup file
-TEST_F(DrmCtaPlugInTest, EncryptAndDecrypt_MultiMedia)
-{
+TEST_F(DrmCtaPlugInTest, EncryptAndDecrypt_MultiMedia) {
     printf("EncryptAndDecrypt_MultiMedia start\n");
     const char* path = "/sdcard/test.mp4";
     const char* cta_path = "/sdcard/test.mp4.cta";
@@ -852,7 +818,8 @@ TEST_F(DrmCtaPlugInTest, EncryptAndDecrypt_MultiMedia)
     // 1. backup original multimedia file
     printf("1. backup original multimedia file\n");
     // 1.1 check file exists
-    ASSERT_EQ(0, access(path, F_OK)) << "please make sure the file [" << path << "] already existed in your device";
+    ASSERT_EQ(0, access(path, F_OK))
+            << "please make sure the file [" << path << "] already existed in your device";
     // 1.2 backup
     system("cp /sdcard/test.mp4 /sdcard/test.mp4.bak");
     // 1.3 check backup file exists
@@ -888,13 +855,13 @@ TEST_F(DrmCtaPlugInTest, EncryptAndDecrypt_MultiMedia)
     ASSERT_NE(-1, original_file_size);
     lseek(clear_fd, 0, SEEK_SET);
 
-    DrmInfo *info = sPlugin->acquireDrmInfo(sUniqeId, &drmInfoReq);
+    DrmInfo* info = sPlugin->acquireDrmInfo(sUniqeId, &drmInfoReq);
 
     // wait encrypt finish
     struct timeval delay;
     delay.tv_sec = 0;
     delay.tv_usec = 50 * 1000;
-    while(!listener->done) {
+    while (!listener->done) {
         select(0, NULL, NULL, NULL, &delay);
     }
 
@@ -904,7 +871,6 @@ TEST_F(DrmCtaPlugInTest, EncryptAndDecrypt_MultiMedia)
     ASSERT_FALSE(listener->hasError);
 
     ASSERT_TRUE(info != NULL);
-
 
     // 2.3 check file size whether has changed
     int cipher_file_size = lseek(clear_fd, 0, SEEK_END);
@@ -921,7 +887,7 @@ TEST_F(DrmCtaPlugInTest, EncryptAndDecrypt_MultiMedia)
     lseek(clear_fd, 0, SEEK_SET);
     listener->reset();
     info = sPlugin->acquireDrmInfo(sUniqeId, &drmInfoReq);
-    while(!listener->done) {
+    while (!listener->done) {
         select(0, NULL, NULL, NULL, &delay);
     }
 
@@ -951,16 +917,14 @@ TEST_F(DrmCtaPlugInTest, EncryptAndDecrypt_MultiMedia)
 }
 
 // Create two files with the same content
-// Encrypt a file, change password, and decrypt it, then compare the decrypt file and the created content
-// multi media file case
-// steps:
+// Encrypt a file, change password, and decrypt it, then compare the decrypt file and the created
+// content multi media file case steps:
 // 1. backup original multimedia file
 // 2. encrypt multimedia file
 // 3. change password
 // 4. decrypt cta file
 // 5. compare decrypted file with backup file
-TEST_F(DrmCtaPlugInTest, ChangePassword_MultiMedia)
-{
+TEST_F(DrmCtaPlugInTest, ChangePassword_MultiMedia) {
     printf("ChangePassword_MultiMedia start\n");
     const char* path = "/sdcard/test.mp4";
     const char* cta_path = "/sdcard/test.mp4.cta";
@@ -970,7 +934,8 @@ TEST_F(DrmCtaPlugInTest, ChangePassword_MultiMedia)
     // 1. backup original multimedia file
     printf("1. backup original multimedia file\n");
     // 1.1 check file exists
-    ASSERT_EQ(0, access(path, F_OK)) << "please make sure the file [" << path << "] already existed in your device";
+    ASSERT_EQ(0, access(path, F_OK))
+            << "please make sure the file [" << path << "] already existed in your device";
     // 1.2 backup
     system("cp /sdcard/test.mp4 /sdcard/test.mp4.bak");
     // 1.3 check backup file exists
@@ -1006,13 +971,13 @@ TEST_F(DrmCtaPlugInTest, ChangePassword_MultiMedia)
     ASSERT_NE(-1, original_file_size);
     lseek(clear_fd, 0, SEEK_SET);
 
-    DrmInfo *info = sPlugin->acquireDrmInfo(sUniqeId, &drmInfoReq);
+    DrmInfo* info = sPlugin->acquireDrmInfo(sUniqeId, &drmInfoReq);
 
     // wait encrypt finish
     struct timeval delay;
     delay.tv_sec = 0;
     delay.tv_usec = 50 * 1000;
-    while(!listener->done) {
+    while (!listener->done) {
         select(0, NULL, NULL, NULL, &delay);
     }
 
@@ -1022,7 +987,6 @@ TEST_F(DrmCtaPlugInTest, ChangePassword_MultiMedia)
     ASSERT_FALSE(listener->hasError);
 
     ASSERT_TRUE(info != NULL);
-
 
     // 2.3 check file size whether has changed
     int cipher_file_size = lseek(clear_fd, 0, SEEK_END);
@@ -1051,7 +1015,7 @@ TEST_F(DrmCtaPlugInTest, ChangePassword_MultiMedia)
     lseek(clear_fd, 0, SEEK_SET);
     listener->reset();
     info = sPlugin->acquireDrmInfo(sUniqeId, &drmInfoReq);
-    while(!listener->done) {
+    while (!listener->done) {
         select(0, NULL, NULL, NULL, &delay);
     }
 
@@ -1088,8 +1052,7 @@ TEST_F(DrmCtaPlugInTest, ChangePassword_MultiMedia)
 // 2. encrypt multimedia file
 // 3. check is cta file
 // recover
-TEST_F(DrmCtaPlugInTest, IsCtaFile_MultiMedia)
-{
+TEST_F(DrmCtaPlugInTest, IsCtaFile_MultiMedia) {
     printf("IsCtaFile_MultiMedia start\n");
     const char* path = "/sdcard/test.mp4";
     const char* cta_path = "/sdcard/test.mp4.cta";
@@ -1099,7 +1062,8 @@ TEST_F(DrmCtaPlugInTest, IsCtaFile_MultiMedia)
     // 1. backup original multimedia file
     printf("1. backup original multimedia file\n");
     // 1.1 check file exists
-    ASSERT_EQ(0, access(path, F_OK)) << "please make sure the file [" << path << "] already existed in your device";
+    ASSERT_EQ(0, access(path, F_OK))
+            << "please make sure the file [" << path << "] already existed in your device";
     // 1.2 backup
     system("cp /sdcard/test.mp4 /sdcard/test.mp4.bak");
     // 1.3 check backup file exists
@@ -1135,13 +1099,13 @@ TEST_F(DrmCtaPlugInTest, IsCtaFile_MultiMedia)
     ASSERT_NE(-1, original_file_size);
     lseek(clear_fd, 0, SEEK_SET);
 
-    DrmInfo *info = sPlugin->acquireDrmInfo(sUniqeId, &drmInfoReq);
+    DrmInfo* info = sPlugin->acquireDrmInfo(sUniqeId, &drmInfoReq);
 
     // wait encrypt finish
     struct timeval delay;
     delay.tv_sec = 0;
     delay.tv_usec = 50 * 1000;
-    while(!listener->done) {
+    while (!listener->done) {
         select(0, NULL, NULL, NULL, &delay);
     }
 
@@ -1151,7 +1115,6 @@ TEST_F(DrmCtaPlugInTest, IsCtaFile_MultiMedia)
     ASSERT_FALSE(listener->hasError);
 
     ASSERT_TRUE(info != NULL);
-
 
     // 2.3 check file size whether has changed
     int cipher_file_size = lseek(clear_fd, 0, SEEK_END);
@@ -1172,8 +1135,6 @@ TEST_F(DrmCtaPlugInTest, IsCtaFile_MultiMedia)
     strncpy(result, info->getData().data, info->getData().length);
     printf("check result: %s\n", result);
     ASSERT_STREQ(DrmRequestType::RESULT_SUCCESS, result);
-
-
 
     // 4. recover
     printf("4. recover\n");
@@ -1198,8 +1159,7 @@ TEST_F(DrmCtaPlugInTest, IsCtaFile_MultiMedia)
 // 3. cancel
 // 4. compare file
 // 5. recover
-TEST_F(DrmCtaPlugInTest, CancelEncrypt_MultiMedia)
-{
+TEST_F(DrmCtaPlugInTest, CancelEncrypt_MultiMedia) {
     printf("CancelEncrypt_MultiMedia start\n");
     const char* path = "/sdcard/test.mp4";
     const char* cta_path = "/sdcard/test.mp4.cta";
@@ -1209,7 +1169,8 @@ TEST_F(DrmCtaPlugInTest, CancelEncrypt_MultiMedia)
     // 1. backup original multimedia file
     printf("1. backup original multimedia file\n");
     // 1.1 check file exists
-    ASSERT_EQ(0, access(path, F_OK)) << "please make sure the file [" << path << "] already existed in your device";
+    ASSERT_EQ(0, access(path, F_OK))
+            << "please make sure the file [" << path << "] already existed in your device";
     // 1.2 backup
     system("cp /sdcard/test.mp4 /sdcard/test.mp4.bak");
     // 1.3 check backup file exists
@@ -1246,14 +1207,14 @@ TEST_F(DrmCtaPlugInTest, CancelEncrypt_MultiMedia)
     ASSERT_NE(-1, original_file_size);
     lseek(clear_fd, 0, SEEK_SET);
 
-    DrmInfo *info = sPlugin->acquireDrmInfo(sUniqeId, &drmInfoReq);
+    DrmInfo* info = sPlugin->acquireDrmInfo(sUniqeId, &drmInfoReq);
 
     // wait encrypt finish
     struct timeval delay;
     delay.tv_sec = 0;
     delay.tv_usec = 50 * 1000;
-    while(!listener->done) {
-        if(listener->needCancel) {
+    while (!listener->done) {
+        if (listener->needCancel) {
             // cancel encrypt
             printf("cancel encrypt\n");
             drmInfoReq.put(DrmRequestType::KEY_ACTION, DrmRequestType::ACTION_CTA5_CANCEL);
@@ -1301,8 +1262,7 @@ TEST_F(DrmCtaPlugInTest, CancelEncrypt_MultiMedia)
 // 3. cancel
 // 4. compare file
 // 5. recover
-TEST_F(DrmCtaPlugInTest, CancelDecrypt_MultiMedia)
-{
+TEST_F(DrmCtaPlugInTest, CancelDecrypt_MultiMedia) {
     printf("CancelDecrypt_MultiMedia start\n");
     const char* path = "/sdcard/test.mp4";
     const char* cta_path = "/sdcard/test.mp4.cta";
@@ -1313,7 +1273,8 @@ TEST_F(DrmCtaPlugInTest, CancelDecrypt_MultiMedia)
     // 1. backup original multimedia file
     printf("1. backup original multimedia file\n");
     // 1.1 check file exists
-    ASSERT_EQ(0, access(path, F_OK)) << "please make sure the file [" << path << "] already existed in your device";
+    ASSERT_EQ(0, access(path, F_OK))
+            << "please make sure the file [" << path << "] already existed in your device";
     // 1.2 backup
     system("cp /sdcard/test.mp4 /sdcard/test.mp4.bak");
     // 1.3 check backup file exists
@@ -1349,13 +1310,13 @@ TEST_F(DrmCtaPlugInTest, CancelDecrypt_MultiMedia)
     ASSERT_NE(-1, original_file_size);
     lseek(clear_fd, 0, SEEK_SET);
 
-    DrmInfo *info = sPlugin->acquireDrmInfo(sUniqeId, &drmInfoReq);
+    DrmInfo* info = sPlugin->acquireDrmInfo(sUniqeId, &drmInfoReq);
 
     // wait encrypt finish
     struct timeval delay;
     delay.tv_sec = 0;
     delay.tv_usec = 50 * 1000;
-    while(!listener->done) {
+    while (!listener->done) {
         select(0, NULL, NULL, NULL, &delay);
     }
 
@@ -1365,7 +1326,6 @@ TEST_F(DrmCtaPlugInTest, CancelDecrypt_MultiMedia)
     ASSERT_FALSE(listener->hasError);
 
     ASSERT_TRUE(info != NULL);
-
 
     // 2.3 check file size whether has changed
     int cipher_file_size = lseek(clear_fd, 0, SEEK_END);
@@ -1386,8 +1346,8 @@ TEST_F(DrmCtaPlugInTest, CancelDecrypt_MultiMedia)
     listener->reset();
     listener->inCancelCase = true;
     info = sPlugin->acquireDrmInfo(sUniqeId, &drmInfoReq);
-    while(!listener->done) {
-        if(listener->needCancel) {
+    while (!listener->done) {
+        if (listener->needCancel) {
             // cancel decrypt
             printf("cancel decrypt\n");
             drmInfoReq.put(DrmRequestType::KEY_ACTION, DrmRequestType::ACTION_CTA5_CANCEL);
@@ -1427,50 +1387,41 @@ TEST_F(DrmCtaPlugInTest, CancelDecrypt_MultiMedia)
     printf("CancelDecrypt_MultiMedia finish\n");
 }
 
-int main(int argc, char** argv)
-{
+int main(int argc, char** argv) {
     InitGoogleTest(&argc, argv);
     int status = RUN_ALL_TESTS();
     cout << "status = " << status << endl;
     return status;
 }
 
-
-bool DrmCtaPlugInTest::isFileEquals(String8 clearFile, String8 cipherFile)
-{
+bool DrmCtaPlugInTest::isFileEquals(String8 clearFile, String8 cipherFile) {
     bool result = true;
     int clearFd = -1;
     clearFd = open(clearFile, O_RDWR, "0666");
-    if (clearFd == -1)
-    {
+    if (clearFd == -1) {
         cout << "open clear file failed" << endl;
     }
 
     int decryptFd = -1;
     decryptFd = open(cipherFile, O_RDWR, "0666");
-    if (decryptFd == -1)
-    {
+    if (decryptFd == -1) {
         cout << "open decryptFd file failed" << endl;
     }
 
-
     int clearLength = lseek(clearFd, 0, SEEK_END);
-    if (clearLength == -1)
-    {
+    if (clearLength == -1) {
         cout << "lseek clearLength failed" << endl;
-        //ALOGE("[ERROR]decrypt:lseek clearLength failed. reason=[%s]", strerror(errno));
+        // ALOGE("[ERROR]decrypt:lseek clearLength failed. reason=[%s]", strerror(errno));
         return false;
     }
     int decryptLength = lseek(decryptFd, 0, SEEK_END);
-    if (decryptLength == -1)
-    {
+    if (decryptLength == -1) {
         cout << "lseek decryptLength failed" << endl;
-        //ALOGE("[ERROR]decrypt:lseek decryptLength failed. reason=[%s]", strerror(errno));
+        // ALOGE("[ERROR]decrypt:lseek decryptLength failed. reason=[%s]", strerror(errno));
         return false;
     }
 
-    if (clearLength != decryptLength)
-    {
+    if (clearLength != decryptLength) {
         cout << "file length is not the same" << endl;
         return false;
     }
@@ -1478,7 +1429,7 @@ bool DrmCtaPlugInTest::isFileEquals(String8 clearFile, String8 cipherFile)
     lseek(clearFd, 0, SEEK_SET);
     lseek(decryptFd, 0, SEEK_SET);
 
-    int cnt_total = 0; //  read cipher size
+    int cnt_total = 0;  //  read cipher size
     int cnt = 0;
 
     int BLK_LEN = 4096;
@@ -1487,8 +1438,7 @@ bool DrmCtaPlugInTest::isFileEquals(String8 clearFile, String8 cipherFile)
     unsigned char buf_de[BLK_LEN];
     bzero(buf_de, sizeof(buf_de));
 
-    while (cnt_total < clearLength)
-    {
+    while (cnt_total < clearLength) {
         bzero(buf_in, sizeof(buf_in));
         bzero(buf_de, sizeof(buf_de));
         int needReadSize = ((data_size - cnt_total) > BLK_LEN) ? BLK_LEN : (data_size - cnt_total);
@@ -1497,24 +1447,21 @@ bool DrmCtaPlugInTest::isFileEquals(String8 clearFile, String8 cipherFile)
 
         cnt = read(decryptFd, buf_de, needReadSize);
 
-        if (memcmp(buf_in, buf_de, needReadSize))
-        {
+        if (memcmp(buf_in, buf_de, needReadSize)) {
             result = false;
-            cout <<"file content not equal---"<< endl;
+            cout << "file content not equal---" << endl;
         }
     }
     close(clearFd);
     close(decryptFd);
-    cout << "result:"<<result<<endl;
+    cout << "result:" << result << endl;
     return result;
 }
 
-int DrmCtaPlugInTest::writeToFile()
-{
+int DrmCtaPlugInTest::writeToFile() {
     int clearFd = -1;
     clearFd = open(clearPath, O_RDWR | O_TRUNC, "0666");
-    if (clearFd == -1)
-    {
+    if (clearFd == -1) {
         cout << "open clear file failed" << endl;
     }
 
@@ -1525,22 +1472,20 @@ int DrmCtaPlugInTest::writeToFile()
     unsigned char buf_out[BLK_LEN];
     bzero(buf_out, sizeof(buf_out));
 
-    for (int i=0; i < BLK_LEN; i++)
-    {
+    for (int i = 0; i < BLK_LEN; i++) {
         buf_out[i] = 'a';
     }
     int min = 1000;
     int max = 10000;
 
     srand(time(NULL));
-    target = rand()%(max-min+1) + min;
-    cout << "target is:"<<target<<endl;
+    target = rand() % (max - min + 1) + min;
+    cout << "target is:" << target << endl;
 
     //***************
     // write the content to target file
     int count = 0;
-    while (count < target)
-    {
+    while (count < target) {
         result += write(clearFd, buf_out, sizeof(buf_out));
         count++;
     }
@@ -1548,15 +1493,14 @@ int DrmCtaPlugInTest::writeToFile()
     return result;
 }
 
-bool DrmCtaPlugInTest::checkDrmInfoResult(DrmInfo* drmInfo,  String8 str)
-{
+bool DrmCtaPlugInTest::checkDrmInfoResult(DrmInfo* drmInfo, String8 str) {
     int length = str.length();
-    char* backChar = new char[length+1];
-    memset(backChar, 0, length+1);
+    char* backChar = new char[length + 1];
+    memset(backChar, 0, length + 1);
     memcpy(backChar, drmInfo->getData().data, length);
     cout << "backChar:" << backChar << endl;
     int eq = memcmp(backChar, str.string(), length);
     cout << "result:" << eq << endl;
     delete[] backChar;
-    return (eq==0);
+    return (eq == 0);
 }

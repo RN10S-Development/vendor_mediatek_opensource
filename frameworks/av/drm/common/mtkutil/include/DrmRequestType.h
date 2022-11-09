@@ -19,14 +19,12 @@
 
 #include <utils/String8.h>
 
-namespace android
-{
-class DrmRequestType
-{
-private:
+namespace android {
+class DrmRequestType {
+  private:
     DrmRequestType(){};
 
-public:
+  public:
     static const int TYPE_SET_DRM_INFO = 2021;
     static const int TYPE_GET_DRM_INFO = 2022;
 
@@ -64,7 +62,7 @@ public:
     static const String8 RESULT_SUCCESS;
     static const String8 RESULT_FAILURE;
 
-    //For CTA5 feature
+    // For CTA5 feature
     static const String8 ACTION_CTA5_ENCRYPT;
     static const String8 ACTION_CTA5_DECRYPT;
     static const String8 ACTION_CTA5_SETKEY;
@@ -87,5 +85,5 @@ public:
     static const String8 KEY_CTA5_FILEPATH;
 };
 
-}
+}  // namespace android
 #endif /* __DRM_INFO_TYPE_H__ */

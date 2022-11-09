@@ -41,4 +41,4 @@ typedef struct {
 }
 #endif
 
-#endif // _CORKSCREW_PTRACE_ARCH_H
+#endif  // _CORKSCREW_PTRACE_ARCH_H

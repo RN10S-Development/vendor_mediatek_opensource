@@ -17,7 +17,7 @@
 #ifndef _FILE_MONITOR_H_
 #define _FILE_MONITOR_H_
 
-void tag_log(int type, const char* tag, const char *fmt, ...);
+void tag_log(int type, const char* tag, const char* fmt, ...);
 
 #ifdef LOGD
 #undef LOGD
@@ -32,5 +32,5 @@ void tag_log(int type, const char* tag, const char *fmt, ...);
 #define LOGW(...) tag_log(0, " WARNING: [WLAN-ASSISTANT]", __VA_ARGS__);
 #define LOGE(...) tag_log(1, " ERR: [WLAN-ASSISTANT]", __VA_ARGS__);
 
-void *wlan_files_monitor(void*);
+void* wlan_files_monitor(void*);
 #endif

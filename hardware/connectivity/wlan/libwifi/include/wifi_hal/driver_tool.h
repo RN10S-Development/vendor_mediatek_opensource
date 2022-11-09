@@ -22,30 +22,30 @@ namespace wifi_hal {
 
 // Utilities for interacting with the driver.
 class DriverTool {
- public:
-  static const int kFirmwareModeSta;
-  static const int kFirmwareModeAp;
-  static const int kFirmwareModeP2p;
+  public:
+    static const int kFirmwareModeSta;
+    static const int kFirmwareModeAp;
+    static const int kFirmwareModeP2p;
 
-  DriverTool() = default;
-  virtual ~DriverTool() = default;
+    DriverTool() = default;
+    virtual ~DriverTool() = default;
 
-  // These methods allow manipulation of the WiFi driver.
-  // They all return true on success, and false otherwise.
-  virtual bool LoadDriver();
-  virtual bool UnloadDriver();
-  virtual bool IsDriverLoaded();
+    // These methods allow manipulation of the WiFi driver.
+    // They all return true on success, and false otherwise.
+    virtual bool LoadDriver();
+    virtual bool UnloadDriver();
+    virtual bool IsDriverLoaded();
 
-  // Check if we need to invoke |ChangeFirmwareMode| to configure
-  // the firmware for the provided mode.
-  // |mode| is one of the kFirmwareMode* constants defined above.
-  // Returns true if needed, and false otherwise.
-  virtual bool IsFirmwareModeChangeNeeded(int mode);
+    // Check if we need to invoke |ChangeFirmwareMode| to configure
+    // the firmware for the provided mode.
+    // |mode| is one of the kFirmwareMode* constants defined above.
+    // Returns true if needed, and false otherwise.
+    virtual bool IsFirmwareModeChangeNeeded(int mode);
 
-  // Change the firmware mode.
-  // |mode| is one of the kFirmwareMode* constants defined above.
-  // Returns true on success, and false otherwise.
-  virtual bool ChangeFirmwareMode(int mode);
+    // Change the firmware mode.
+    // |mode| is one of the kFirmwareMode* constants defined above.
+    // Returns true on success, and false otherwise.
+    virtual bool ChangeFirmwareMode(int mode);
 
 };  // class DriverTool
 

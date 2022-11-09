@@ -23,9 +23,9 @@ namespace android {
 
 // send broadcast to DrmDialogReceiver to show refer dialog
 extern bool sendBroadcastMessage(String16 data, String16 filePath);
-extern bool startDrmDialogService(String16 drm_cid, String16 rightsIssuer, String16 drmMethod, int rightsStatus,
-                                  String16 filePath);
+extern bool startDrmDialogService(String16 drm_cid, String16 rightsIssuer, String16 drmMethod,
+                                  int rightsStatus, String16 filePath);
 
-}
+}  // namespace android
 
 #endif

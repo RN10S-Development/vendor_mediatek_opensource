@@ -19,12 +19,10 @@
 
 #include <stdio.h>
 
-namespace android
-{
+namespace android {
 
-class FileUtil
-{
-public:
+class FileUtil {
+  public:
     static bool fopenx(const char* filename, const char* mode, FILE** fp);
     static bool fclosex(FILE* fp);
     static bool fseekx(FILE* fp, long int offset, int origin);
@@ -34,6 +32,6 @@ public:
     static bool fgetsx(FILE* fp, char* str, int num);
 };
 
-}
+}  // namespace android
 
 #endif /* FILEUTIL_H_ */

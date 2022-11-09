@@ -26,23 +26,17 @@
 #include "powerd_int.h"
 #include "PowerManager.h"
 
-static void wakeupService(void)
-{
-    pthread_cond_signal(&g_cond);
-}
+static void wakeupService(void) { pthread_cond_signal(&g_cond); }
 
-void* mtkPowerManager(void *data)
-{
+void* mtkPowerManager(void* data) {
     pthread_mutex_lock(&g_mutex);
-    if (!powerd_core_pre_init())
-        powerd_done = true;
+    if (!powerd_core_pre_init()) powerd_done = true;
     pthread_mutex_unlock(&g_mutex);
     ALOGI("mtkPowerManager - data:%p", data);
 
-    //nice(-10);
+    // nice(-10);
 
     powerd_main(0, NULL, wakeupService);
 
     return NULL;
 }
-

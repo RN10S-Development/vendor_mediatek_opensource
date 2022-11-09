@@ -24,41 +24,39 @@
 
 #include "ccci_common.h"
 
-#define DEV_IOC_MAGIC               'd'
-#define READ_DEV_DATA               _IOR(DEV_IOC_MAGIC,  1, unsigned int)
-#define OPEN_DEVINFO_NODE_FAIL        0x1001
-#define READ_DEVINFO_DATA_FAIL        0x1002
-#define ID_INDEX                    12        //HRID
+#define DEV_IOC_MAGIC 'd'
+#define READ_DEV_DATA _IOR(DEV_IOC_MAGIC, 1, unsigned int)
+#define OPEN_DEVINFO_NODE_FAIL 0x1001
+#define READ_DEVINFO_DATA_FAIL 0x1002
+#define ID_INDEX 12  // HRID
 
-
-static int byte_reverse(unsigned char *id_ptr){
+static int byte_reverse(unsigned char* id_ptr) {
     int i = 0;
     int tmp = 0;
 
-    for (i=0 ; i<=2;i+=2){
-        tmp = *(id_ptr+i);
-        *(id_ptr+i) = *(id_ptr+i+1);
-        *(id_ptr+i+1) = tmp;
+    for (i = 0; i <= 2; i += 2) {
+        tmp = *(id_ptr + i);
+        *(id_ptr + i) = *(id_ptr + i + 1);
+        *(id_ptr + i + 1) = tmp;
     }
     return 0;
 }
 
-static int cross_id_switch(unsigned char *id_1_ptr, unsigned char *id_2_ptr){
+static int cross_id_switch(unsigned char* id_1_ptr, unsigned char* id_2_ptr) {
     unsigned char tmp = 0;
 
-    tmp = *(id_1_ptr+1);
-    *(id_1_ptr+1) = *(id_2_ptr);
+    tmp = *(id_1_ptr + 1);
+    *(id_1_ptr + 1) = *(id_2_ptr);
     *(id_2_ptr) = tmp;
 
-    tmp = *(id_1_ptr+2);
-    *(id_1_ptr+2) = *(id_2_ptr+3);
-    *(id_2_ptr+3) = tmp;
+    tmp = *(id_1_ptr + 2);
+    *(id_1_ptr + 2) = *(id_2_ptr + 3);
+    *(id_2_ptr + 3) = tmp;
 
     return 0;
 }
 
-static int dump_id_data(unsigned int id_1, unsigned int id_2){
-
+static int dump_id_data(unsigned int id_1, unsigned int id_2) {
     /* -----------------------------------     */
     /* Dump for debug                        */
     /* -----------------------------------     */
@@ -68,23 +66,21 @@ static int dump_id_data(unsigned int id_1, unsigned int id_2){
     return 0;
 }
 
-int compute_random_pattern(unsigned int * p_val){
-
+int compute_random_pattern(unsigned int* p_val) {
     int fd = 0;
     int ret = 0;
     int i = 0;
     unsigned char tmp;
     unsigned int id_1 = ID_INDEX;
     unsigned int id_2 = ID_INDEX + 1;
-    unsigned char* id_1_ptr = (unsigned char *)&id_1;
-    unsigned char* id_2_ptr = (unsigned char *)&id_2;
+    unsigned char* id_1_ptr = (unsigned char*)&id_1;
+    unsigned char* id_2_ptr = (unsigned char*)&id_2;
 
     /* =================================== */
     /* open devinfo driver                 */
     /* =================================== */
     fd = open("/dev/devmap", O_RDONLY, 0);
-    if (fd < 0)
-    {
+    if (fd < 0) {
         ret = OPEN_DEVINFO_NODE_FAIL;
         goto _fail;
     }
@@ -92,15 +88,13 @@ int compute_random_pattern(unsigned int * p_val){
     /* -----------------------------------     */
     /* Read ID data                           */
     /* -----------------------------------     */
-    if ((ret = ioctl(fd, READ_DEV_DATA, &id_1)) != 0)
-    {
+    if ((ret = ioctl(fd, READ_DEV_DATA, &id_1)) != 0) {
         CCCI_LOGE("get id_1 fail:%d\n", ret);
         ret = READ_DEVINFO_DATA_FAIL;
         goto _fail;
     }
 
-    if ((ret = ioctl(fd, READ_DEV_DATA, &id_2)) != 0)
-    {
+    if ((ret = ioctl(fd, READ_DEV_DATA, &id_2)) != 0) {
         CCCI_LOGE("get id_2 fail:%d\n", ret);
         ret = READ_DEVINFO_DATA_FAIL;
         goto _fail;
@@ -133,8 +127,7 @@ _end:
 
 _fail:
     CCCI_LOGE("failure occured!! ret:%d\n", ret);
-    if (fd >= 0)
-        close(fd);
+    if (fd >= 0) close(fd);
 
     return -1;
 }

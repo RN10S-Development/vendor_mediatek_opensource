@@ -42,13 +42,9 @@ void WifiApIface::invalidate() {
     is_valid_ = false;
 }
 
-bool WifiApIface::isValid() {
-    return is_valid_;
-}
+bool WifiApIface::isValid() { return is_valid_; }
 
-std::string WifiApIface::getName() {
-    return ifname_;
-}
+std::string WifiApIface::getName() { return ifname_; }
 
 void WifiApIface::removeInstance(std::string instance) {
     instances_.erase(std::remove(instances_.begin(), instances_.end(), instance), instances_.end());

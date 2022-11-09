@@ -24,13 +24,13 @@ namespace wifi_system {
 
 // Utilities for interacting with the HAL.
 class HalTool {
- public:
-  HalTool() = default;
-  virtual ~HalTool() = default;
+  public:
+    HalTool() = default;
+    virtual ~HalTool() = default;
 
-  virtual bool InitFunctionTable(wifi_hal_fn* hal_fn);
+    virtual bool InitFunctionTable(wifi_hal_fn* hal_fn);
 
-  virtual bool CanGetValidChannels(wifi_hal_fn* hal_fn);
+    virtual bool CanGetValidChannels(wifi_hal_fn* hal_fn);
 };  // class HalTool
 
 }  // namespace wifi_system

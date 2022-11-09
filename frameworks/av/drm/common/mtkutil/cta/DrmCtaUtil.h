@@ -27,10 +27,10 @@
 namespace android {
 
 class DrmCtaUtil {
-public:
+  public:
     DrmCtaUtil();
 
-public:
+  public:
     /*
      * Get the file full path from fd
      */
@@ -45,34 +45,35 @@ public:
     static uint32_t getNormalFromUintVar(String8 uvar);
 
     static String8 getErrorCallbackMsg(String8 path, String8 flag);
-private:
+
+  private:
     String8 mCtaKey;
-    //static vector<String8> sCtaWhiteList;
+    // static vector<String8> sCtaWhiteList;
 
-public:
+  public:
     class Listener {
-        public:
-            Listener() : mListener(NULL), mUniqueId(-1) {}
+      public:
+        Listener() : mListener(NULL), mUniqueId(-1) {}
 
-            Listener(IDrmEngine::OnInfoListener *listener, int uniqueId)
-                : mListener(listener), mUniqueId(uniqueId) {};
+        Listener(IDrmEngine::OnInfoListener* listener, int uniqueId)
+            : mListener(listener), mUniqueId(uniqueId){};
 
-            IDrmEngine::OnInfoListener *GetListener() const {return mListener;}
-            int GetUniqueId() const {return mUniqueId;}
+        IDrmEngine::OnInfoListener* GetListener() const { return mListener; }
+        int GetUniqueId() const { return mUniqueId; }
 
-        private:
-            IDrmEngine::OnInfoListener *mListener;
-            int mUniqueId;
+      private:
+        IDrmEngine::OnInfoListener* mListener;
+        int mUniqueId;
     };
 
-public:
-    static bool notify(const Vector<DrmCtaUtil::Listener> *infoListener, String8 progress);
+  public:
+    static bool notify(const Vector<DrmCtaUtil::Listener>* infoListener, String8 progress);
     static bool isTrustCtaClient(pid_t pid);
-    static bool isTrustCtaClient(String8 &processName);
-    static bool IsCtaTrustedCheckTokenClient(String8 &processName);
-    static bool IsCtaTrustedGetTokenClient(String8 &processName);
+    static bool isTrustCtaClient(String8& processName);
+    static bool IsCtaTrustedCheckTokenClient(String8& processName);
+    static bool IsCtaTrustedGetTokenClient(String8& processName);
 };
 
-}
+}  // namespace android
 
-#endif // __DRM_CTA_UTIL_H__
+#endif  // __DRM_CTA_UTIL_H__

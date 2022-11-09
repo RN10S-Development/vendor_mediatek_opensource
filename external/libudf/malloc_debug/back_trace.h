@@ -19,10 +19,10 @@
 extern "C" {
 #endif
 
-size_t get_backtrace_fp(void* fp, intptr_t*, size_t); /*fp unwind*/
+size_t get_backtrace_fp(void* fp, intptr_t*, size_t);      /*fp unwind*/
 size_t get_backtrace(intptr_t* addrs, size_t max_entries); /*gcc unwind*/
 
 #ifdef __cplusplus
 }
 #endif
-#endif // #ifndef BACK_TRACE_H
+#endif  // #ifndef BACK_TRACE_H

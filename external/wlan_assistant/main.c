@@ -19,7 +19,7 @@
 #include "filemonitor/file_monitor.h"
 
 /* #define CONFIG_DEBUG_WITH_SHELL */
-int main(int __unused argc, char __unused **argv) {
-	wlan_files_monitor(NULL);
-	return 0;
+int main(int __unused argc, char __unused** argv) {
+    wlan_files_monitor(NULL);
+    return 0;
 }

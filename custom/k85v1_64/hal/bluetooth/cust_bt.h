@@ -20,6 +20,6 @@
 /* SERIAL PORT */
 #define CUST_BT_SERIAL_PORT "/dev/stpbt"
 /* BAUDRATE */
-#define CUST_BT_BAUD_RATE   4000000 /* use 4M but is not controlled by bt directly */
+#define CUST_BT_BAUD_RATE 4000000 /* use 4M but is not controlled by bt directly */
 
 #endif /* __CUST_BT_H__ */

@@ -37,10 +37,12 @@ typedef uintptr_t backtrace_frame_t;
  * Populates the backtrace array with the program counters from the call stack.
  * Returns the number of frames collected, or -1 if an error occurred.
  */
-__attribute__((visibility("default")))
-ssize_t libudf_unwind_backtrace(backtrace_frame_t* backtrace, size_t ignore_depth, size_t max_depth);
+__attribute__((visibility("default"))) ssize_t libudf_unwind_backtrace(backtrace_frame_t* backtrace,
+                                                                       size_t ignore_depth,
+                                                                       size_t max_depth);
 
-ssize_t libudf_unwind_backtrace_gcc(backtrace_frame_t* backtrace, size_t ignore_depth, size_t max_depth);
+ssize_t libudf_unwind_backtrace_gcc(backtrace_frame_t* backtrace, size_t ignore_depth,
+                                    size_t max_depth);
 
 /*
  * Unwinds the call stack of a task within a remote process using ptrace().
@@ -48,10 +50,11 @@ ssize_t libudf_unwind_backtrace_gcc(backtrace_frame_t* backtrace, size_t ignore_
  * Returns the number of frames collected, or -1 if an error occurred.
  */
 ssize_t libudf_unwind_backtrace_ptrace(pid_t tid, const ptrace_context_t* context,
-        backtrace_frame_t* backtrace, size_t ignore_depth, size_t max_depth);
+                                       backtrace_frame_t* backtrace, size_t ignore_depth,
+                                       size_t max_depth);
 
 #ifdef __cplusplus
 }
 #endif
 
-#endif // _CORKSCREW_BACKTRACE_H
+#endif  // _CORKSCREW_BACKTRACE_H

@@ -16,11 +16,10 @@
 
 #ifndef _CFG_FG_D_H
 #define _CFG_FG_D_H
-ap_nvram_fg_config_struct stFGConfigDefault =
-{
-    /* dsp_dev[20]: if chip detector say it's not 3332 use /dev/stpfg,else use /ttyMT1 */
-    {'/','d','e','v','/','s','t','p','f','g','d',0x0,0x0,0x0,0x0,0x0,0x0,0x0,0x0,0x0},
-    /* nvram_car_tune_value: */
-    119
-};
+ap_nvram_fg_config_struct stFGConfigDefault = {
+        /* dsp_dev[20]: if chip detector say it's not 3332 use /dev/stpfg,else use /ttyMT1 */
+        {'/', 'd', 'e', 'v', '/', 's', 't', 'p', 'f', 'g',
+         'd', 0x0, 0x0, 0x0, 0x0, 0x0, 0x0, 0x0, 0x0, 0x0},
+        /* nvram_car_tune_value: */
+        119};
 #endif /* _CFG_FG_D_H */

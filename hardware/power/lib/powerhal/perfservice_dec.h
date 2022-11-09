@@ -31,4 +31,4 @@ struct predefined_app perf_app[] = {
 };
 #endif
 
-#endif // ANDROID_PERFSERVICE_DEC_H
+#endif  // ANDROID_PERFSERVICE_DEC_H

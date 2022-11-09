@@ -29,19 +29,17 @@
 #include "libnvram_log.h"
 extern int iFilePRODUCT_INFOLID;
 
-
 /* Just tell NVRAM to create Product info default record */
 void* NVRAM_PRODUCTINFO(void* arg) {
-	F_ID pin_fid;
-	int rec_size = 0;
-	int rec_num = 0;
+    F_ID pin_fid;
+    int rec_size = 0;
+    int rec_num = 0;
 
-	NVRAM_LOG("[NVRAM Daemon]product info lid %d ++\n", iFilePRODUCT_INFOLID);
-	pin_fid = NVM_GetFileDesc(iFilePRODUCT_INFOLID, &rec_size, &rec_num, true);
-	NVRAM_LOG("[NVRAM Daemon] product info FID %d rec_size %d rec_num %d\n",
-	          pin_fid.iFileDesc, rec_size, rec_num);
-	if (!NVM_CloseFileDesc(pin_fid))
-		NVRAM_LOG("[NVRAM Daemon] close product info error");
-	pthread_exit(NULL);
-	return NULL;
+    NVRAM_LOG("[NVRAM Daemon]product info lid %d ++\n", iFilePRODUCT_INFOLID);
+    pin_fid = NVM_GetFileDesc(iFilePRODUCT_INFOLID, &rec_size, &rec_num, true);
+    NVRAM_LOG("[NVRAM Daemon] product info FID %d rec_size %d rec_num %d\n", pin_fid.iFileDesc,
+              rec_size, rec_num);
+    if (!NVM_CloseFileDesc(pin_fid)) NVRAM_LOG("[NVRAM Daemon] close product info error");
+    pthread_exit(NULL);
+    return NULL;
 }

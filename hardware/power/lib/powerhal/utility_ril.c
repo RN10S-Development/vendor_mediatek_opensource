@@ -40,8 +40,7 @@ static int certPid = -1;
  */
 int socketConnect() {
     int sock = socket_local_client(SOCKET_NAME, ANDROID_SOCKET_NAMESPACE_RESERVED, SOCK_STREAM);
-    if(sock < 0)
-        return -1;
+    if (sock < 0) return -1;
 
     return sock;
 }
@@ -49,7 +48,7 @@ int socketConnect() {
 /*
  * Disconnect form socket
  */
- int socketDisconnect(int sock) {
+int socketDisconnect(int sock) {
     int ret;
 
     assert(sock > 0);
@@ -67,7 +66,7 @@ int sendData(int socket, int argCount, char** data) {
     int ret = -1, i, msgLen = -1;
 
     // send number of argument
-    ret = send(socket, (const void *)&argCount, sizeof(int), 0);
+    ret = send(socket, (const void*)&argCount, sizeof(int), 0);
     if (sizeof(int) == ret) {
         // success, send length parameter
         for (i = 0; i < argCount; i++) {
@@ -90,8 +89,7 @@ int sendData(int socket, int argCount, char** data) {
  * gameMode represents the state in game
  * lowLatencyMode represents whether low latency mode or not
  */
-int notify_rild_game_event(int gameMode, int lowLatencyMode)
-{
+int notify_rild_game_event(int gameMode, int lowLatencyMode) {
     int ret = -1;
 
     // connect
@@ -101,7 +99,7 @@ int notify_rild_game_event(int gameMode, int lowLatencyMode)
     }
 
     // send data
-    char **data = (char **) calloc(1, 1 * sizeof(char *));
+    char** data = (char**)calloc(1, 1 * sizeof(char*));
     if (data == NULL) {
         ret = socketDisconnect(socket);
         return -1;
@@ -124,8 +122,7 @@ int notify_rild_game_event(int gameMode, int lowLatencyMode)
  *     0: fail
  *     count: number of byte sent
  */
-int update_packet(const char * packet)
-{
+int update_packet(const char* packet) {
     int ret = 0;
 
     // connect
@@ -135,7 +132,7 @@ int update_packet(const char * packet)
     }
 
     // send data
-    char **data = (char **) calloc(1, 1 * sizeof(char *));
+    char** data = (char**)calloc(1, 1 * sizeof(char*));
     if (data == NULL) {
         ret = socketDisconnect(socket);
         return 0;
@@ -157,8 +154,7 @@ int update_packet(const char * packet)
  * lowLatencyMode represents whether low latency mode or not
  * period represents the period in low latency mode
  */
-int notify_rild_opt_info(int lowLatencyMode, int period)
-{
+int notify_rild_opt_info(int lowLatencyMode, int period) {
     int ret = -1;
 
     // connect
@@ -169,7 +165,7 @@ int notify_rild_opt_info(int lowLatencyMode, int period)
     }
 
     // send data
-    char **data = (char **) calloc(1, 1 * sizeof(char *));
+    char** data = (char**)calloc(1, 1 * sizeof(char*));
     if (data == NULL) {
         ret = socketDisconnect(socket);
         return -1;
@@ -184,15 +180,13 @@ int notify_rild_opt_info(int lowLatencyMode, int period)
     ALOGD("notify_rild_opt_info %d %d %d\n", socket, lowLatencyMode, period);
 
     return 0;
-
 }
 
 /*
  * Notify optimization information to rild
  * enable represents whether 1st arrow enable or not
  */
-int notify_rild_weak_signal_opt(int enable)
-{
+int notify_rild_weak_signal_opt(int enable) {
     int ret = -1;
 
     // connect
@@ -202,7 +196,7 @@ int notify_rild_weak_signal_opt(int enable)
     }
 
     // send data
-    char **data = (char **) calloc(1, 1 * sizeof(char *));
+    char** data = (char**)calloc(1, 1 * sizeof(char*));
     if (data == NULL) {
         ret = socketDisconnect(socket);
         return -1;
@@ -220,7 +214,6 @@ int notify_rild_weak_signal_opt(int enable)
     ALOGD("notify_rild_weak_signal_opt %d %d\n", socket, enable);
 
     return 0;
-
 }
 
 /*
@@ -228,8 +221,7 @@ int notify_rild_weak_signal_opt(int enable)
  * pid represents process id
  * status represents the status of the process
  */
-int notify_rild_app_status(int pid, int status)
-{
+int notify_rild_app_status(int pid, int status) {
     int ret = -1;
 
     // connect
@@ -240,7 +232,7 @@ int notify_rild_app_status(int pid, int status)
     }
 
     // send data
-    char **data = (char **) calloc(1, 1 * sizeof(char *));
+    char** data = (char**)calloc(1, 1 * sizeof(char*));
     if (data == NULL) {
         ret = socketDisconnect(socket);
         return -1;
@@ -255,14 +247,12 @@ int notify_rild_app_status(int pid, int status)
     ALOGD("notify_rild_app_status %d %d %d\n", socket, pid, status);
 
     return 0;
-
 }
 
 /*
  * Query capability status
  */
-int query_capability(int pid, const char* featureName)
-{
+int query_capability(int pid, const char* featureName) {
     int ret = -1;
 
     // connect
@@ -273,7 +263,7 @@ int query_capability(int pid, const char* featureName)
     ALOGI("query_capability %d %d %s\n", socket, pid, featureName);
 
     // send data
-    char **data = (char **) malloc(1 * sizeof(char *));
+    char** data = (char**)malloc(1 * sizeof(char*));
     asprintf(&data[0], "QUERY_CAP, %d, %s", pid, featureName);
     sendData(socket, 1, data);
     free(data[0]);
@@ -302,8 +292,7 @@ int query_capability(int pid, const char* featureName)
  * Reset rild related function
  * power_on_init: 1 if it is powerhal init first time
  */
-int reset_rild_opt_info(int power_on_init)
-{
+int reset_rild_opt_info(int power_on_init) {
     if (power_on_init != 1) {
         notify_rild_opt_info(0, 0);
         notify_rild_weak_signal_opt(0);
@@ -315,12 +304,11 @@ int reset_rild_opt_info(int power_on_init)
  * Interface for resource register (PERF_RES_NET_MD_LOW_LATENCY)
  * Notify low latency mode
  */
-int notify_rild_opt_update(int lowLatencyMode, void *scn)
-{
+int notify_rild_opt_update(int lowLatencyMode, void* scn) {
     int period = 0;
-    tScnNode *ptr = scn;
+    tScnNode* ptr = scn;
 
-    if(lowLatencyMode == 1 && ptr != NULL) {
+    if (lowLatencyMode == 1 && ptr != NULL) {
         period = ptr->lock_duration;
     }
 
@@ -332,8 +320,7 @@ int notify_rild_opt_update(int lowLatencyMode, void *scn)
  * Interface for resource register (PERF_RES_NET_MD_CERT_PID)
  * Set certificate pid
  */
-int notify_rild_cert_pid_set(int pid, void *scn)
-{
+int notify_rild_cert_pid_set(int pid, void* scn) {
     certPid = pid;
     ALOGD("notify_rild_cert_pid_set pid:%d, scn:%p\n", certPid, scn);
     return 0;
@@ -343,8 +330,7 @@ int notify_rild_cert_pid_set(int pid, void *scn)
  * Interface for resource register (PERF_RES_NET_MD_CERT_PID)
  * Reset certificate pid
  */
-int notify_rild_cert_pid_reset(int pid, void *scn)
-{
+int notify_rild_cert_pid_reset(int pid, void* scn) {
     certPid = -1;
     ALOGV("notify_rild_cert_pid_reset, %d, %p\n", pid, scn);
     return 0;
@@ -354,8 +340,7 @@ int notify_rild_cert_pid_reset(int pid, void *scn)
  * Interface for resource register (PERF_RES_NET_MD_CRASH_PID)
  * Set crash pid
  */
-int notify_rild_crash_pid_set(int pid, void *scn)
-{
+int notify_rild_crash_pid_set(int pid, void* scn) {
     ALOGD("notify_rild_crash_pid_set certPid:%d, crash:%d, scn:%p\n", certPid, pid, scn);
     if (pid == certPid) {
         notify_rild_app_status(pid, STATE_DEAD);
@@ -367,8 +352,7 @@ int notify_rild_crash_pid_set(int pid, void *scn)
  * Interface for resource register (PERF_RES_NET_MD_CRASH_PID)
  * Reset crash pid
  */
-int notify_rild_crash_pid_reset(int pid, void *scn)
-{
+int notify_rild_crash_pid_reset(int pid, void* scn) {
     ALOGV("notify_rild_crash_pid_reset, %d, %p\n", pid, scn);
     return 0;
 }
@@ -377,8 +361,7 @@ int notify_rild_crash_pid_reset(int pid, void *scn)
  * Interface for resource register (PERF_RES_NET_MD_WEAK_SIG_OPT)
  * Set crash pid
  */
-int notify_rild_weak_sig_opt_set(int enable, void *scn)
-{
+int notify_rild_weak_sig_opt_set(int enable, void* scn) {
     ALOGI("notify_rild_weak_sig_opt_set enable:%d, scn:%p\n", enable, scn);
     notify_rild_weak_signal_opt(enable);
     return 0;

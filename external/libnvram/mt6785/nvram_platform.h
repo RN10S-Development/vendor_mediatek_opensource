@@ -18,10 +18,8 @@
 #define __AP_NVRAM_PLATFORM_H__
 
 #ifdef __cplusplus
-extern "C"
-{
+extern "C" {
 #endif
-
 
 #ifdef __cplusplus
 }

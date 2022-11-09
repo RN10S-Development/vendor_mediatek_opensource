@@ -17,21 +17,20 @@
 #ifndef __CCCI_MDINIT_RELATE_H__
 #define __CCCI_MDINIT_RELATE_H__
 
-int get_rsc_protol_value(int md_id, char *buf, int len);
+int get_rsc_protol_value(int md_id, char* buf, int len);
 
-int start_service_verified(const char *service_name, const char*service_status_name, int waitmsec);
-int stop_service_verified(const char *service_name, const char*service_status_name, int waitmsec);
+int start_service_verified(const char* service_name, const char* service_status_name, int waitmsec);
+int stop_service_verified(const char* service_name, const char* service_status_name, int waitmsec);
 
 void start_all_ccci_up_layer_services(void);
 void stop_all_ccci_up_layer_services(void);
 void check_to_restart_md_v2(unsigned int monitor_fd, int first_boot);
 
-void notify_md_status(int status, int flight_mode, char *buf);
+void notify_md_status(int status, int flight_mode, char* buf);
 void md_init_related_init(int md_id);
-
 
 int check_decrypt_ready(void);
 
-int wait_for_property(const char *name, const char *desired_value, int waitmsec);
+int wait_for_property(const char* name, const char* desired_value, int waitmsec);
 
 #endif

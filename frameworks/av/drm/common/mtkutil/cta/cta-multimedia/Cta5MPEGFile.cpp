@@ -27,23 +27,20 @@
 
 using namespace android;
 
-Cta5MPEGFile::Cta5MPEGFile(int fd, String8 key) : Cta5CommonMultimediaFile(fd, key)
-{
+Cta5MPEGFile::Cta5MPEGFile(int fd, String8 key) : Cta5CommonMultimediaFile(fd, key) {
     ALOGD("Cta5MPEGFile(fd, key)");
 }
 
-//This constructor is useful when you want to get a Cta5 file format
-//To convert a normal file to a CTA5 file, you may need this version
-Cta5MPEGFile::Cta5MPEGFile(String8 mimeType, String8 cid, String8 dcfFlHeaders,
-        uint64_t datatLen, String8 key) :
-        Cta5CommonMultimediaFile(mimeType, cid, dcfFlHeaders, datatLen, key)
-{
+// This constructor is useful when you want to get a Cta5 file format
+// To convert a normal file to a CTA5 file, you may need this version
+Cta5MPEGFile::Cta5MPEGFile(String8 mimeType, String8 cid, String8 dcfFlHeaders, uint64_t datatLen,
+                           String8 key)
+    : Cta5CommonMultimediaFile(mimeType, cid, dcfFlHeaders, datatLen, key) {
     ALOGD("Cta5CommonMultimediaFile(mimeType, cid, dcfFlHeaders, datatLen, key)");
 }
 
-Cta5MPEGFile::Cta5MPEGFile(String8 mimeType, uint64_t datatLen, String8 key) :
-        Cta5CommonMultimediaFile(mimeType, datatLen, key)
-{
+Cta5MPEGFile::Cta5MPEGFile(String8 mimeType, uint64_t datatLen, String8 key)
+    : Cta5CommonMultimediaFile(mimeType, datatLen, key) {
     ALOGD("Cta5MPEGFile(mimeType, datatLen, key)");
 }
 
@@ -60,11 +57,11 @@ bool Cta5MPEGFile::parseHeaders(int fd) {
 
     uint8_t header[12];
     // If type is not ftyp,mdata,moov or free, return false directly. Or else, it may be mpeg4 file.
-    if (DrmCtaMultiMediaUtil::readAt(fd, 0, header, 12) != 12
-            || (memcmp("ftyp", &header[4], 4) && memcmp("mdat", &header[4], 4)
-                && memcmp("moov", &header[4], 4) && memcmp("free", &header[4], 4)
-                            && memcmp("wide", &header[4], 4))) {
-        ALOGE("[ERROR][CTA5]return false, type=0x%8.8x", *((uint32_t *)&header[4]));
+    if (DrmCtaMultiMediaUtil::readAt(fd, 0, header, 12) != 12 ||
+        (memcmp("ftyp", &header[4], 4) && memcmp("mdat", &header[4], 4) &&
+         memcmp("moov", &header[4], 4) && memcmp("free", &header[4], 4) &&
+         memcmp("wide", &header[4], 4))) {
+        ALOGE("[ERROR][CTA5]return false, type=0x%8.8x", *((uint32_t*)&header[4]));
         return false;
     }
 
@@ -99,10 +96,9 @@ bool Cta5MPEGFile::parseHeaders(int fd) {
 
         char chunkstring[5];
         DrmCtaMultiMediaUtil::MakeFourCCString(chunkType, chunkstring);
-        ALOGD("saw chunk type %s, size %ld @ %ld", chunkstring, (long) chunkSize, (long) offset);
+        ALOGD("saw chunk type %s, size %ld @ %ld", chunkstring, (long)chunkSize, (long)offset);
         switch (chunkType) {
-            case FOURCC('f', 't', 'y', 'p'):
-            {
+            case FOURCC('f', 't', 'y', 'p'): {
                 if (chunkDataSize < 8) {
                     return false;
                 }
@@ -136,8 +132,7 @@ bool Cta5MPEGFile::parseHeaders(int fd) {
                 break;
             }
 
-            case FOURCC('m', 'o', 'o', 'v'):
-            {
+            case FOURCC('m', 'o', 'o', 'v'): {
                 moovAtomStartOffset = offset;
                 moovAtomEndOffset = offset + chunkSize;
 
@@ -145,7 +140,8 @@ bool Cta5MPEGFile::parseHeaders(int fd) {
                 moov_size = chunkSize;
                 done = true;
 
-                ALOGD("found moov: moov_offset: %ld, moov_size: %ld", (long) moov_offset, (long) moov_size);
+                ALOGD("found moov: moov_offset: %ld, moov_size: %ld", (long)moov_offset,
+                      (long)moov_size);
                 break;
             }
 
@@ -158,11 +154,10 @@ bool Cta5MPEGFile::parseHeaders(int fd) {
             case FOURCC('t', 'r', 'u', 'n'):
             case FOURCC('s', 'a', 'i', 'z'):
             case FOURCC('s', 'a', 'i', 'o'):
-            case FOURCC('u', 'u', 'i', 'd'):
-            {
+            case FOURCC('u', 'u', 'i', 'd'): {
                 char chunk[5];
                 DrmCtaMultiMediaUtil::MakeFourCCString(chunkType, chunk);
-                ALOGD("chunk: %s @ %ld, chunkSize:%ld", chunk, (long) offset, (long) chunkSize);
+                ALOGD("chunk: %s @ %ld, chunkSize:%ld", chunk, (long)offset, (long)chunkSize);
                 kMaxScanOffset += chunkSize;
                 break;
             }
@@ -174,7 +169,7 @@ bool Cta5MPEGFile::parseHeaders(int fd) {
     }
 
     // stored header information into Vector<header>
-    Header * moov_header = new Header();
+    Header* moov_header = new Header();
     moov_header->clear_header_offset = moov_offset;
     moov_header->clear_header_size = moov_size;
 

@@ -51,27 +51,24 @@ using namespace vendor::mediatek::hardware::wifi::supplicant::V2_0;
  * object is used core for global control operations on
  * wpa_supplicant.
  */
-class Supplicant : public ISupplicant
-{
-public:
+class Supplicant : public ISupplicant {
+  public:
     Supplicant(struct wpa_global* global);
     ~Supplicant() override = default;
     bool isValid();
 
     // Hidl methods exposed.
     Return<void> getInterface(
-        const android::hardware::wifi::supplicant::V1_0::ISupplicant::IfaceInfo& iface_info,
-        getInterface_cb _hidl_cb) override;
-    Return<void> registerCallback(
-        const sp<ISupplicantCallback>& callback,
-        registerCallback_cb _hidl_cb) override;
+            const android::hardware::wifi::supplicant::V1_0::ISupplicant::IfaceInfo& iface_info,
+            getInterface_cb _hidl_cb) override;
+    Return<void> registerCallback(const sp<ISupplicantCallback>& callback,
+                                  registerCallback_cb _hidl_cb) override;
 
-private:
+  private:
     // Corresponding worker functions for the HIDL methods.
     std::pair<SupplicantStatus, sp<ISupplicantIface>> getInterfaceInternal(
-        const android::hardware::wifi::supplicant::V1_0::ISupplicant::IfaceInfo& iface_info);
-    SupplicantStatus registerCallbackInternal(
-        const sp<ISupplicantCallback>& callback);
+            const android::hardware::wifi::supplicant::V1_0::ISupplicant::IfaceInfo& iface_info);
+    SupplicantStatus registerCallbackInternal(const sp<ISupplicantCallback>& callback);
 
     // Raw pointer to the global structure maintained by the core.
     struct wpa_global* wpa_global_;
@@ -81,9 +78,9 @@ private:
 
 }  // namespace implementation
 }  // namespace V2_1
-}  // namespace wifi
 }  // namespace supplicant
+}  // namespace wifi
 }  // namespace hardware
 }  // namespace mediatek
-}  //namespace vendor
+}  // namespace vendor
 #endif  // MTK_WPA_SUPPLICANT_HIDL_SUPPLICANT_H

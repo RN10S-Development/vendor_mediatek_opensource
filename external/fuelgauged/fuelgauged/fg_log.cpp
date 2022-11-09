@@ -26,55 +26,48 @@
 
 #include "fg_log.h"
 
-
 static int fgdlog_fd = -1;
 static int fgdlog_level = FGLOG_DEFAULT_LEVEL;
 FGLOG_CTRL fgdlog_ctrl = FGLOG_CTRL_TO_KERNEL;
 
-int fgdlog_get_level(void) {
-    return fgdlog_level;
-}
+int fgdlog_get_level(void) { return fgdlog_level; }
 
-void fgdlog_set_level(int level) {
-    fgdlog_level = level;
-}
+void fgdlog_set_level(int level) { fgdlog_level = level; }
 
-void fgdlog_init(void)
-{
-	static const char *name = "/dev/kmsg";
-	int ret = 0;
+void fgdlog_init(void) {
+    static const char* name = "/dev/kmsg";
+    int ret = 0;
 
     if (fgdlog_fd >= 0) return; /* Already initialized */
 
     fgdlog_fd = open(name, O_WRONLY);
     if (fgdlog_fd < 0) {
-        //ALOGE("open fuel gauge daemon failed\n");
+        // ALOGE("open fuel gauge daemon failed\n");
         return;
     }
-	ret = fcntl(fgdlog_fd, F_SETFD, FD_CLOEXEC);
-	if (ret != 0){
-		//ALOGE("open fgdlog_fd failed\n");
-		return;
-	}
+    ret = fcntl(fgdlog_fd, F_SETFD, FD_CLOEXEC);
+    if (ret != 0) {
+        // ALOGE("open fgdlog_fd failed\n");
+        return;
+    }
 }
 
 #define LOG_BUF_MAX 512
 
-void fgdlog_vwrite(int level, const char *fmt, va_list ap)
-{
+void fgdlog_vwrite(int level, const char* fmt, va_list ap) {
     char buf[LOG_BUF_MAX];
 
     if (level > fgdlog_level) {
-    	ALOGI("log level too low, fgdlog_level = %d\n", fgdlog_level);
-    	return;
+        ALOGI("log level too low, fgdlog_level = %d\n", fgdlog_level);
+        return;
     }
     if (fgdlog_fd < 0) {
-    	ALOGW("fd < 0, init first!\n");
-    	fgdlog_init();
+        ALOGW("fd < 0, init first!\n");
+        fgdlog_init();
     }
     if (fgdlog_fd < 0) {
-    	ALOGW("init failed, return!\n");
-    	return;
+        ALOGW("init failed, return!\n");
+        return;
     }
 
     vsnprintf(buf, LOG_BUF_MAX, fmt, ap);
@@ -83,16 +76,14 @@ void fgdlog_vwrite(int level, const char *fmt, va_list ap)
     write(fgdlog_fd, buf, strlen(buf));
 }
 
-void fgdlog_write(int level, const char *fmt, ...)
-{
+void fgdlog_write(int level, const char* fmt, ...) {
     va_list ap;
     va_start(ap, fmt);
     fgdlog_vwrite(level, fmt, ap);
     va_end(ap);
 }
 
-void fgdlog_exit(void)
-{
-		close(fgdlog_fd);
-		fgdlog_fd = -1;
+void fgdlog_exit(void) {
+    close(fgdlog_fd);
+    fgdlog_fd = -1;
 }

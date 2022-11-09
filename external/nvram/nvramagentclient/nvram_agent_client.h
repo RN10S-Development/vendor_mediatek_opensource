@@ -28,29 +28,29 @@ using namespace android;
 
 class NvRAMAgentClient {
   private:
-	class DeathNotifier: public IBinder::DeathRecipient {
-	  public:
-		DeathNotifier();
-		virtual ~DeathNotifier();
-		virtual void binderDied(const wp<IBinder>& who);
-	};
+    class DeathNotifier : public IBinder::DeathRecipient {
+      public:
+        DeathNotifier();
+        virtual ~DeathNotifier();
+        virtual void binderDied(const wp<IBinder>& who);
+    };
 
-	NvRAMAgentClient();
-	static Mutex sMutex;
-	static sp<DeathNotifier> sDeathNotifier;
-	static sp<INvRAMAgent> sNvRAMAgentService;
-	static const sp<INvRAMAgent>& getNvRAMAgentService();
+    NvRAMAgentClient();
+    static Mutex sMutex;
+    static sp<DeathNotifier> sDeathNotifier;
+    static sp<INvRAMAgent> sNvRAMAgentService;
+    static const sp<INvRAMAgent>& getNvRAMAgentService();
 
   public:
-	static NvRAMAgentClient* create();
-	char* readFile(int file_lid, int & size);
-	int writeFile(int file_lid, int size, char *buff);
-	char* readFileByName(char* file_name, int & size);
-	int writeFileByName(char* file_name, int size, char *buff);
-	int getFileDesSize(int file_lid, int & recSize, int & recNum);
+    static NvRAMAgentClient* create();
+    char* readFile(int file_lid, int& size);
+    int writeFile(int file_lid, int size, char* buff);
+    char* readFileByName(char* file_name, int& size);
+    int writeFileByName(char* file_name, int size, char* buff);
+    int getFileDesSize(int file_lid, int& recSize, int& recNum);
 
-	int writeFileEx(int file_lid, int rec_no, int size, char *buff);
-	~NvRAMAgentClient();
+    int writeFileEx(int file_lid, int rec_no, int size, char* buff);
+    ~NvRAMAgentClient();
 };
 
 #endif

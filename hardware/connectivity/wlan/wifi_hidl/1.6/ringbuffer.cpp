@@ -48,9 +48,7 @@ enum Ringbuffer::AppendStatus Ringbuffer::append(const std::vector<uint8_t>& inp
     return AppendStatus::SUCCESS;
 }
 
-const std::list<std::vector<uint8_t>>& Ringbuffer::getData() const {
-    return data_;
-}
+const std::list<std::vector<uint8_t>>& Ringbuffer::getData() const { return data_; }
 
 void Ringbuffer::clear() {
     data_.clear();

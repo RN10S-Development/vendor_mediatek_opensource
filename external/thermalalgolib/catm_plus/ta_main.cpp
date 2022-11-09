@@ -26,49 +26,45 @@
 #include <signal.h>
 #include <errno.h>
 
-
-
 #define LIB_FULL_NAME "libthermalalgo.so"
 
-#define UNUSED(x)    if(x){}
+#define UNUSED(x) \
+    if (x) {      \
+    }
 
-int (*libthermal_algo_setup)(void ) = NULL;
+int (*libthermal_algo_setup)(void) = NULL;
 
-void loadlib()
-{
-	void *handle;
+void loadlib() {
+    void* handle;
 
-	handle = dlopen(LIB_FULL_NAME, RTLD_NOW);
-	if (handle == NULL) {
-		TALOG_ERROR("Can't load library: %s", dlerror());
-		goto fail_out;
-	}
+    handle = dlopen(LIB_FULL_NAME, RTLD_NOW);
+    if (handle == NULL) {
+        TALOG_ERROR("Can't load library: %s", dlerror());
+        goto fail_out;
+    }
 
-	if ((libthermal_algo_setup = (int (*)(void))dlsym(handle, "libthermal_algo_setup")) == NULL) {
-		TALOG_ERROR("load 'libthermal_algo_setup' error: %s", dlerror());
-		goto close_handle;
-	}
-	return;
+    if ((libthermal_algo_setup = (int (*)(void))dlsym(handle, "libthermal_algo_setup")) == NULL) {
+        TALOG_ERROR("load 'libthermal_algo_setup' error: %s", dlerror());
+        goto close_handle;
+    }
+    return;
 
 close_handle:
-	dlclose(handle);
+    dlclose(handle);
 fail_out:
-	return;
+    return;
 }
 
+int main(int argc, char* argv[]) {
+    UNUSED(argc);
+    UNUSED(argv);
 
-int main(int argc, char *argv[])
-{
-        UNUSED(argc);
-        UNUSED(argv);
+    TALOG_INFO("ta_main\n");
+    loadlib();
 
-	TALOG_INFO("ta_main\n");
-	loadlib();
+    if (libthermal_algo_setup) {
+        libthermal_algo_setup();
+    }
 
-	if(libthermal_algo_setup){
-		libthermal_algo_setup();
-	}
-
-
-	return 0;
+    return 0;
 }

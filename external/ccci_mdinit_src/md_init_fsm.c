@@ -34,15 +34,13 @@
 #include "platform/mdinit_platform.h"
 #include "ccci_common.h"
 
-
 // NVRAM issue make timeout value as 22s,
-#define MAX_OPEN_PORT_RETRY_NUM            (600)
+#define MAX_OPEN_PORT_RETRY_NUM (600)
 
 static int mdstatusfd = -1;
 
 //--------------structure define-----------------//
-typedef struct
-{
+typedef struct {
     unsigned int data[2];
     unsigned int channel;
     unsigned int reserved;
@@ -76,52 +74,48 @@ enum {
     CCCI_MD_STA_EXCEPTION,
 };
 
-enum {
-    MD_DEBUG_REL_INFO_NOT_READY = 0,
-    MD_IS_DEBUG_VERSION,
-    MD_IS_RELEASE_VERSION
-};
+enum { MD_DEBUG_REL_INFO_NOT_READY = 0, MD_IS_DEBUG_VERSION, MD_IS_RELEASE_VERSION };
 
 //----------------maro define-----------------//
 // For MD1
-#define MONITOR_DEV_FOR_MD1        "/dev/ccci_monitor"
-#define MD1_INIT_CMD            "0"
-#define MD1_TAG                "ccci_mdinit(1)"
+#define MONITOR_DEV_FOR_MD1 "/dev/ccci_monitor"
+#define MD1_INIT_CMD "0"
+#define MD1_TAG "ccci_mdinit(1)"
 
 // For MD2
-#define MONITOR_DEV_FOR_MD2        "/dev/ccci2_monitor"
-#define MD2_INIT_CMD            "1"
-#define MD2_TAG                "ccci_mdinit(2)"
+#define MONITOR_DEV_FOR_MD2 "/dev/ccci2_monitor"
+#define MD2_INIT_CMD "1"
+#define MD2_TAG "ccci_mdinit(2)"
 
 // For MD3
-#define MONITOR_DEV_FOR_MD3        "/dev/ccci3_monitor"
-#define MD3_INIT_CMD            "2"
-#define MD3_TAG                "ccci_mdinit(3)"
+#define MONITOR_DEV_FOR_MD3 "/dev/ccci3_monitor"
+#define MD3_INIT_CMD "2"
+#define MD3_TAG "ccci_mdinit(3)"
 
 // Common
-#define MD_INIT_OLD_FILE        "/sys/class/BOOT/BOOT/boot/md"
-#define MD_INIT_NEW_FILE        "/sys/kernel/ccci/boot"
-#define CCCI_MONITOR_CH            (0xf0000000)
-#define MD_COMM_TAG            "ccci_mdinit(0)"
+#define MD_INIT_OLD_FILE "/sys/class/BOOT/BOOT/boot/md"
+#define MD_INIT_NEW_FILE "/sys/kernel/ccci/boot"
+#define CCCI_MONITOR_CH (0xf0000000)
+#define MD_COMM_TAG "ccci_mdinit(0)"
 
 //----------------variable define-----------------//
-static int  md_ctl_fsm_curr_state = CCCI_MD_STA_INIT; /* Modem Control Finity State Machine global control variable */
-static int  ignore_time_out_msg = 0;
-static int  gotten_md_info = MD_DEBUG_REL_INFO_NOT_READY;
-static int  md_id = -1;
+static int md_ctl_fsm_curr_state =
+        CCCI_MD_STA_INIT; /* Modem Control Finity State Machine global control variable */
+static int ignore_time_out_msg = 0;
+static int gotten_md_info = MD_DEBUG_REL_INFO_NOT_READY;
+static int md_id = -1;
 static char md_boot_name[32];
 
 static int set_md_boot_env_data(int md_id, int fd);
 
 /* External functin list by env_setting.c */
-extern int compute_random_pattern(unsigned int * p_val);
+extern int compute_random_pattern(unsigned int* p_val);
 extern int get_stored_modem_type_val(int md_id);
 extern int store_modem_type_val(int md_id, int new_val);
 extern unsigned int parse_sys_env_rat_setting(int md_id);
 extern int update_inf_to_bootprof(char str[]);
 
-static int check_curret_md_status(int desired)
-{
+static int check_curret_md_status(int desired) {
     if (md_ctl_fsm_curr_state == desired) {
         CCCI_LOGI("status already is %d\n", desired);
         return 1;
@@ -129,38 +123,37 @@ static int check_curret_md_status(int desired)
     return 0;
 }
 
-static void set_current_md_status(int status, int flight_mode)
-{
+static void set_current_md_status(int status, int flight_mode) {
     char buf[32];
     time_t cur_time;
     int len;
 
     md_ctl_fsm_curr_state = status;
-    switch(status){
-    case CCCI_MD_STA_INIT:
-        len = snprintf(buf, sizeof(buf), "init");
-        break;
-    case CCCI_MD_STA_BOOT_READY:
-        len = snprintf(buf, sizeof(buf), "ready");
-        break;
-    case CCCI_MD_STA_BOOT_UP:
-        len = snprintf(buf, sizeof(buf), "bootup");
-        break;
-    case CCCI_MD_STA_RESET:
-        len = snprintf(buf, sizeof(buf), "reset");
-        break;
-    case CCCI_MD_STA_STOP:
-        len = snprintf(buf, sizeof(buf), "stop");
-        break;
-    case CCCI_MD_STA_FLIGHT_MODE:
-        len = snprintf(buf, sizeof(buf), "flightmode");
-        break;
-    case CCCI_MD_STA_EXCEPTION:
-        len = snprintf(buf, sizeof(buf), "exception");
-        break;
-    default:
-        len = snprintf(buf, sizeof(buf), "undefined");
-        break;
+    switch (status) {
+        case CCCI_MD_STA_INIT:
+            len = snprintf(buf, sizeof(buf), "init");
+            break;
+        case CCCI_MD_STA_BOOT_READY:
+            len = snprintf(buf, sizeof(buf), "ready");
+            break;
+        case CCCI_MD_STA_BOOT_UP:
+            len = snprintf(buf, sizeof(buf), "bootup");
+            break;
+        case CCCI_MD_STA_RESET:
+            len = snprintf(buf, sizeof(buf), "reset");
+            break;
+        case CCCI_MD_STA_STOP:
+            len = snprintf(buf, sizeof(buf), "stop");
+            break;
+        case CCCI_MD_STA_FLIGHT_MODE:
+            len = snprintf(buf, sizeof(buf), "flightmode");
+            break;
+        case CCCI_MD_STA_EXCEPTION:
+            len = snprintf(buf, sizeof(buf), "exception");
+            break;
+        default:
+            len = snprintf(buf, sizeof(buf), "undefined");
+            break;
     }
 
     update_inf_to_bootprof(buf);
@@ -170,67 +163,64 @@ static void set_current_md_status(int status, int flight_mode)
 }
 
 /****************************************************************************/
-/* modem control message handle function                                                                  */
+/* modem control message handle function */
 /*                                                                                                                           */
 /****************************************************************************/
 
-static int common_msg_handler(int msg, int resv)
-{
+static int common_msg_handler(int msg, int resv) {
     int ret = 1;
     int data = 0;
 
     switch (msg) {
-    case CCCI_MD_MSG_SEND_BATTERY_INFO:
-        if(ioctl(system_ch_handle, CCCI_IOC_SEND_BATTERY_INFO, &data))
-            CCCI_LOGE("send md battery info fail: %d", errno);
-        else
-            CCCI_LOGD("send md battery info OK");
-        break;
-    case CCCI_MD_MSG_CFG_UPDATE:
-        CCCI_LOGD("CFG UPDATE: 0x%x(dummy)\n", resv);
-        break;
-    case CCCI_MD_MSG_RANDOM_PATTERN:
-        CCCI_LOGD("CCCI_MD_MSG_RANDOM_PATTERN\n");
-        compute_random_pattern((unsigned int*) &data);
-        if (0 != ioctl(system_ch_handle, CCCI_IOC_RESET_AP, &data))
-            CCCI_LOGE("reset_ap_ioctl failed.\n");
-        break;
-    case CCCI_MD_MSG_STORE_NVRAM_MD_TYPE:
-        CCCI_LOGD("CCCI_MD_MSG_STORE_SIM_MODE\n");
-        ioctl(system_ch_handle, CCCI_IOC_GET_MD_TYPE_SAVING, &data);
-        CCCI_LOGD("md%d type in kernel(%d)\n", md_id+1, data);
-        if (data == get_stored_modem_type_val(md_id))
-            CCCI_LOGD("No need to store md type(%d)\n", data);
-        else
-            store_modem_type_val(md_id, data);
-        break;
-    case CCCI_MD_MSG_EXCEPTION:
-        if (check_curret_md_status(CCCI_MD_STA_EXCEPTION))
+        case CCCI_MD_MSG_SEND_BATTERY_INFO:
+            if (ioctl(system_ch_handle, CCCI_IOC_SEND_BATTERY_INFO, &data))
+                CCCI_LOGE("send md battery info fail: %d", errno);
+            else
+                CCCI_LOGD("send md battery info OK");
             break;
-        CCCI_LOGD(" CCCI_MD_MSG_EXCEPTION\n");
-        set_current_md_status(CCCI_MD_STA_EXCEPTION, 0);
-        break;
-    default:
-        ret = 0;
-        break;
+        case CCCI_MD_MSG_CFG_UPDATE:
+            CCCI_LOGD("CFG UPDATE: 0x%x(dummy)\n", resv);
+            break;
+        case CCCI_MD_MSG_RANDOM_PATTERN:
+            CCCI_LOGD("CCCI_MD_MSG_RANDOM_PATTERN\n");
+            compute_random_pattern((unsigned int*)&data);
+            if (0 != ioctl(system_ch_handle, CCCI_IOC_RESET_AP, &data))
+                CCCI_LOGE("reset_ap_ioctl failed.\n");
+            break;
+        case CCCI_MD_MSG_STORE_NVRAM_MD_TYPE:
+            CCCI_LOGD("CCCI_MD_MSG_STORE_SIM_MODE\n");
+            ioctl(system_ch_handle, CCCI_IOC_GET_MD_TYPE_SAVING, &data);
+            CCCI_LOGD("md%d type in kernel(%d)\n", md_id + 1, data);
+            if (data == get_stored_modem_type_val(md_id))
+                CCCI_LOGD("No need to store md type(%d)\n", data);
+            else
+                store_modem_type_val(md_id, data);
+            break;
+        case CCCI_MD_MSG_EXCEPTION:
+            if (check_curret_md_status(CCCI_MD_STA_EXCEPTION)) break;
+            CCCI_LOGD(" CCCI_MD_MSG_EXCEPTION\n");
+            set_current_md_status(CCCI_MD_STA_EXCEPTION, 0);
+            break;
+        default:
+            ret = 0;
+            break;
     }
     return ret;
 }
 
 /****************************************************************************/
-/* initial and main thread                                                                                           */
+/* initial and main thread */
 /*                                                                                                                           */
 /****************************************************************************/
-static int is_md_command_finish(int md_id, int stop)
-{
+static int is_md_command_finish(int md_id, int stop) {
     int count = 0;
     char mdstatuspath[20];
 
     CCCI_LOGI("md_id = %d; mdstatusfd = %d\n", md_id, mdstatusfd);
-    if(mdstatusfd < 0) {
+    if (mdstatusfd < 0) {
         if (md_id == 2)
             snprintf(mdstatuspath, sizeof(mdstatuspath), "/dev/ccci_md3_sta");
-        else if(!md_id)
+        else if (!md_id)
             snprintf(mdstatuspath, sizeof(mdstatuspath), "/dev/ccci_md1_sta");
         else {
             CCCI_LOGE("incorrect md id %d\n", md_id);
@@ -262,9 +252,7 @@ static int is_md_command_finish(int md_id, int stop)
                 if (status_buf.event_type == MD_STA_EV_READY ||
                     status_buf.event_type == MD_STA_EV_EXCEPTION)
                     break;
-
             }
-
         }
 
     } while (1);
@@ -272,8 +260,7 @@ static int is_md_command_finish(int md_id, int stop)
     return status_buf.event_type;
 }
 
-static int trigger_modem_to_run(unsigned int monitor_fd, int flight_mode, int first_boot)
-{
+static int trigger_modem_to_run(unsigned int monitor_fd, int flight_mode, int first_boot) {
     int fd, ret, Mdstatus;
     int current_md_status = MD_STATE_INVALID;
     char data[20];
@@ -314,8 +301,7 @@ start_service:
     return 0;
 }
 
-static int stop_modem(unsigned int monitor_fd, int *data)
-{
+static int stop_modem(unsigned int monitor_fd, int* data) {
     int ret, Mdstatus;
 
     ret = ioctl(monitor_fd, CCCI_IOC_DO_STOP_MD, data);
@@ -336,22 +322,21 @@ static int stop_modem(unsigned int monitor_fd, int *data)
 extern void* monitor_time_update_thread(void* arg);
 extern int time_srv_init(void);
 
-int set_md_boot_env_data(int md_id, int fd)
-{
-    unsigned int data[16] = { 0 };
+int set_md_boot_env_data(int md_id, int fd) {
+    unsigned int data[16] = {0};
 
     data[0] = get_mdlog_boot_mode(md_id);
     data[1] = get_md_sbp_code(md_id, 2);
     data[2] = get_md_dbg_dump_flag(md_id);
     data[3] = get_sbp_subid_setting();
-    CCCI_LOGI("set md boot data:mdl=%d sbp=%d dbg_dump=%d sbp_sub=%d\n", data[0], data[1], data[2], data[3]);
+    CCCI_LOGI("set md boot data:mdl=%d sbp=%d dbg_dump=%d sbp_sub=%d\n", data[0], data[1], data[2],
+              data[3]);
     ioctl(fd, CCCI_IOC_SET_BOOT_DATA, &data);
     return 0;
 }
 
 /* Util function */
-static int get_ft_inf_key_val_helper(char key[], int *pval, char str[], int length)
-{
+static int get_ft_inf_key_val_helper(char key[], int* pval, char str[], int length) {
     int i;
     char curr_key[64];
     char curr_val[64];
@@ -359,15 +344,14 @@ static int get_ft_inf_key_val_helper(char key[], int *pval, char str[], int leng
     int key_size = 0;
     int val_size = 0;
 
-    for (i = 0; i < length; i++){
+    for (i = 0; i < length; i++) {
         if (step == 0) {
             /* Get key step */
-            if (((str[i] >= 'a') && (str[i] <= 'z')) ||
-                ((str[i] >= 'A') && (str[i] <= 'Z')) ||
-                ((str[i] >= '0') && (str[i] <= '9')) || (str[i]=='_')) {
+            if (((str[i] >= 'a') && (str[i] <= 'z')) || ((str[i] >= 'A') && (str[i] <= 'Z')) ||
+                ((str[i] >= '0') && (str[i] <= '9')) || (str[i] == '_')) {
                 curr_key[key_size] = str[i];
                 key_size++;
-            } else if (str[i]==':') {
+            } else if (str[i] == ':') {
                 step = 1;
             } else {
                 /* Invalid raw string */
@@ -378,7 +362,7 @@ static int get_ft_inf_key_val_helper(char key[], int *pval, char str[], int leng
             if ((str[i] >= '0') && (str[i] <= '9')) {
                 curr_val[val_size] = str[i];
                 val_size++;
-            } else if ((str[i]==',') || (str[i]=='\0')){
+            } else if ((str[i] == ',') || (str[i] == '\0')) {
                 /* find a key:val pattern? */
                 if (val_size == 0) {
                     /* val size abnormal */
@@ -399,29 +383,25 @@ static int get_ft_inf_key_val_helper(char key[], int *pval, char str[], int leng
                 return -1;
             }
         } /* end of if (step...) */
-    }/* end of for (... */
+    }     /* end of for (... */
 
     curr_key[key_size] = 0;
     curr_val[val_size] = 0;
-    if (strcmp(key, curr_key) != 0)
-        return 0;
+    if (strcmp(key, curr_key) != 0) return 0;
 
-    if (val_size == 0)
-        return -1;
+    if (val_size == 0) return -1;
 
     *pval = atoi(curr_val);
     return 1;
 }
 
-static int get_ft_inf_key_val(char key[], int *p_val)
-{
+static int get_ft_inf_key_val(char key[], int* p_val) {
     int fd;
     int ft_raw_size;
-    char *p_ft_raw;
+    char* p_ft_raw;
     int ret;
     fd = open("/sys/kernel/ccci/ft_info", O_RDONLY);
-    if (fd < 0)
-        return -11;
+    if (fd < 0) return -11;
 
     p_ft_raw = malloc(4096);
     if (p_ft_raw == NULL) {
@@ -445,8 +425,7 @@ static int get_ft_inf_key_val(char key[], int *p_val)
     return ret;
 }
 
-static void wait_for_rst_lock_free(int fd)
-{
+static void wait_for_rst_lock_free(int fd) {
     int rst_cnt;
     int retry_cnt;
 
@@ -459,8 +438,7 @@ static void wait_for_rst_lock_free(int fd)
                 CCCI_LOGD("get rst lock cnt fail\n");
                 break;
             }
-            if (rst_cnt == 0)
-                break;
+            if (rst_cnt == 0) break;
             sleep(1);
             if (ioctl(fd, CCCI_IOC_SHOW_LOCK_USER, &rst_cnt) < 0)
                 CCCI_LOGD("show rst lock user fail\n");
@@ -468,9 +446,8 @@ static void wait_for_rst_lock_free(int fd)
     }
 }
 
-int main_v2(int input_md_id, int sub_ver)
-{
-    int ret, fd, tmp=0;
+int main_v2(int input_md_id, int sub_ver) {
+    int ret, fd, tmp = 0;
     ssize_t s;
     CCCI_BUFF_T buff;
     char dev_port[32];
@@ -479,51 +456,51 @@ int main_v2(int input_md_id, int sub_ver)
     int port_open_retry = MAX_OPEN_PORT_RETRY_NUM;
     int md_type = 0;
     char tmp_buf[4];
-    char *lk_info_buf;
+    char* lk_info_buf;
     int bc_fd;
 
     CCCI_LOGI("md_init ver:2.30, sub:%d, %d", sub_ver, input_md_id);
 
-    //Check if input parameter is valid
+    // Check if input parameter is valid
     md_id = input_md_id - 1;
     monitor_ch = CCCI_MONITOR_CH;
 
     set_current_md_status(CCCI_MD_STA_INIT, md_id);
 
-    //Configure service and dev port name
-    switch(md_id) {
-    case 0:
-        snprintf(dev_port, 32, "%s", ccci_get_node_name(USR_CCCI_CTRL, MD_SYS1));
-        break;
-    case 1:
-        snprintf(dev_port, 32, "%s", ccci_get_node_name(USR_CCCI_CTRL, MD_SYS2));
-        break;
-    case 2:
-        snprintf(dev_port, 32, "%s", ccci_get_node_name(USR_CCCI_CTRL, MD_SYS3));
-        break;
-    default:
-        CCCI_LOGE("[Error]Invalid md sys id: %d\n", md_id+1);
-        return -1;
+    // Configure service and dev port name
+    switch (md_id) {
+        case 0:
+            snprintf(dev_port, 32, "%s", ccci_get_node_name(USR_CCCI_CTRL, MD_SYS1));
+            break;
+        case 1:
+            snprintf(dev_port, 32, "%s", ccci_get_node_name(USR_CCCI_CTRL, MD_SYS2));
+            break;
+        case 2:
+            snprintf(dev_port, 32, "%s", ccci_get_node_name(USR_CCCI_CTRL, MD_SYS3));
+            break;
+        default:
+            CCCI_LOGE("[Error]Invalid md sys id: %d\n", md_id + 1);
+            return -1;
     }
 
-    snprintf(md_boot_name, 32, MD_INIT_NEW_FILE); // <== Using new md boot file
+    snprintf(md_boot_name, 32, MD_INIT_NEW_FILE);  // <== Using new md boot file
 
     update_inf_to_bootprof("decpyt ready");
 
     // Retry to open if dev node attr not ready
-    while(1) {
+    while (1) {
         fd = open(dev_port, O_RDWR);
         if (fd < 0) {
             port_open_retry--;
-            if(port_open_retry>0) {
-                usleep(10*1000);
+            if (port_open_retry > 0) {
+                usleep(10 * 1000);
                 continue;
             } else {
                 CCCI_LOGE("open %s fail: %d", dev_port, errno);
                 return -1;
             }
         } else {
-            CCCI_LOGD("%s is opened(%d).", dev_port, (MAX_OPEN_PORT_RETRY_NUM-port_open_retry));
+            CCCI_LOGD("%s is opened(%d).", dev_port, (MAX_OPEN_PORT_RETRY_NUM - port_open_retry));
             break;
         }
     }
@@ -532,37 +509,36 @@ int main_v2(int input_md_id, int sub_ver)
     md_image_exist_check(fd, curr_md_id);
 
     // Get current MD type and update mux daemon name
-    //update_service_name(); // no need, 82/92, muxd name will be changed at real time.
+    // update_service_name(); // no need, 82/92, muxd name will be changed at real time.
 
-    if(time_srv_init()==0){
+    if (time_srv_init() == 0) {
         pthread_create(&tid, NULL, monitor_time_update_thread, NULL);
     }
 
     tmp = parse_sys_env_rat_setting(md_id);
-    if(ioctl(fd, CCCI_IOC_RELOAD_MD_TYPE, &tmp) != 0)
+    if (ioctl(fd, CCCI_IOC_RELOAD_MD_TYPE, &tmp) != 0)
         CCCI_LOGD("update modem type to kernel fail: err=%d", errno);
 
     ret = trigger_modem_to_run(fd, 0, 1);
-    if (ret < 0)
-        CCCI_LOGE("boot modem fail!\n");
+    if (ret < 0) CCCI_LOGE("boot modem fail!\n");
 
-    if( gotten_md_info == MD_DEBUG_REL_INFO_NOT_READY ){
-        if(0 == ioctl(fd, CCCI_IOC_GET_MD_INFO, &tmp)){
+    if (gotten_md_info == MD_DEBUG_REL_INFO_NOT_READY) {
+        if (0 == ioctl(fd, CCCI_IOC_GET_MD_INFO, &tmp)) {
             gotten_md_info = tmp;
-            if(gotten_md_info == MD_IS_DEBUG_VERSION)
+            if (gotten_md_info == MD_IS_DEBUG_VERSION)
                 CCCI_LOGD("MD is debug version");
-            else if(gotten_md_info == MD_IS_RELEASE_VERSION)
+            else if (gotten_md_info == MD_IS_RELEASE_VERSION)
                 CCCI_LOGD("MD is release version");
-            else{
+            else {
                 CCCI_LOGD("MD version is not ready now");
                 gotten_md_info = MD_DEBUG_REL_INFO_NOT_READY;
             }
-        }else{
+        } else {
             CCCI_LOGD("MD version is unknow: err=%d", errno);
         }
     }
 
-    //system_ch_handle = fd;
+    // system_ch_handle = fd;
     bc_fd = open("/dev/ccci_mdx_sta", O_RDWR);
     if (bc_fd < 0) {
         CCCI_LOGE("open '/dev/ccci_mdx_sta' fail: %d\n", errno);
@@ -570,84 +546,79 @@ int main_v2(int input_md_id, int sub_ver)
     }
     /* block on reading CCCI_MONITOR device until a modem reset message is gotten */
     do {
-        s = read(fd, (void *)&buff, sizeof(buff));
-        if (s<=0) {
-            if(s != -1) {
+        s = read(fd, (void*)&buff, sizeof(buff));
+        if (s <= 0) {
+            if (s != -1) {
                 CCCI_LOGE("read fail ret=%d\n", errno);
             }
             continue;
-        } else if (s!= sizeof(buff)) {
+        } else if (s != sizeof(buff)) {
             CCCI_LOGE("read CCCI data with unexpected size: %d\n", (int)s);
             continue;
-            //return -1;
+            // return -1;
         }
 
         CCCI_LOGD("buff.data[0] = 0x%08X, data[1] = 0x%08X, channel = %08X, reserved = 0x%08X\n",
-            buff.data[0], buff.data[1], buff.channel, buff.reserved);
+                  buff.data[0], buff.data[1], buff.channel, buff.reserved);
 
-        if ( (buff.data[0] == 0xFFFFFFFF) && (buff.channel == monitor_ch) ) { /* Monitor channel message */
+        if ((buff.data[0] == 0xFFFFFFFF) &&
+            (buff.channel == monitor_ch)) { /* Monitor channel message */
             /* Check common message first */
             if (common_msg_handler(buff.data[1], buff.reserved)) {
                 continue;
             }
 
             switch (buff.data[1]) {
-            case CCCI_MD_MSG_FORCE_STOP_REQUEST:
-                if (check_curret_md_status(CCCI_MD_STA_STOP))
+                case CCCI_MD_MSG_FORCE_STOP_REQUEST:
+                    if (check_curret_md_status(CCCI_MD_STA_STOP)) break;
+                    if (check_curret_md_status(CCCI_MD_STA_FLIGHT_MODE)) break;
+                    delay_to_reset_md(2);
+                    tmp = 0;
+                    ret = stop_modem(fd, &tmp);
+                    wait_for_rst_lock_free(bc_fd);
+                    if (!is_meta_mode()) {
+                        stop_all_ccci_up_layer_services();
+                    }
+                    set_current_md_status(CCCI_MD_STA_STOP, 0);
                     break;
-                if (check_curret_md_status(CCCI_MD_STA_FLIGHT_MODE))
-                    break;
-                delay_to_reset_md(2);
-                tmp = 0;
-                ret = stop_modem(fd, &tmp);
-                wait_for_rst_lock_free(bc_fd);
-                if (!is_meta_mode()) {
-                    stop_all_ccci_up_layer_services();
-                }
-                set_current_md_status(CCCI_MD_STA_STOP, 0);
-                break;
-            case CCCI_MD_MSG_FORCE_START_REQUEST:
-                if (check_curret_md_status(CCCI_MD_STA_BOOT_READY))
-                    break;
+                case CCCI_MD_MSG_FORCE_START_REQUEST:
+                    if (check_curret_md_status(CCCI_MD_STA_BOOT_READY)) break;
 
-                trigger_modem_to_run(fd, 0, 0);
-                break;
-
-            case CCCI_MD_MSG_FLIGHT_STOP_REQUEST:
-                if (check_curret_md_status(CCCI_MD_STA_STOP))
-                    break;
-                if (check_curret_md_status(CCCI_MD_STA_FLIGHT_MODE))
+                    trigger_modem_to_run(fd, 0, 0);
                     break;
 
-                tmp = 1;
-                ret = stop_modem(fd, &tmp);
-                set_current_md_status(CCCI_MD_STA_FLIGHT_MODE, 0);
-                break;
-            case CCCI_MD_MSG_FLIGHT_START_REQUEST:
-                if (check_curret_md_status(CCCI_MD_STA_BOOT_READY))
+                case CCCI_MD_MSG_FLIGHT_STOP_REQUEST:
+                    if (check_curret_md_status(CCCI_MD_STA_STOP)) break;
+                    if (check_curret_md_status(CCCI_MD_STA_FLIGHT_MODE)) break;
+
+                    tmp = 1;
+                    ret = stop_modem(fd, &tmp);
+                    set_current_md_status(CCCI_MD_STA_FLIGHT_MODE, 0);
+                    break;
+                case CCCI_MD_MSG_FLIGHT_START_REQUEST:
+                    if (check_curret_md_status(CCCI_MD_STA_BOOT_READY)) break;
+
+                    trigger_modem_to_run(fd, 1, 0);
                     break;
 
-                trigger_modem_to_run(fd, 1, 0);
-                break;
+                case CCCI_MD_MSG_RESET_REQUEST:
+                    delay_to_reset_md(2);
+                    tmp = 0;
+                    ret = stop_modem(fd, &tmp);
+                    wait_for_rst_lock_free(bc_fd);
+                    if (!is_meta_mode()) stop_all_ccci_up_layer_services();
+                    set_current_md_status(CCCI_MD_STA_STOP, 0);
 
-            case CCCI_MD_MSG_RESET_REQUEST:
-                delay_to_reset_md(2);
-                tmp = 0;
-                ret = stop_modem(fd, &tmp);
-                wait_for_rst_lock_free(bc_fd);
-                if (!is_meta_mode())
-                    stop_all_ccci_up_layer_services();
-                set_current_md_status(CCCI_MD_STA_STOP, 0);
+                    trigger_modem_to_run(fd, 0, 0);
+                    break;
 
-                trigger_modem_to_run(fd, 0, 0);
-                break;
-
-            default:
-                CCCI_LOGE("Invalid message, should not enter here!!!\n");
-                break;
+                default:
+                    CCCI_LOGE("Invalid message, should not enter here!!!\n");
+                    break;
             }
         } else { /* pattern not invalid */
-            CCCI_LOGE("[Error]Invalid pattern, data[0]:%08x channel:%08x\n", buff.data[0], buff.channel);
+            CCCI_LOGE("[Error]Invalid pattern, data[0]:%08x channel:%08x\n", buff.data[0],
+                      buff.channel);
             continue;
         }
     } while (1);

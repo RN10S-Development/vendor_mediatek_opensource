@@ -45,13 +45,9 @@ void WifiStaIface::invalidate() {
     is_valid_ = false;
 }
 
-bool WifiStaIface::isValid() {
-    return is_valid_;
-}
+bool WifiStaIface::isValid() { return is_valid_; }
 
-std::string WifiStaIface::getName() {
-    return ifname_;
-}
+std::string WifiStaIface::getName() { return ifname_; }
 
 std::set<sp<IWifiStaIfaceEventCallback>> WifiStaIface::getEventCallbacks() {
     return event_cb_handler_.getCallbacks();

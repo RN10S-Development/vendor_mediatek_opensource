@@ -19,19 +19,17 @@
 
 #include <time.h>
 
-namespace android
-{
+namespace android {
 
-class SecureTimerHelper
-{
-public:
+class SecureTimerHelper {
+  public:
     static const int NTP_SYNC_SUCCESS;
     static const int NTP_SYNC_NETWORK_TIMEOUT;
     static const int NTP_SYNC_SERVER_TIMEOUT;
     static const int NTP_SYNC_NETWORK_ERROR;
     static const int NTP_SYNC_INVALID_OFFSET;
 
-public:
+  public:
     // implements SNTP time synchronization
     // get the time offset, between the current device time and real time
     // realTime = deviceTime[current] + Offset
@@ -39,10 +37,10 @@ public:
     // {offset} is set to 0 if fails, otherwise the actuall offset
     static int syncNTPTime(time_t& offset);
 
-public:
+  public:
     static int syncNTPTime(time_t& offset, const char* svr_addr, int addr_type);
 };
 
-} // namespace android
+}  // namespace android
 
 #endif /* SECURETIMERHELPER_H_ */

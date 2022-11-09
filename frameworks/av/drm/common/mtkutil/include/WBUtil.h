@@ -19,31 +19,27 @@
 
 #include "RO.h"
 
-namespace android
-{
+namespace android {
 
-class WB
-{
-public:
-    WB(char* _p, int _len)
-    {
+class WB {
+  public:
+    WB(char* _p, int _len) {
         p = _p;
         offset = 0;
         len = _len;
     }
 
-public:
+  public:
     char* p;
     int offset;
     int len;
 };
 
-class WBUtil
-{
-public:
+class WBUtil {
+  public:
     static bool parseWbXml(char* buffer, int length, RO* ro);
 
-private:
+  private:
     static bool parseConstraint(WB& wb, int permission, RO* ro);
     static bool gotoNextStartTag(WB& wb);
     static bool gotoNextEndTag(WB& wb);
@@ -51,6 +47,6 @@ private:
     static bool gotoNextTag(WB& wb, bool start);
 };
 
-}
+}  // namespace android
 
 #endif /* WBUTIL_H_ */

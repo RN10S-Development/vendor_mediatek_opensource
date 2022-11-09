@@ -6,4 +6,4 @@
 
 bool bypass_white_list();
 
-#endif // WHITE_LIST_H
+#endif  // WHITE_LIST_H

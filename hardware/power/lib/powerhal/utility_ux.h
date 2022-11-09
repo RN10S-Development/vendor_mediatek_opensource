@@ -48,14 +48,14 @@ typedef enum {
     CMD_PREDICT_MODE,
 } CmdMode;
 
-void notifyCmdMode(int mode); //predict or fix
-void notify_APPState(const char *packname, int32_t uid);
-void notifyForegroundApp(const char *packname, int32_t uid);
-int notifyLowLatencyMode(int LowLatencyMode, void *scn);
+void notifyCmdMode(int mode);  // predict or fix
+void notify_APPState(const char* packname, int32_t uid);
+void notifyForegroundApp(const char* packname, int32_t uid);
+int notifyLowLatencyMode(int LowLatencyMode, void* scn);
 int resetUtilityUx(int power_on_init);
 
 #ifdef __cplusplus
 }
 #endif
 
-#endif  /* _UX_UTILITY_ */
+#endif /* _UX_UTILITY_ */

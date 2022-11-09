@@ -30,18 +30,16 @@ pfCallbackForPlatform callback_for_nvram_platform = NULL;
 extern pfCallbackForPlatform callback_for_nvram_platform;
 #endif
 
-
-int nvram_platform_callback(NVRAM_PLATFORM_T* pPlatform ) {
-
-	pPlatform->log_block = 2;
-	pPlatform->resv_block = 2;
-	pPlatform->DM_block = 1;
-#if 0 //FIXME
+int nvram_platform_callback(NVRAM_PLATFORM_T* pPlatform) {
+    pPlatform->log_block = 2;
+    pPlatform->resv_block = 2;
+    pPlatform->DM_block = 1;
+#if 0  // FIXME
 	pPlatform->layout_version = 0;
 	pPlatform->header_offset = 0;
 #endif
-	ALOGD("nvram_layout_callback will run!!!");
-	return 0;
+    ALOGD("nvram_layout_callback will run!!!");
+    return 0;
 }
 
 #if 0

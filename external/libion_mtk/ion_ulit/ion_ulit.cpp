@@ -25,29 +25,25 @@
 #include <iostream>
 
 #ifdef __cplusplus
-extern "C"  {
+extern "C" {
 #endif
 
 #define ION_PROC1_NAME "_All_"
 #define ION_PROC2_NAME "No_Process"
 
-void dumping_callstack(const char *func_name, int ion_fd, int share_fd)
-{
-
- 	if (strstr("_All_", ION_PROC1_NAME)) {
-		std::string dump;
-		UnwindCurThreadBT(&dump);
-		if(ion_fd != -1)
-			ALOGE("%s, backtrace is:\n %s \n", __func__, dump.c_str());
-			//write(ion_fd, dump.c_str(), dump.length());  //Dump to file
-	} else if ((strstr(getprogname(), ION_PROC1_NAME)) || (strstr(getprogname(), ION_PROC2_NAME))) {
-		std::string dump;
-		UnwindCurThreadBT(&dump);
-		if(ion_fd != -1)
-			ALOGE("%s, backtrace is:\n %s \n", __func__, dump.c_str());
-			//write(ion_fd, dump.c_str(), dump.length());  //Dump to file
-	}
-	ALOGE("proc %s func %s ion_fd %d, share fd %d!\n", getprogname(), func_name, ion_fd, share_fd);
+void dumping_callstack(const char* func_name, int ion_fd, int share_fd) {
+    if (strstr("_All_", ION_PROC1_NAME)) {
+        std::string dump;
+        UnwindCurThreadBT(&dump);
+        if (ion_fd != -1) ALOGE("%s, backtrace is:\n %s \n", __func__, dump.c_str());
+        // write(ion_fd, dump.c_str(), dump.length());  //Dump to file
+    } else if ((strstr(getprogname(), ION_PROC1_NAME)) || (strstr(getprogname(), ION_PROC2_NAME))) {
+        std::string dump;
+        UnwindCurThreadBT(&dump);
+        if (ion_fd != -1) ALOGE("%s, backtrace is:\n %s \n", __func__, dump.c_str());
+        // write(ion_fd, dump.c_str(), dump.length());  //Dump to file
+    }
+    ALOGE("proc %s func %s ion_fd %d, share fd %d!\n", getprogname(), func_name, ion_fd, share_fd);
 }
 
 #ifdef __cplusplus

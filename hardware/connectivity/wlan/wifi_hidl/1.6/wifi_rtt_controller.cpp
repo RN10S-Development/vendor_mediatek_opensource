@@ -39,17 +39,13 @@ void WifiRttController::invalidate() {
     is_valid_ = false;
 }
 
-bool WifiRttController::isValid() {
-    return is_valid_;
-}
+bool WifiRttController::isValid() { return is_valid_; }
 
 std::vector<sp<V1_6::IWifiRttControllerEventCallback>> WifiRttController::getEventCallbacks() {
     return event_callbacks_;
 }
 
-std::string WifiRttController::getIfaceName() {
-    return ifname_;
-}
+std::string WifiRttController::getIfaceName() { return ifname_; }
 
 Return<void> WifiRttController::getBoundIface(getBoundIface_cb hidl_status_cb) {
     return validateAndCall(this, WifiStatusCode::ERROR_WIFI_RTT_CONTROLLER_INVALID,

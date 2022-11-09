@@ -34,23 +34,23 @@ namespace mtkpower {
 namespace V1_0 {
 namespace implementation {
 
-using ::vendor::mediatek::hardware::mtkpower::V1_0::IMtkPerf;
+using ::android::sp;
 using ::android::hardware::hidl_array;
 using ::android::hardware::hidl_memory;
 using ::android::hardware::hidl_string;
 using ::android::hardware::hidl_vec;
+using ::android::hardware::IPCThreadState;
 using ::android::hardware::Return;
 using ::android::hardware::Void;
-using ::android::hardware::IPCThreadState;
-using ::android::sp;
-using ::android::hardware::hidl_vec;
+using ::vendor::mediatek::hardware::mtkpower::V1_0::IMtkPerf;
 
 struct MtkPerf : public IMtkPerf {
     MtkPerf();
     ~MtkPerf();
 
-    Return<int32_t> perfLockAcquire(int32_t hdl, uint32_t duration, const hidl_vec<int32_t>& boostList, int32_t reserved)  override;
-    Return<void> perfLockRelease(int32_t hdl, int32_t reserved)  override;
+    Return<int32_t> perfLockAcquire(int32_t hdl, uint32_t duration,
+                                    const hidl_vec<int32_t>& boostList, int32_t reserved) override;
+    Return<void> perfLockRelease(int32_t hdl, int32_t reserved) override;
 };
 
 extern "C" IMtkPerf* HIDL_FETCH_IMtkPerf(const char* name);

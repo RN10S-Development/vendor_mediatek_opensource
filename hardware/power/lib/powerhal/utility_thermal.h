@@ -21,12 +21,12 @@
 
 using namespace std;
 
-#define MAX_CONF_NAME   (18)
+#define MAX_CONF_NAME (18)
 
-enum thermal_error{
-    TS_ERR_NO_FILE_EXIST = -3,  /*< file is not exist */
-    TS_ERR_NO_INIT = -2,        /*< not initialized */
-    TS_ERR_NO_LOAD = -1,        /*< unnecessary to load conf */
+enum thermal_error {
+    TS_ERR_NO_FILE_EXIST = -3, /*< file is not exist */
+    TS_ERR_NO_INIT = -2,       /*< not initialized */
+    TS_ERR_NO_LOAD = -1,       /*< unnecessary to load conf */
     TS_ERR_UNKNOW
 };
 
@@ -40,8 +40,8 @@ typedef struct {
     int perf_used;
 } thermal_conf_type;
 
-extern int load_thm_api_start(int idx, void *scn);
-extern int load_thm_api_stop(int idx, void *scn);
+extern int load_thm_api_start(int idx, void* scn);
+extern int load_thm_api_stop(int idx, void* scn);
 extern int reset_thermal_policy(int power_on_init);
 
-#endif // ANDROID_UTILITY_THERMAL_H
+#endif  // ANDROID_UTILITY_THERMAL_H

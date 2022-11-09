@@ -17,17 +17,14 @@
 #ifndef _CFG_FG_FILE_H
 #define _CFG_FG_FILE_H
 
-
 // the record structure define of bt nvram file
-typedef struct
-{
-	char dsp_dev[20];
-	unsigned int nvram_car_tune_value;
+typedef struct {
+    char dsp_dev[20];
+    unsigned int nvram_car_tune_value;
 } ap_nvram_fg_config_struct;
 
-
-//the record size and number of bt nvram file
-#define CFG_FILE_FG_CONFIG_SIZE    sizeof(ap_nvram_fg_config_struct)
-#define CFG_FILE_FG_CONFIG_TOTAL   1
+// the record size and number of bt nvram file
+#define CFG_FILE_FG_CONFIG_SIZE sizeof(ap_nvram_fg_config_struct)
+#define CFG_FILE_FG_CONFIG_TOTAL 1
 
 #endif /* _CFG_FG_FILE_H */

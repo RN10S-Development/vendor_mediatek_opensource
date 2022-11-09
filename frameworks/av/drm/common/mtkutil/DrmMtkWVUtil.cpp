@@ -47,10 +47,7 @@ const static String8 KB_LOCATION("/data/drm/");
 const static String8 KB_DIR("/data/drm/wv/");
 const static String8 KB_FILE("/data/drm/wv/kb.dat");
 
-
-
 int DrmMtkWVUtil::loadKeybox(unsigned char* data, unsigned int offset, unsigned int length) {
-
     // open the kb data file
     FILE* fp = fopen(KB_FILE.string(), "rb");
     if (NULL == fp) {
@@ -63,7 +60,8 @@ int DrmMtkWVUtil::loadKeybox(unsigned char* data, unsigned int offset, unsigned 
     BYTE iv[IV_LEN];
     bzero(iv, sizeof(iv));
     if (IV_LEN != fread(iv, sizeof(BYTE), sizeof(iv), fp)) {
-        ALOGE("loadKeybox: failed to read valid IV from kb data file, reason: [%s]", strerror(errno));
+        ALOGE("loadKeybox: failed to read valid IV from kb data file, reason: [%s]",
+              strerror(errno));
         fclose(fp);
         return DRM_ERROR_UNKNOWN;
     }
@@ -71,7 +69,8 @@ int DrmMtkWVUtil::loadKeybox(unsigned char* data, unsigned int offset, unsigned 
     BYTE data_in[KEYBOX_LEN + 16];
     bzero(data_in, sizeof(data_in));
     if ((KEYBOX_LEN + 16) != fread(data_in, sizeof(BYTE), sizeof(data_in), fp)) {
-        ALOGE("loadKeybox: failed to read valid data from kb data file, reason: [%s]", strerror(errno));
+        ALOGE("loadKeybox: failed to read valid data from kb data file, reason: [%s]",
+              strerror(errno));
         fclose(fp);
         return DRM_ERROR_UNKNOWN;
     }
@@ -107,10 +106,9 @@ int DrmMtkWVUtil::saveKeybox(unsigned char* data, unsigned int length) {
         return DRM_ERROR_UNKNOWN;
     }
 
-    //chanage permission to avoid other and group users writing file
+    // chanage permission to avoid other and group users writing file
     int ret = chmod(KB_FILE.string(), 0644);
-    if (ret != 0)
-    {
+    if (ret != 0) {
         ALOGE("fchmod failed, reason: [%s]", strerror(errno));
     }
 
@@ -153,6 +151,4 @@ int DrmMtkWVUtil::saveKeybox(unsigned char* data, unsigned int length) {
     return DRM_NO_ERROR;
 }
 
-String8 DrmMtkWVUtil::getDeviceId() {
-    return DrmUtil::readId();
-}
+String8 DrmMtkWVUtil::getDeviceId() { return DrmUtil::readId(); }

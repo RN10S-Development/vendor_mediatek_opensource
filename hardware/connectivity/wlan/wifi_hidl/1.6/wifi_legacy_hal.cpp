@@ -458,9 +458,7 @@ wifi_error WifiLegacyHal::stop(
     return WIFI_SUCCESS;
 }
 
-bool WifiLegacyHal::isStarted() {
-    return is_started_;
-}
+bool WifiLegacyHal::isStarted() { return is_started_; }
 
 wifi_error WifiLegacyHal::waitForDriverReady() {
     return global_func_table_.wifi_wait_for_driver_ready();

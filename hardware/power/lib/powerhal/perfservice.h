@@ -37,35 +37,35 @@ using namespace std;
 #define CFG_TBL_INVALID_VALUE (-123456)
 
 enum {
-    SETSYS_MANAGEMENT_PREDICT  = 1,
-    SETSYS_SPORTS_APK          = 2,
-    SETSYS_FOREGROUND_SPORTS   = 3,
+    SETSYS_MANAGEMENT_PREDICT = 1,
+    SETSYS_SPORTS_APK = 2,
+    SETSYS_FOREGROUND_SPORTS = 3,
     SETSYS_MANAGEMENT_PERIODIC = 4,
-    SETSYS_INTERNET_STATUS     = 5,
-    SETSYS_NETD_STATUS         = 6,
-    SETSYS_PREDICT_INFO        = 7,
+    SETSYS_INTERNET_STATUS = 5,
+    SETSYS_NETD_STATUS = 6,
+    SETSYS_PREDICT_INFO = 7,
     SETSYS_NETD_DUPLICATE_PACKET_LINK = 8,
 };
 
 enum {
-    INDEX_SYSTEM_APK     = 0,
+    INDEX_SYSTEM_APK = 0,
     INDEX_USER_SPECIFIED = 1,
-    INDEX_GAME_MODE      = 2,
+    INDEX_GAME_MODE = 2,
     INDEX_ARM_NATIVE_LIB = 3,
-    INDEX_HPS            = 4,
-    INDEX_VCORE          = 5,
-    INDEX_TLP            = 6,
-    INDEX_NUM            = 7,
+    INDEX_HPS = 4,
+    INDEX_VCORE = 5,
+    INDEX_TLP = 6,
+    INDEX_NUM = 7,
     // others
     INDEX_APP_RUNNING = 8,
     INDEX_NATIVE_RUNNING = 9,
 };
 
 enum {
-    APK_BENCHMARK     = 0,
-    APK_GAME          = 1,
+    APK_BENCHMARK = 0,
+    APK_GAME = 1,
     APK_NOT_BENCHMARK = 2,
-    APK_OTHERS        = 3,
+    APK_OTHERS = 3,
 };
 
 struct xml_activity {
@@ -80,32 +80,32 @@ struct xml_activity {
 
 struct xml_gift {
     char packName[128];
-    char **AttrName;
-    char **AttrValue;
+    char** AttrName;
+    char** AttrValue;
 };
 
 typedef struct tScnConTable {
-    string  cmdName;
-    int     cmdID;
-    int     legacyCmdID;
-    string  entry;
-    int     defaultVal;
-    int     curVal;
-    string  comp;
-    int     maxVal;
-    int     minVal;
-    int     resetVal; // value to reset this entry
-    int     isValid;
-    int     normalVal;
-    int     sportVal;
-    int     ignore;
-    string  prefix;
+    string cmdName;
+    int cmdID;
+    int legacyCmdID;
+    string entry;
+    int defaultVal;
+    int curVal;
+    string comp;
+    int maxVal;
+    int minVal;
+    int resetVal;  // value to reset this entry
+    int isValid;
+    int normalVal;
+    int sportVal;
+    int ignore;
+    string prefix;
 } tScnConTable;
 
 enum {
-    ONESHOT       = 0,
-    BIGGEST       = 1,
-    SMALLEST      = 2,
+    ONESHOT = 0,
+    BIGGEST = 1,
+    SMALLEST = 2,
 };
 
 typedef int (*rsc_set)(int, void*);
@@ -113,43 +113,43 @@ typedef int (*rsc_unset)(int, void*);
 typedef int (*rsc_init)(int);
 
 typedef struct tRscConfig {
-    int     cmdID; // -1 : final entry
-    string  cmdName;
-    int     comp;
-    int     maxVal;
-    int     minVal;
-    int     defaultVal;
-    int     normalVal;
-    int     sportVal;
-    int     force_update; // always trigger update lock
-    rsc_set   set_func;
+    int cmdID;  // -1 : final entry
+    string cmdName;
+    int comp;
+    int maxVal;
+    int minVal;
+    int defaultVal;
+    int normalVal;
+    int sportVal;
+    int force_update;  // always trigger update lock
+    rsc_set set_func;
     rsc_unset unset_func;
-    rsc_init  init_func;
+    rsc_init init_func;
 } tRscConfig;
 
 typedef struct tRscCtlEntry {
-    int     curVal;
-    int     log;
-    int     isValid;
-    int     resetVal; // value to reset this entry
+    int curVal;
+    int log;
+    int isValid;
+    int resetVal;  // value to reset this entry
 } tRscCtlEntry;
 
 void switchNormalAndSportMode(int mode);
-int cmdSetting(int icmd, char *scmd, tScnNode *scenario, int param_1);
-void Scn_cmdSetting(char *cmd, int scn, int param_1);
-int getForegroundInfo(char **pPackName, int *pPid, int *pUid);
+int cmdSetting(int icmd, char* scmd, tScnNode* scenario, int param_1);
+void Scn_cmdSetting(char* cmd, int scn, int param_1);
+int getForegroundInfo(char** pPackName, int* pPid, int* pUid);
 
 /* smart detect */
 int smart_init(void);
 int smart_table_init(void);
 int smart_table_init_flag(void);
-int smart_reset(const char *pack, int pid);
-int smart_check_pack_existed(int type, const char *pack, int uid, int fromUid);
+int smart_reset(const char* pack, int pid);
+int smart_check_pack_existed(int type, const char* pack, int uid, int fromUid);
 int smart_set_benchmark_mode(int benchmark);
-int smart_add_pack(const char *pack);
+int smart_add_pack(const char* pack);
 int smart_add_benchmark(void);
-int smart_add_specific_benchmark(const char *pack);
+int smart_add_specific_benchmark(const char* pack);
 int smart_add_game(void);
 
-int loadConTable(const char *file_name);
-#endif // ANDROID_PERFSERVICE_H
+int loadConTable(const char* file_name);
+#endif  // ANDROID_PERFSERVICE_H

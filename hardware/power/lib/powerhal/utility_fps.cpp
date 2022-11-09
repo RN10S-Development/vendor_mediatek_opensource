@@ -28,12 +28,12 @@
 #include "common.h"
 #include "utility_fps.h"
 
-#define FSTB_FPS_LEN    32
+#define FSTB_FPS_LEN 32
 
-#define PATH_CFP_UP_LOADING       "/proc/perfmgr/boost_ctrl/cpu_ctrl/cfp_up_loading"
-#define PATH_CFP_DOWN_LOADING     "/proc/perfmgr/boost_ctrl/cpu_ctrl/cfp_down_loading"
+#define PATH_CFP_UP_LOADING "/proc/perfmgr/boost_ctrl/cpu_ctrl/cfp_up_loading"
+#define PATH_CFP_DOWN_LOADING "/proc/perfmgr/boost_ctrl/cpu_ctrl/cfp_down_loading"
 
-//using namespace std;
+// using namespace std;
 
 /* variable */
 static int fstb_support = 0;
@@ -47,8 +47,7 @@ static int cpu_up_loading_now = -1;
 static int cpu_down_loading_now = -1;
 
 /* static function */
-static void init_fstb(void)
-{
+static void init_fstb(void) {
     /*char file_char_array[1024];*/
     char line[256];
     FILE* file = fopen(PATH_FSTB_LIST_FILE, "r");
@@ -62,8 +61,7 @@ static void init_fstb(void)
     }
 }
 
-static void init_fteh(void)
-{
+static void init_fteh(void) {
     /*char file_char_array[1024];*/
     char line[256];
     FILE* file = fopen(PATH_FTEH_LIST_FILE, "r");
@@ -77,8 +75,7 @@ static void init_fteh(void)
     }
 }
 
-static void setFstbFps(int fps_high, int fps_low)
-{
+static void setFstbFps(int fps_high, int fps_low) {
     char fstb_fps[FSTB_FPS_LEN] = "";
     if (fstb_support) {
         if (fps_high == -1 && fps_low == -1) {
@@ -89,11 +86,10 @@ static void setFstbFps(int fps_high, int fps_low)
             ALOGV("set fstb_fps: %s", fstb_fps);
             set_value(PATH_FSTB_FPS, fstb_fps);
         }
-   }
+    }
 }
 
-static void setFstbSoftFps(int fps_high, int fps_low)
-{
+static void setFstbSoftFps(int fps_high, int fps_low) {
     char fstb_fps[FSTB_FPS_LEN] = "";
     if (fstb_support) {
         if (fps_high == -1 && fps_low == -1) {
@@ -104,11 +100,10 @@ static void setFstbSoftFps(int fps_high, int fps_low)
             ALOGV("set fstb_fps: %s", fstb_fps);
             set_value(PATH_FSTB_SOFT_FPS, fstb_fps);
         }
-   }
+    }
 }
 
-static void setCfpLoading(int up_loading, int down_loading)
-{
+static void setCfpLoading(int up_loading, int down_loading) {
     int cur_up, cur_down;
     static int cfpSupport = -1, nDefaultCfpUpLoading, nDefaultCfpDownLoading;
     struct stat stat_buf;
@@ -123,16 +118,13 @@ static void setCfpLoading(int up_loading, int down_loading)
             cfpSupport = 1;
             nDefaultCfpUpLoading = get_int_value(PATH_CFP_UP_LOADING);
             nDefaultCfpDownLoading = get_int_value(PATH_CFP_DOWN_LOADING);
-        }
-        else {
+        } else {
             cfpSupport = 0;
         }
     }
 
-    if (up_loading == -1)
-        up_loading = nDefaultCfpUpLoading;
-    if (down_loading == -1)
-        down_loading = nDefaultCfpDownLoading;
+    if (up_loading == -1) up_loading = nDefaultCfpUpLoading;
+    if (down_loading == -1) down_loading = nDefaultCfpDownLoading;
 
     if (cfpSupport) {
         ALOGI("set cfp loading: %d %d", up_loading, down_loading);
@@ -150,70 +142,61 @@ static void setCfpLoading(int up_loading, int down_loading)
 }
 
 /* function */
-int fstb_init(int power_on)
-{
+int fstb_init(int power_on) {
     struct stat stat_buf;
     char str2[FSTB_FPS_LEN];
 
     ALOGV("fstb_init: %d", power_on);
     fstb_support = (0 == stat(PATH_FSTB_SOFT_FPS, &stat_buf)) ? 1 : 0;
 
-    if(fstb_support) {
-        get_str_value(PATH_FSTB_FPS, str2, sizeof(str2)-1);
+    if (fstb_support) {
+        get_str_value(PATH_FSTB_FPS, str2, sizeof(str2) - 1);
         strncpy(pFstbDefaultFps, str2, FSTB_FPS_LEN - 1);
-        get_str_value(PATH_FSTB_SOFT_FPS, str2, sizeof(str2)-1);
+        get_str_value(PATH_FSTB_SOFT_FPS, str2, sizeof(str2) - 1);
         strncpy(pFstbDefaultSoftFps, str2, FSTB_FPS_LEN - 1);
         ALOGI("pFstbDefaultFps:%s", pFstbDefaultFps);
-        if (0 == stat(PATH_FSTB_LIST, &stat_buf))
-            init_fstb();
-        if (0 == stat(PATH_FTEH_LIST, &stat_buf))
-            init_fteh();
+        if (0 == stat(PATH_FSTB_LIST, &stat_buf)) init_fstb();
+        if (0 == stat(PATH_FTEH_LIST, &stat_buf)) init_fteh();
     }
     return 0;
 }
 
-int setFstbFpsHigh(int fps_high, void *scn)
-{
+int setFstbFpsHigh(int fps_high, void* scn) {
     ALOGV("setFstbFpsHigh: %p", scn);
     fps_high_now = fps_high;
     setFstbFps(fps_high_now, fps_low_now);
     return 0;
 }
 
-int setFstbFpsLow(int fps_low, void *scn)
-{
+int setFstbFpsLow(int fps_low, void* scn) {
     ALOGV("setFstbFpsLow: %p", scn);
     fps_low_now = fps_low;
     setFstbFps(fps_high_now, fps_low_now);
     return 0;
 }
 
-int setFstbSoftFpsHigh(int fps_high, void *scn)
-{
+int setFstbSoftFpsHigh(int fps_high, void* scn) {
     ALOGV("setFstbSoftFpsHigh: %p", scn);
     fps_soft_high_now = fps_high;
     setFstbSoftFps(fps_soft_high_now, fps_soft_low_now);
     return 0;
 }
 
-int setFstbSoftFpsLow(int fps_low, void *scn)
-{
+int setFstbSoftFpsLow(int fps_low, void* scn) {
     ALOGV("setFstbSoftFpsLow: %p", scn);
     fps_soft_low_now = fps_low;
     setFstbSoftFps(fps_soft_high_now, fps_soft_low_now);
     return 0;
 }
 
-int setCfpUpLoading(int up_loading, void *scn)
-{
+int setCfpUpLoading(int up_loading, void* scn) {
     ALOGV("setCfpUpLoading: %p", scn);
     cpu_up_loading_now = up_loading;
     setCfpLoading(cpu_up_loading_now, cpu_down_loading_now);
     return 0;
 }
 
-int setCfpDownLoading(int down_loading, void *scn)
-{
+int setCfpDownLoading(int down_loading, void* scn) {
     ALOGV("setCfpDownLoading: %p", scn);
     cpu_down_loading_now = down_loading;
     setCfpLoading(cpu_up_loading_now, cpu_down_loading_now);

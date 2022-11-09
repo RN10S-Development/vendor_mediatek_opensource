@@ -22,32 +22,32 @@
 extern "C" {
 #endif
 
-#define GSENSOR_NAME                    "/dev/gsensor"
-#define GSENSOR_ATTR_SELFTEST           "/sys/bus/platform/drivers/gsensor/selftest"
+#define GSENSOR_NAME "/dev/gsensor"
+#define GSENSOR_ATTR_SELFTEST "/sys/bus/platform/drivers/gsensor/selftest"
 
-#define SAR_NAME                    "/dev/sar"
+#define SAR_NAME "/dev/sar"
 
-#define GYROSCOPE_NAME                  "/dev/gyroscope"
-#define ALSPS_NAME                      "/dev/als_ps"
+#define GYROSCOPE_NAME "/dev/gyroscope"
+#define ALSPS_NAME "/dev/als_ps"
 
-#define MSENSOR_NAME                  "/dev/msensor"
+#define MSENSOR_NAME "/dev/msensor"
 /*---------------------------------------------------------------------------*/
 // hardware\libhardware\include\hardware\sensors.h
-#define LIBHWM_GRAVITY_EARTH            (9.80665f)
+#define LIBHWM_GRAVITY_EARTH (9.80665f)
 /*---------------------------------------------------------------------------*/
-#define LIBHWM_ACC_NVRAM_SENSITIVITY    (65536)
+#define LIBHWM_ACC_NVRAM_SENSITIVITY (65536)
 /*---------------------------------------------------------------------------*/
-#define LSB_TO_GRA(X)                   ((X*LIBHWM_GRAVITY_EARTH)/LIBHWM_ACC_NVRAM_SENSITIVITY)
-#define GRA_TO_LSB(X)                   (round((X*LIBHWM_ACC_NVRAM_SENSITIVITY)/LIBHWM_GRAVITY_EARTH))
+#define LSB_TO_GRA(X) ((X * LIBHWM_GRAVITY_EARTH) / LIBHWM_ACC_NVRAM_SENSITIVITY)
+#define GRA_TO_LSB(X) (round((X * LIBHWM_ACC_NVRAM_SENSITIVITY) / LIBHWM_GRAVITY_EARTH))
 /*---------------------------------------------------------------------------*/
-#define LIBHWM_INVAL_FD                 (-1)
+#define LIBHWM_INVAL_FD (-1)
 /*---------------------------------------------------------------------------*/
-#define LIBHWM_IS_INVAL_FD(fd)          (fd == LIBHWM_INVAL_FD)
+#define LIBHWM_IS_INVAL_FD(fd) (fd == LIBHWM_INVAL_FD)
 // Gyroscope sensor sensitivity 1000
-#define LIBHWM_GYRO_NVRAM_SENSITIVITY   1000
+#define LIBHWM_GYRO_NVRAM_SENSITIVITY 1000
 /*---------------------------------------------------------------------------*/
 #define ABSDIF(X, Y) ((X > Y) ? (Y - X) : (X - Y))
-#define ABS(X)      ((X > 0) ? (X) : (-X))
+#define ABS(X) ((X > 0) ? (X) : (-X))
 /*---------------------------------------------------------------------------*/
 typedef enum {
     HWM_TYPE_NONE = 0,
@@ -59,15 +59,15 @@ typedef enum {
 } HwmType;
 /*---------------------------------------------------------------------------*/
 typedef struct {
-    HwmType     type;
-    char        *ctl;
-    char        *dat;
-    int         ctl_fd;
-    int         dat_fd;
+    HwmType type;
+    char* ctl;
+    char* dat;
+    int ctl_fd;
+    int dat_fd;
 } HwmDev;
 /*---------------------------------------------------------------------------*/
 typedef union {
-    struct {    /*raw data*/
+    struct { /*raw data*/
         int rx;
         int ry;
         int rz;
@@ -91,70 +91,69 @@ typedef union {
 } HwmData;
 /*---------------------------------------------------------------------------*/
 typedef struct {
-    void *ptr;
-    int   len;
+    void* ptr;
+    int len;
 } HwmPrivate;
 /*---------------------------------------------------------------------------*/
-struct caliData
-{
+struct caliData {
     int64_t timeStamp;
     float data[6];
     int8_t status;
 };
 /*---------------------------------------------------------------------------*/
-extern int gsensor_calibration(int fd, int period, int count, int tolerance, HwmData *cali);
-extern int gsensor_write_nvram(HwmData *dat);
-extern int gsensor_read_nvram(HwmData *dat);
+extern int gsensor_calibration(int fd, int period, int count, int tolerance, HwmData* cali);
+extern int gsensor_write_nvram(HwmData* dat);
+extern int gsensor_read_nvram(HwmData* dat);
 extern int gsensor_rst_cali(int fd);
-extern int gsensor_set_cali(int fd, HwmData *dat);
-extern int gsensor_get_cali(int fd, HwmData *dat);
+extern int gsensor_set_cali(int fd, HwmData* dat);
+extern int gsensor_get_cali(int fd, HwmData* dat);
 extern int gsensor_enable_cali(int fd);
 extern int gsensor_do_selftest(int fd);
-extern int gsensor_read(int fd, HwmData *dat);
+extern int gsensor_read(int fd, HwmData* dat);
 extern int gsensor_init(int fd);
 extern int gsensor_close(int fd);
-extern int gsensor_open(int *fd);
+extern int gsensor_open(int* fd);
 extern int gsensor_start_static_calibration(void);
-extern int gsensor_get_static_calibration(struct caliData *caliDat);
-extern int gsensor_set_static_calibration(struct caliData *caliDat);
-extern int gyroscope_calibration(int fd, int period, int count, int tolerance, HwmData *cali);
-extern int gyroscope_write_nvram(HwmData *dat);
-extern int gyroscope_read_nvram(HwmData *dat);
+extern int gsensor_get_static_calibration(struct caliData* caliDat);
+extern int gsensor_set_static_calibration(struct caliData* caliDat);
+extern int gyroscope_calibration(int fd, int period, int count, int tolerance, HwmData* cali);
+extern int gyroscope_write_nvram(HwmData* dat);
+extern int gyroscope_read_nvram(HwmData* dat);
 extern int gyroscope_rst_cali(int fd);
-extern int gyroscope_set_cali(int fd, HwmData *dat);
-extern int gyroscope_get_cali(int fd, HwmData *dat);
+extern int gyroscope_set_cali(int fd, HwmData* dat);
+extern int gyroscope_get_cali(int fd, HwmData* dat);
 extern int gyroscope_enable_cali(int fd);
 extern int gyroscope_do_selftest(int fd);
-extern int gyroscope_read(int fd, HwmData *dat);
+extern int gyroscope_read(int fd, HwmData* dat);
 extern int gyroscope_close(int fd);
-extern int gyroscope_open(int *fd);
+extern int gyroscope_open(int* fd);
 extern int gyroscope_init(int fd);
 extern int gyroscope_start_static_calibration(void);
-extern int gyroscope_get_static_calibration(struct caliData *caliDat);
-extern int gyroscope_set_static_calibration(struct caliData *caliDat);
+extern int gyroscope_get_static_calibration(struct caliData* caliDat);
+extern int gyroscope_set_static_calibration(struct caliData* caliDat);
 extern int msensor_do_selftest(int fd);
 extern int msensor_close(int fd);
-extern int msensor_open(int *fd);
+extern int msensor_open(int* fd);
 
 /*yucong add for sar calibration functions*/
 extern int sar_start_static_calibration(void);
-extern int sar_get_static_calibration(struct caliData *caliDat);
+extern int sar_get_static_calibration(struct caliData* caliDat);
 
 /*yucong add for alsps calibration functions*/
-extern int alsps_calibration(int fd, int period, int count, HwmData *cali);
-extern int alsps_write_nvram(HwmData *dat);
-extern int alsps_read_nvram(HwmData *dat);
+extern int alsps_calibration(int fd, int period, int count, HwmData* cali);
+extern int alsps_write_nvram(HwmData* dat);
+extern int alsps_read_nvram(HwmData* dat);
 extern int alsps_rst_cali(int fd);
-extern int alsps_set_cali(int fd, HwmData *dat);
-extern int alsps_get_cali(int fd, HwmData *dat);
+extern int alsps_set_cali(int fd, HwmData* dat);
+extern int alsps_get_cali(int fd, HwmData* dat);
 extern int alsps_ps_enable_cali(int fd);
-extern int alsps_read(int fd, HwmData *dat);
-extern int alsps_set_threshold(int fd, HwmData *dat);
+extern int alsps_read(int fd, HwmData* dat);
+extern int alsps_set_threshold(int fd, HwmData* dat);
 extern int als_start_static_calibration(void);
-extern int als_get_static_calibration(struct caliData *caliDat);
-extern int als_set_static_calibration(struct caliData *caliDat);
-extern int als_set_cali(int fd, struct caliData *caliDat);
-extern int als_set_backlight_bias(int fd, struct caliData *caliDat);
+extern int als_get_static_calibration(struct caliData* caliDat);
+extern int als_set_static_calibration(struct caliData* caliDat);
+extern int als_set_cali(int fd, struct caliData* caliDat);
+extern int als_set_backlight_bias(int fd, struct caliData* caliDat);
 
 /*---------------------------------------------------------------------------*/
 /*---------------------------------------------------------------------------*/
@@ -171,12 +170,12 @@ extern int XM_set_psensor_threshold(int high, int low);
 extern int clear_psensor_calibration(void);
 /*---------------------------------------------------------------------------*/
 extern int do_gsensor_calibration(int tolerance);
-extern int get_gsensor_calibration(float *x, float *y, float *z);
+extern int get_gsensor_calibration(float* x, float* y, float* z);
 extern int clear_gsensor_calibration(void);
 
 /*---------------------------------------------------------------------------*/
 extern int do_gyroscope_calibration(int tolerance);
-extern int get_gyroscope_calibration(float *x, float *y, float *z);
+extern int get_gyroscope_calibration(float* x, float* y, float* z);
 extern int clear_gyroscope_calibration(void);
 #ifdef __cplusplus
 }

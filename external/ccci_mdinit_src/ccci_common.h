@@ -21,7 +21,7 @@
 #include "mdinit_relate.h"
 
 extern int curr_md_id;
-extern int  system_ch_handle;
+extern int system_ch_handle;
 extern const char md_img_folder[32];
 extern const char md_img_cip_folder[32];
 
@@ -32,14 +32,12 @@ int is_current_md_en(int md_id);
 int get_ccci_drv_ver(void);
 int kernel_setting_prepare(void);
 int check_lk_load_md_status(int md_id);
-//int check_decrypt_ready(void);
-int md_image_exist_check(int fd,int md_id);
-//int wait_for_property(const char *name, const char *desired_value, int waitmsec);
-unsigned int str2uint(char *str);
+// int check_decrypt_ready(void);
+int md_image_exist_check(int fd, int md_id);
+// int wait_for_property(const char *name, const char *desired_value, int waitmsec);
+unsigned int str2uint(char* str);
 
 int main_v1(int md_id, int sub_ver);
 int main_v2(int md_id, int sub_ver);
-
-
 
 #endif

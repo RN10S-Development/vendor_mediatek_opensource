@@ -23,6 +23,6 @@
 #include <sys/mman.h>
 
 size_t get_backtrace_fp(void* fp, intptr_t*, size_t); /*fp unwind*/
-//size_t get_backtrace_fp(void*, int*, unsigned int);
+// size_t get_backtrace_fp(void*, int*, unsigned int);
 
-#endif // #ifnedef FP_UNWIND_H
+#endif  // #ifnedef FP_UNWIND_H

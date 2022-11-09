@@ -8,14 +8,14 @@
 
 static void dump_bt_file(size_t c, intptr_t* addrs, int fd) {
     char buf[32];
-    char tmp[512]; // 32*32 is safe
+    char tmp[512];  // 32*32 is safe
     size_t i;
 
-    tmp[0] = 0; // Need to initialize tmp[0] for the first strcat
+    tmp[0] = 0;  // Need to initialize tmp[0] for the first strcat
     strlcat(tmp, "call stack:\n", sizeof tmp);
 
-    for (i=0; i<c; i++) {
-        snprintf(buf, sizeof buf, "%zu: %p\n", i, (void *)addrs[i]);
+    for (i = 0; i < c; i++) {
+        snprintf(buf, sizeof buf, "%zu: %p\n", i, (void*)addrs[i]);
         strlcat(tmp, buf, sizeof tmp);
     }
 
@@ -24,12 +24,12 @@ static void dump_bt_file(size_t c, intptr_t* addrs, int fd) {
 
 static void dump_maps() {
     char cmd[80];
-    snprintf(cmd, sizeof(cmd),"cat /proc/%d/maps > /data/maps_%d.txt", getpid(), getpid());
+    snprintf(cmd, sizeof(cmd), "cat /proc/%d/maps > /data/maps_%d.txt", getpid(), getpid());
     debug_log("%s\n", cmd);
     system(cmd);
 }
 
-static int open_log_file(const char *path_name) {
+static int open_log_file(const char* path_name) {
     assert(path_name != NULL);
     int fd = open(path_name, O_WRONLY | O_CREAT, S_IRUSR | S_IWUSR);
     return fd;
@@ -37,7 +37,7 @@ static int open_log_file(const char *path_name) {
 
 static void dump_info(int fd) {
     uint32_t i;
-    //int max_count = 0;
+    // int max_count = 0;
     char write_buf[256];
 
     info_log("\nstart dumping debug 15\n");
@@ -46,14 +46,15 @@ static void dump_info(int fd) {
     for (i = 0; i < CHUNK_HASH_TABLE_SIZE; i++) {
         PChunkHashEntry entry = gChunkHashTable.chunk_hash_table[i];
         while (entry != NULL) {
-            //sprintf(write_buf, "slot: %d, addr: %p, size: %zu, flag: 0x%x\n", i, entry->chunk_start, entry->bytes, entry->flag);
-            sprintf(write_buf, "slot: %d, addr: %p, size: %zu\n", i, entry->chunk_start, entry->bytes);
+            // sprintf(write_buf, "slot: %d, addr: %p, size: %zu, flag: 0x%x\n", i,
+            // entry->chunk_start, entry->bytes, entry->flag);
+            sprintf(write_buf, "slot: %d, addr: %p, size: %zu\n", i, entry->chunk_start,
+                    entry->bytes);
             write(fd, write_buf, strlen(write_buf));
 
             if (entry->bt_entry->numEntries != 0) {
                 dump_bt_file(entry->bt_entry->numEntries, entry->bt_entry->backtrace, fd);
-            }
-            else
+            } else
                 error_log("[ERROR] addr without bt\n");
 
             entry = entry->next;
@@ -61,11 +62,13 @@ static void dump_info(int fd) {
     }
 
     memset(write_buf, 0, sizeof(write_buf));
-    write(fd, "\n---start dumping historical allocations:\n", strlen("\n---start dumping historical allocations:\n"));
-    for(i = 0; i < gDebugConfig.mHistoricalBufferSize; i++) {
+    write(fd, "\n---start dumping historical allocations:\n",
+          strlen("\n---start dumping historical allocations:\n"));
+    for (i = 0; i < gDebugConfig.mHistoricalBufferSize; i++) {
         PChunkHashEntry entry = gHistoricalAllocTable.historical_alloc_table[i];
         if (entry != NULL) {
-            sprintf(write_buf, "slot: %d, addr: %p, size: %zu\n", i, entry->chunk_start, entry->bytes);
+            sprintf(write_buf, "slot: %d, addr: %p, size: %zu\n", i, entry->chunk_start,
+                    entry->bytes);
             write(fd, write_buf, strlen(write_buf));
             if (entry->bt_entry->numEntries != 0) {
                 write(fd, "malloc ", strlen("malloc "));
@@ -85,8 +88,7 @@ static void dump_info(int fd) {
 static void dump_debug15_statistics(int fd) {
     char entry_statistics[80];
     int pid = getpid();
-    snprintf(entry_statistics, sizeof(entry_statistics),
-        "%-5d %zu\n", pid, gChunkHashTable.count);
+    snprintf(entry_statistics, sizeof(entry_statistics), "%-5d %zu\n", pid, gChunkHashTable.count);
     write(fd, entry_statistics, strlen(entry_statistics));
 }
 
@@ -99,8 +101,8 @@ void malloc_signal_handler(int n, siginfo_t* info, void* unused) {
 
     int fd;
     char entry_statistics[80];
-    (void)n; //avoid build warning
-    (void)info; //avoid build warning
+    (void)n;     // avoid build warning
+    (void)info;  // avoid build warning
     (void)unused;
     debug_log("malloc_signal_handler\n");
 
@@ -110,16 +112,15 @@ void malloc_signal_handler(int n, siginfo_t* info, void* unused) {
 
     if (gDebugConfig.mSig) {
         if (malloc_debug_statistics) {
-            fd = open("/data/debug15_statistics.txt", O_WRONLY|O_APPEND);
+            fd = open("/data/debug15_statistics.txt", O_WRONLY | O_APPEND);
             if (fd < 0) {
-                fd = open("/data/debug15_statistics.txt", O_WRONLY|O_CREAT|O_APPEND, 0666);
+                fd = open("/data/debug15_statistics.txt", O_WRONLY | O_CREAT | O_APPEND, 0666);
                 if (fd < 0) {
                     error_log("couldn't open output file, errno = %d", errno);
                     return;
                 }
                 fchmod(fd, 0666);
-                snprintf(entry_statistics, sizeof(entry_statistics),
-                    "pid   chunk_count\n");
+                snprintf(entry_statistics, sizeof(entry_statistics), "pid   chunk_count\n");
                 write(fd, entry_statistics, strlen(entry_statistics));
             }
 

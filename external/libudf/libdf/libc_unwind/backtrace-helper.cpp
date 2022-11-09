@@ -25,8 +25,8 @@ extern "C" {
 #endif
 
 backtrace_frame_t* add_backtrace_entry(uintptr_t pc, backtrace_frame_t* backtrace,
-        size_t ignore_depth, size_t max_depth,
-        size_t* ignored_frames, size_t* returned_frames) {
+                                       size_t ignore_depth, size_t max_depth,
+                                       size_t* ignored_frames, size_t* returned_frames) {
     if (*ignored_frames < ignore_depth) {
         *ignored_frames += 1;
         return NULL;
@@ -36,7 +36,8 @@ backtrace_frame_t* add_backtrace_entry(uintptr_t pc, backtrace_frame_t* backtrac
     }
     backtrace_frame_t* frame = &backtrace[*returned_frames];
     *frame = pc;
-    //LIBUDF_LOG("[Oliver_Zeng] frame addr:%p pc value %u num_frames %zu\n", frame, pc, *returned_frames);
+    // LIBUDF_LOG("[Oliver_Zeng] frame addr:%p pc value %u num_frames %zu\n", frame, pc,
+    // *returned_frames);
     *returned_frames += 1;
     return frame;
 }

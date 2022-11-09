@@ -26,15 +26,15 @@
 #define LOG_TAG "NVRAM"
 #endif
 
-#define NVBAK_LOG(...) \
-        do { \
-            ALOGD(__VA_ARGS__); \
-        } while (0)
+#define NVBAK_LOG(...)      \
+    do {                    \
+        ALOGD(__VA_ARGS__); \
+    } while (0)
 
-#define TEXT(__a)  __a
+#define TEXT(__a) __a
 
-#define NVRAM_LOG(...) \
-    do { \
+#define NVRAM_LOG(...)      \
+    do {                    \
         ALOGD(__VA_ARGS__); \
     } while (0)
 

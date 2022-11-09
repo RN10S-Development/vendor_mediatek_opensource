@@ -18,10 +18,10 @@
 #define ANDROID_PERFSERVICE_XMLPARSE_H
 
 int perfservice_xmlparse_init(void);
-void updateScnListfromXML(tScnNode *pPackList);
-int updateCusScnTable(const char *path);
-int loadConTable(const char *file_name);
+void updateScnListfromXML(tScnNode* pPackList);
+int updateCusScnTable(const char* path);
+int loadConTable(const char* file_name);
 void perfservice_xmlparse_freeList(void);
 int perfservice_xmlparse_reload_whitelist(void);
 
-#endif // ANDROID_PERFSERVICE_XMLPARSE_H
+#endif  // ANDROID_PERFSERVICE_XMLPARSE_H

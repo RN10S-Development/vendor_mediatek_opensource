@@ -7,8 +7,8 @@ extern "C" {
 
 #define USE_DL_PREFIX
 
-#define ONLY_MSPACES 1 // default: MSPACE 0
-#define MSPACES 1 // default: MSPACE 0
+#define ONLY_MSPACES 1  // default: MSPACE 0
+#define MSPACES 1       // default: MSPACE 0
 //#define DEBUG 1
 //#define IN_MSPACE 1
 
@@ -20,11 +20,10 @@ extern "C" {
 //#define IN_DEBUG 1
 
 #include "malloc.c"
-#ifdef  LOG_TAG
-#undef  LOG_TAG
+#ifdef LOG_TAG
+#undef LOG_TAG
 #endif
 #define LOG_TAG "MTK_UBRD_DEBUG"
-
 
 #ifdef __cplusplus
 }

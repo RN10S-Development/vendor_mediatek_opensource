@@ -40,8 +40,7 @@ static void initUxLibrary() {
     initlib = true;
     sDlOpHandler = dlopen(UX_RIL_PATH, RTLD_NOW);
     if (sDlOpHandler == NULL) {
-        ALOGE("[%s] dlopen failed in %s: %s",
-                __FUNCTION__, UX_RIL_PATH, dlerror());
+        ALOGE("[%s] dlopen failed in %s: %s", __FUNCTION__, UX_RIL_PATH, dlerror());
         return;
     }
     func = dlsym(sDlOpHandler, "NwkOptHal_wrap_switch_game_mode_S");
@@ -83,8 +82,7 @@ static void notifyNetdBoostUid(int enable, int uid) /* -1: don't care */
     static int boost_uid = -1;
     int last_boost_uid = -1;
 
-    ALOGD("notifyNetdBoostUid enable:%d -> %d, uid:%d -> %d",
-        netd_boost, enable, boost_uid, uid);
+    ALOGD("notifyNetdBoostUid enable:%d -> %d, uid:%d -> %d", netd_boost, enable, boost_uid, uid);
 
     if (enable != -1 && enable != netd_boost) { /* -1: don't care */
         netd_boost = enable;
@@ -116,7 +114,7 @@ static void notifyNetdBoostUid(int enable, int uid) /* -1: don't care */
     }
 }
 
-void notify_APPState(const char *packname, int32_t uid) {
+void notify_APPState(const char* packname, int32_t uid) {
     initUxLibrary();
     if (notifyAppState == NULL) {
         ALOGE("notifyAppState error = NULL");
@@ -126,7 +124,7 @@ void notify_APPState(const char *packname, int32_t uid) {
     ALOGI("notifyAppState pack:%s, uid:%d", packname, uid);
 }
 
-void notifyForegroundApp(const char *packname, int32_t uid) {
+void notifyForegroundApp(const char* packname, int32_t uid) {
     initUxLibrary();
     if (notifyAppState == NULL) {
         ALOGE("notifyAppState error = NULL");
@@ -137,7 +135,7 @@ void notifyForegroundApp(const char *packname, int32_t uid) {
     ALOGI("notifyForegroundApp pack:%s, uid:%d", packname, uid);
 }
 
-int notifyLowLatencyMode(int lowLatencyMode, void *scn) {
+int notifyLowLatencyMode(int lowLatencyMode, void* scn) {
     ALOGV("notifyLowLatencyMode: %p", scn);
     if (lowLatencyMode == -1) return 0;
     if (lowLatencyMode == 1) {
@@ -151,14 +149,11 @@ int notifyLowLatencyMode(int lowLatencyMode, void *scn) {
     return 0;
 }
 
-int resetUtilityUx(int poweron_init)
-{
-    if(poweron_init != 1) {
+int resetUtilityUx(int poweron_init) {
+    if (poweron_init != 1) {
         notifyLowLatencyMode(0, NULL);
     }
     return 0;
 }
 
-void notifyCmdMode(int mode) {
-    notifyUxGameEvent(mode | 0x10);
-}
+void notifyCmdMode(int mode) { notifyUxGameEvent(mode | 0x10); }

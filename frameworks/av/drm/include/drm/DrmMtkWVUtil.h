@@ -22,15 +22,15 @@
 namespace android {
 
 class DrmMtkWVUtil {
-private:
+  private:
     DrmMtkWVUtil();
 
-public:
+  public:
     static int loadKeybox(unsigned char* data, unsigned int offset, unsigned int length);
     static int saveKeybox(unsigned char* data, unsigned int length);
     static String8 getDeviceId();
 };
 
-}
+}  // namespace android
 
-#endif // __DRM_MTK_WV_UTIL_H__
+#endif  // __DRM_MTK_WV_UTIL_H__

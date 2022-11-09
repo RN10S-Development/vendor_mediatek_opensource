@@ -21,18 +21,15 @@
 extern "C" {
 #endif
 
-
 /*** STANDARD INCLUDES *******************************************************/
-
 
 /*** PROJECT INCLUDES ********************************************************/
 
-
 /*** MACROS ******************************************************************/
-#define PS_CLUSTER_MAX  8
-#define MAX_NAME_LEN    256
-#define MAX_SYSINFO_LEN  521
-#define MAX_ARGS_PER_REQUEST 40 // 20 * 2
+#define PS_CLUSTER_MAX 8
+#define MAX_NAME_LEN 256
+#define MAX_SYSINFO_LEN 521
+#define MAX_ARGS_PER_REQUEST 40  // 20 * 2
 
 /*** GLOBAL TYPES DEFINITIONS ************************************************/
 enum tPowerMsg {
@@ -56,7 +53,7 @@ enum tPowerMsg {
 
 struct tPowerData {
     enum tPowerMsg msg;
-    void          *pBuf;
+    void* pBuf;
 };
 
 struct tHintData {
@@ -67,9 +64,9 @@ struct tHintData {
 struct tAppStateData {
     char pack[MAX_NAME_LEN];
     char activity[MAX_NAME_LEN];
-    int  pid;
-    int  state;
-    int  uid;
+    int pid;
+    int state;
+    int uid;
 };
 
 struct tQueryInfoData {
@@ -102,23 +99,21 @@ struct tCusConfig {
 
 struct tPerfLockData {
     int hdl;
-	int pid;
-	int uid;
+    int pid;
+    int uid;
     int duration;
-    int *rscList;
+    int* rscList;
     int size;
     int reserved;
 };
 
 /*** PRIVATE TYPES DEFINITIONS ***********************************************/
 
-
 /*** GLOBAL VARIABLE DECLARATIONS (EXTERN) ***********************************/
 
-
 /*** PUBLIC FUNCTION PROTOTYPES **********************************************/
-long power_msg(void * pMsg, void **ppRspMsg);
-int powerd_cus_init(int *pCusHintTbl, void *fnptr);
+long power_msg(void* pMsg, void** ppRspMsg);
+int powerd_cus_init(int* pCusHintTbl, void* fnptr);
 
 #ifdef __cplusplus
 }

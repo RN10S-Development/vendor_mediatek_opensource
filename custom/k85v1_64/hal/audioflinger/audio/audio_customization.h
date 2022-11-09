@@ -23,11 +23,9 @@
 
 namespace android {
 
-//AudioCustomizeInterface  Interface
-class AudioCustomization : public AudioCustomizationBase
-{
-
-public:
+// AudioCustomizeInterface  Interface
+class AudioCustomization : public AudioCustomizationBase {
+  public:
     AudioCustomization();
     ~AudioCustomization();
 
@@ -36,12 +34,11 @@ public:
 
     void EXT_DAC_SetPlaybackFreq(unsigned int frequency);
 
-    void EXT_DAC_TurnOnSpeaker(unsigned int source ,unsigned int speaker);
+    void EXT_DAC_TurnOnSpeaker(unsigned int source, unsigned int speaker);
 
-    void EXT_DAC_TurnOffSpeaker(unsigned int source,unsigned int speaker);
+    void EXT_DAC_TurnOffSpeaker(unsigned int source, unsigned int speaker);
 
-    void EXT_DAC_SetVolume(unsigned int speaker,unsigned int vol);
-
+    void EXT_DAC_SetVolume(unsigned int speaker, unsigned int vol);
 };
 
-};
+};  // namespace android

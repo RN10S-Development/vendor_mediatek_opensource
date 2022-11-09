@@ -19,87 +19,46 @@
 
 using namespace android;
 
-ByteBuffer::ByteBuffer() : mBuffer(NULL), mLen(0)
-{
-}
+ByteBuffer::ByteBuffer() : mBuffer(NULL), mLen(0) {}
 
-ByteBuffer::ByteBuffer(char* b, size_t len)
-{
-    allocate((const char*)b, len);
-}
+ByteBuffer::ByteBuffer(char* b, size_t len) { allocate((const char*)b, len); }
 
-ByteBuffer::ByteBuffer(const char* b, size_t len)
-{
-    allocate(b, len);
-}
+ByteBuffer::ByteBuffer(const char* b, size_t len) { allocate(b, len); }
 
-ByteBuffer::ByteBuffer(char* str)
-{
-    allocate((const char*)str, strlen(str));
-}
+ByteBuffer::ByteBuffer(char* str) { allocate((const char*)str, strlen(str)); }
 
-ByteBuffer::ByteBuffer(const char* str)
-{
-    allocate(str, strlen(str));
-}
+ByteBuffer::ByteBuffer(const char* str) { allocate(str, strlen(str)); }
 
-ByteBuffer::ByteBuffer(const ByteBuffer& copy)
-{
-    allocate(copy.mBuffer, copy.mLen);
-}
+ByteBuffer::ByteBuffer(const ByteBuffer& copy) { allocate(copy.mBuffer, copy.mLen); }
 
-ByteBuffer& ByteBuffer::operator=(const ByteBuffer& other)
-{
+ByteBuffer& ByteBuffer::operator=(const ByteBuffer& other) {
     cleanUp();
     allocate(other.mBuffer, other.mLen);
     return *this;
 }
 
-ByteBuffer::~ByteBuffer()
-{
-    cleanUp();
-}
+ByteBuffer::~ByteBuffer() { cleanUp(); }
 
-const char* ByteBuffer::buffer() const
-{
-    return mBuffer;
-}
+const char* ByteBuffer::buffer() const { return mBuffer; }
 
-size_t ByteBuffer::length() const
-{
-    return mLen;
-}
+size_t ByteBuffer::length() const { return mLen; }
 
-void ByteBuffer::setTo(char* b, size_t len)
-{
-    setTo((const char*)b, len);
-}
+void ByteBuffer::setTo(char* b, size_t len) { setTo((const char*)b, len); }
 
-void ByteBuffer::setTo(const char* b, size_t len)
-{
+void ByteBuffer::setTo(const char* b, size_t len) {
     cleanUp();
     allocate(b, len);
 }
 
-void ByteBuffer::setTo(char* str)
-{
-    setTo((const char*)str);
-}
+void ByteBuffer::setTo(char* str) { setTo((const char*)str); }
 
-void ByteBuffer::setTo(const char* str)
-{
-    setTo(str, strlen(str));
-}
+void ByteBuffer::setTo(const char* str) { setTo(str, strlen(str)); }
 
-void ByteBuffer::allocate(const char* b, size_t len)
-{
-    if (NULL == b || 0 == len)
-    {
+void ByteBuffer::allocate(const char* b, size_t len) {
+    if (NULL == b || 0 == len) {
         mBuffer = NULL;
         mLen = 0;
-    }
-    else
-    {
+    } else {
         mBuffer = new char[len];
         memset(mBuffer, 0, len);
         memcpy(mBuffer, b, len);
@@ -107,10 +66,8 @@ void ByteBuffer::allocate(const char* b, size_t len)
     }
 }
 
-void ByteBuffer::cleanUp()
-{
-    if (NULL != mBuffer)
-    {
+void ByteBuffer::cleanUp() {
+    if (NULL != mBuffer) {
         delete[] mBuffer;
         mBuffer = NULL;
     }

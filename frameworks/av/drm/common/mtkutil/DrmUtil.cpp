@@ -76,8 +76,8 @@ using namespace android;
 // static const int OLD_STYLE_FL_CID_LENGTH = 28;
 
 // static const int VER_01_0 = 10; // the value indicating Rights Object version
-// static const char* RO_VERSION_01_0 = "VER_01_0"; // the version string tag, placed at the beginning of RO file
-// static const int SIZE_VER_01_0  = 9; // the length of string tag
+// static const char* RO_VERSION_01_0 = "VER_01_0"; // the version string tag, placed at the
+// beginning of RO file static const int SIZE_VER_01_0  = 9; // the length of string tag
 
 // constants for device id's .dat file.
 const static String8 ID_LOCATION("/data/drm/");
@@ -90,7 +90,7 @@ Mutex DrmUtil::mROLock;
 Mutex DrmUtil::mDCFLock;
 char value[PROPERTY_VALUE_MAX];
 bool DrmUtil::sDDebug = (property_get("ro.build.type", value, NULL) && !strcasecmp(value, "eng")) ||
-        property_get("vendor.debug.drm.logd", value, NULL) == 1;
+                        property_get("vendor.debug.drm.logd", value, NULL) == 1;
 bool DrmUtil::sVDebug = property_get("vendor.debug.drm.logv", value, NULL) == 1;
 
 #if 0
@@ -232,27 +232,22 @@ static int readUintVarBuffer(char* data, size_t* forward)
 }
 #endif
 
-bool DrmUtil::checkDir(String8 dir)
-{
+bool DrmUtil::checkDir(String8 dir) {
     if (sVDebug) ALOGV("checkDir: [%s]", dir.string());
     struct stat stFileInfo;
-    if (stat(dir.string(), &stFileInfo) == 0)
-    {
-        return true; // directory exist
-    } else
-    {
+    if (stat(dir.string(), &stFileInfo) == 0) {
+        return true;  // directory exist
+    } else {
         if (sDDebug) ALOGD("checkDir: %s is not existence, then create it.", dir.string());
-        CreateMulvPath((char*) dir.string());
+        CreateMulvPath((char*)dir.string());
         return true;
     }
 }
 
-bool DrmUtil::checkExistence(String8 filePath)
-{
+bool DrmUtil::checkExistence(String8 filePath) {
     if (sVDebug) ALOGV("checkExistence: [%s]", filePath.string());
     struct stat stFileInfo;
-    if (stat(filePath.string(), &stFileInfo) == -1)
-    {
+    if (stat(filePath.string(), &stFileInfo) == -1) {
         ALOGE("checkExistence failed for %s, reason [%s]", filePath.string(), strerror(errno));
         return false;
     }
@@ -1459,10 +1454,8 @@ ByteBuffer DrmUtil::getDcfDrmKey(DrmMetadata* pMetaData)
 }
 #endif
 
-
 // return the device unique 16 bytes drm key
-ByteBuffer DrmUtil::getDrmKey()
-{
+ByteBuffer DrmUtil::getDrmKey() {
     char drmkey[DrmDef::DRM_MAX_ID_LENGTH + 1];
     bzero(drmkey, sizeof(drmkey));
 
@@ -1474,31 +1467,27 @@ ByteBuffer DrmUtil::getDrmKey()
     // get an fixed key to encrypt imei
     long s = 0x3D4FAD6A;
     long v = ~(0xA9832DC6 ^ s);
-    for (int i = 0; i < 4; i++)
-    {
-        imei_encrypt_key[i] = (char) (0xFF & (v >> (i * 8)));
+    for (int i = 0; i < 4; i++) {
+        imei_encrypt_key[i] = (char)(0xFF & (v >> (i * 8)));
     }
     v = 0x16F0D768 ^ s;
-    for (int i = 0; i < 4; i++)
-    {
-        imei_encrypt_key[i + 4] = (char) (0xFF & (v >> (i * 8)));
+    for (int i = 0; i < 4; i++) {
+        imei_encrypt_key[i + 4] = (char)(0xFF & (v >> (i * 8)));
     }
     v = ~(0x278FB1EA ^ s);
-    for (int i = 0; i < 4; i++)
-    {
-        imei_encrypt_key[i + 8] = (char) (0xFF & (v >> (i * 8)));
+    for (int i = 0; i < 4; i++) {
+        imei_encrypt_key[i + 8] = (char)(0xFF & (v >> (i * 8)));
     }
     v = 0x5F3C54EC ^ s;
-    for (int i = 0; i < 4; i++)
-    {
-        imei_encrypt_key[i + 12] = (char) (0xFF & (v >> (i * 8)));
+    for (int i = 0; i < 4; i++) {
+        imei_encrypt_key[i + 12] = (char)(0xFF & (v >> (i * 8)));
     }
 
     unsigned int devIdLen = imei.length();
-    if (devIdLen > DrmDef::DRM_MAX_ID_LENGTH)
-    {
+    if (devIdLen > DrmDef::DRM_MAX_ID_LENGTH) {
         devIdLen = DrmDef::DRM_MAX_ID_LENGTH;
-        ALOGE("getDrmKey, imei length[%d] > drm key length[%d]", devIdLen, DrmDef::DRM_MAX_ID_LENGTH);
+        ALOGE("getDrmKey, imei length[%d] > drm key length[%d]", devIdLen,
+              DrmDef::DRM_MAX_ID_LENGTH);
     }
 
     // encrypt imei to get an unique key
@@ -1509,8 +1498,7 @@ ByteBuffer DrmUtil::getDrmKey()
     return ByteBuffer(drmkey, DrmDef::DRM_MAX_KEY_LENGTH);
 }
 
-ByteBuffer DrmUtil::base64_decode_bytebuffer(ByteBuffer& buf)
-{
+ByteBuffer DrmUtil::base64_decode_bytebuffer(ByteBuffer& buf) {
     EVP_ENCODE_CTX ectx;
     unsigned char* out = (unsigned char*)malloc(buf.length());
     int outlen = 0;
@@ -1521,9 +1509,8 @@ ByteBuffer DrmUtil::base64_decode_bytebuffer(ByteBuffer& buf)
     EVP_DecodeUpdate(&ectx, out, &outlen, (const unsigned char*)buf.buffer(), buf.length());
     tlen += outlen;
     decode_result = EVP_DecodeFinal(&ectx, out + tlen, &outlen);
-    if(decode_result < 0)
-    {
-        ALOGE("EVP_DecodeFinal failed:decode_result = %d",decode_result);
+    if (decode_result < 0) {
+        ALOGE("EVP_DecodeFinal failed:decode_result = %d", decode_result);
     }
     tlen += outlen;
 
@@ -1532,8 +1519,8 @@ ByteBuffer DrmUtil::base64_decode_bytebuffer(ByteBuffer& buf)
     return result;
 }
 
-void DrmUtil::base64_decrypt_buffer(unsigned char* input, unsigned char* output, int inputLength, int& outputLength)
-{
+void DrmUtil::base64_decrypt_buffer(unsigned char* input, unsigned char* output, int inputLength,
+                                    int& outputLength) {
     EVP_ENCODE_CTX ectx;
     unsigned char* out = (unsigned char*)malloc(inputLength);
     int outlen = 0;
@@ -1550,29 +1537,25 @@ void DrmUtil::base64_decrypt_buffer(unsigned char* input, unsigned char* output,
     free(out);
 }
 
-void DrmUtil::rc4_encrypt_buffer(unsigned char* toBuffer, unsigned char* fromBuffer, int size)
-{
+void DrmUtil::rc4_encrypt_buffer(unsigned char* toBuffer, unsigned char* fromBuffer, int size) {
     ByteBuffer drmkey(getDrmKey());
     RC4_KEY k;
     RC4_set_key(&k, DrmDef::DRM_MAX_KEY_LENGTH, (unsigned char*)drmkey.buffer());
     RC4(&k, size, fromBuffer, toBuffer);
 }
 
-void DrmUtil::rc4_decrypt_buffer(unsigned char* toBuffer, unsigned char* fromBuffer, int size)
-{
+void DrmUtil::rc4_decrypt_buffer(unsigned char* toBuffer, unsigned char* fromBuffer, int size) {
     rc4_encrypt_buffer(toBuffer, fromBuffer, size);
 }
 
-String8 DrmUtil::hash(char* seed, int seedLen)
-{
+String8 DrmUtil::hash(char* seed, int seedLen) {
     if (sVDebug) ALOGV("hash ----> seed [%s], seedLen [%d]", seed, seedLen);
 
-    if (seedLen <= 0 || NULL == seed)
-    {
+    if (seedLen <= 0 || NULL == seed) {
         ALOGE("hash: invalid seed length or seed.");
     }
 
-    char hashResult[17]; // 16 + 1: the result of MD5 hash is 128 bit
+    char hashResult[17];  // 16 + 1: the result of MD5 hash is 128 bit
     bzero(hashResult, sizeof(hashResult));
 
     MD5((unsigned char*)seed, seedLen, (unsigned char*)hashResult);
@@ -1584,8 +1567,7 @@ String8 DrmUtil::hash(char* seed, int seedLen)
     return hexHashResult;
 }
 
-void DrmUtil::CreateMulvPath(char* muldir)
-{
+void DrmUtil::CreateMulvPath(char* muldir) {
     if (sDDebug) ALOGD("CreateMulvPath() : %s", muldir);
     char str[PATH_MAX];
     bzero(str, sizeof(str));
@@ -1600,20 +1582,19 @@ void DrmUtil::CreateMulvPath(char* muldir)
 
     size_t len = strlen(str);
     unsigned int i = 0;
-    for (i = 0; i < len; i++)
-    {
-        if (str[i] == '/')
-        {
+    for (i = 0; i < len; i++) {
+        if (str[i] == '/') {
             str[i] = '\0';
-            if (access(str, F_OK) != 0) // if one level of directory does not exist. F_OK for existence check.
+            if (access(str, F_OK) !=
+                0)  // if one level of directory does not exist. F_OK for existence check.
             {
-                mkdir(str, 0770); // make directory for one level
+                mkdir(str, 0770);  // make directory for one level
             }
             str[i] = '/';
         }
     }
 
-    if (len > 0 && access(str, F_OK) != 0) // some cases, it does not end with '/'
+    if (len > 0 && access(str, F_OK) != 0)  // some cases, it does not end with '/'
     {
         mkdir(str, 0770);
     }
@@ -2759,14 +2740,12 @@ int DrmUtil::getEntryNum(String8 ro_file)
 
 #endif
 
-String8 DrmUtil::readIMEI()
-{
+String8 DrmUtil::readIMEI() {
     if (sVDebug) ALOGV("readIMEI ---->");
     // for getDrmKey() purpose, if the id is empty "",
     // we use a "000000000000000" instead
     String8 id = readId();
-    if (id.isEmpty())
-    {
+    if (id.isEmpty()) {
         getMAC(id);
         if (sDDebug) ALOGD("readIMEI: empty id, get mac address[%s] as new id", id.string());
         saveId(id);
@@ -2775,19 +2754,16 @@ String8 DrmUtil::readIMEI()
     return id;
 }
 
-String8 DrmUtil::readId()
-{
+String8 DrmUtil::readId() {
     if (sVDebug) ALOGV("readId ---->");
     static String8 result;
-    if(!result.isEmpty())
-    {
+    if (!result.isEmpty()) {
         if (sDDebug) ALOGD("readId: Use cached id[%s]", result.string());
         return result;
     }
 
     FILE* fp = fopen(ID_FILE.string(), "rb");
-    if (NULL == fp)
-    {
+    if (NULL == fp) {
         ALOGE("readId: failed to open id data file, reason [%s].", strerror(errno));
         String8 result("");
         getMAC(result);
@@ -2800,10 +2776,9 @@ String8 DrmUtil::readId()
     bzero(data, sizeof(data));
 
     fseek(fp, 0, SEEK_SET);
-    if (0 >= fread(data, sizeof(BYTE), sizeof(data) - 1, fp))
-    {
+    if (0 >= fread(data, sizeof(BYTE), sizeof(data) - 1, fp)) {
         fclose(fp);
-        return String8(""); // id.dat file error, empty string returned
+        return String8("");  // id.dat file error, empty string returned
     }
 
     fclose(fp);
@@ -2813,8 +2788,7 @@ String8 DrmUtil::readId()
     return result;
 }
 
-int DrmUtil::saveId(const String8& id)
-{
+int DrmUtil::saveId(const String8& id) {
     if (sVDebug) ALOGV("saveId: new id[%s]", id.string());
 
     // Remove the original one first
@@ -2823,10 +2797,8 @@ int DrmUtil::saveId(const String8& id)
     // write to file
     checkDir(ID_DIR);
     FILE* fp = fopen(ID_FILE.string(), "wb");
-    if (NULL == fp)
-    {
-        ALOGE("saveId: failed to open data file, reason [%s].",
-                strerror(errno));
+    if (NULL == fp) {
+        ALOGE("saveId: failed to open data file, reason [%s].", strerror(errno));
         return -1;
     }
 
@@ -2836,10 +2808,9 @@ int DrmUtil::saveId(const String8& id)
 
     fseek(fp, 0, SEEK_SET);
     size_t id_len = id.length();
-    if (sVDebug) ALOGV("saveId: the length of id [%d]", (int) id_len);
+    if (sVDebug) ALOGV("saveId: the length of id [%d]", (int)id_len);
 
-    if (id_len != fwrite(id.string(), 1, id_len, fp))
-    {
+    if (id_len != fwrite(id.string(), 1, id_len, fp)) {
         ALOGE("saveId: failed to write to data file, reason [%s].", strerror(errno));
         fclose(fp);
         remove(ID_FILE.string());
@@ -2852,9 +2823,8 @@ int DrmUtil::saveId(const String8& id)
 }
 
 // returns seconds west of greenwhich of current time zone.
-int DrmUtil::getTZOffset()
-{
-    tzset(); // update time zone setting information
+int DrmUtil::getTZOffset() {
+    tzset();  // update time zone setting information
     struct timezone tz;
     gettimeofday(NULL, &tz);
 
@@ -2866,24 +2836,21 @@ int DrmUtil::getTZOffset()
 /**
  * MAC address like 00:11:ee:ff:aa:10
  */
-void DrmUtil::getMAC(String8& mac)
-{
+void DrmUtil::getMAC(String8& mac) {
     // generate a random id as mac, don't use nvram to read mac, because from O, Google don't allow
     // vendor so link libbinder.so
-    srand(time(NULL)); // initialize seed
+    srand(time(NULL));  // initialize seed
     int number = rand();
     number++;
     String8 result("");
     int i = 0;
-    for (; i < 10; ++i)
-    {
+    for (; i < 10; ++i) {
         mac.appendFormat("%02x", rand() % 128);
     }
     if (sDDebug) ALOGD("generate a random id [%s]", mac.string());
 }
 
-String8 DrmUtil::getPathFromFd(int fd)
-{
+String8 DrmUtil::getPathFromFd(int fd) {
     char buffer[256];
     char linkto[4096];
     memset(buffer, 0, 256);
@@ -2891,12 +2858,10 @@ String8 DrmUtil::getPathFromFd(int fd)
     snprintf(buffer, sizeof(buffer), "/proc/%d/fd/%d", gettid(), fd);
     int len = 0;
     len = readlink(buffer, linkto, sizeof(linkto));
-    if(len > 4096)
-    {
+    if (len > 4096) {
         ALOGE("The file path is too long : %d", len);
         String8 path;
         return path;
     }
-    return String8::format("%s",linkto);
-
+    return String8::format("%s", linkto);
 }

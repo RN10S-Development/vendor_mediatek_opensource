@@ -20,8 +20,7 @@
 #include <Cta5File.h>
 #include <Cta5CommonMultimediaFile.h>
 
-namespace android
-{
+namespace android {
 
 struct riffList {
     uint32_t ID;
@@ -30,13 +29,12 @@ struct riffList {
 };
 
 // big endian fourcc
-#define BFOURCC(c1, c2, c3, c4) \
-    (c4 << 24 | c3 << 16 | c2 << 8 | c1)
+#define BFOURCC(c1, c2, c3, c4) (c4 << 24 | c3 << 16 | c2 << 8 | c1)
 
 #define FORMATFOURCC "0x%08x:%c%c%c%c"
-#define PRINTFOURCC(x) x,((uint8_t*)&x)[0],((uint8_t*)&x)[1],((uint8_t*)&x)[2],((uint8_t*)&x)[3]
+#define PRINTFOURCC(x) x, ((uint8_t*)&x)[0], ((uint8_t*)&x)[1], ((uint8_t*)&x)[2], ((uint8_t*)&x)[3]
 // size of chunk should be WORD align
-#define EVEN(i) (uint32_t)((i) + ((i) & 1))
+#define EVEN(i) (uint32_t)((i) + ((i)&1))
 
 /**
  * This class is used to construct a CTA5 common multimedia file
@@ -46,25 +44,25 @@ struct riffList {
  * If you want to convert other multimedia files which have two or more headers,
  * you need to create a new class and implented from Cta5CommonMultimediaFile
  */
-class Cta5AVIFile : public Cta5CommonMultimediaFile
-{
-public:
-    Cta5AVIFile(int fd,String8 key);
+class Cta5AVIFile : public Cta5CommonMultimediaFile {
+  public:
+    Cta5AVIFile(int fd, String8 key);
 
-    //This constructor is useful when you want to get a Cta5 file format
-    //To convert a normal file to a CTA5 file, you may need this version
-    Cta5AVIFile(String8 mimeType, String8 cid, String8 dcfFlHeaders, uint64_t datatLen, String8 key);
+    // This constructor is useful when you want to get a Cta5 file format
+    // To convert a normal file to a CTA5 file, you may need this version
+    Cta5AVIFile(String8 mimeType, String8 cid, String8 dcfFlHeaders, uint64_t datatLen,
+                String8 key);
 
-    //Now dcf header is no need
+    // Now dcf header is no need
     Cta5AVIFile(String8 mimeType, uint64_t datatLen, String8 key);
-public:
-    virtual ~Cta5AVIFile(){}
-    /*
-        * This function is used to parse all main header of specified multimedia files
-        * the result is one or more header offset and size
-        */
-    virtual bool parseHeaders(int fd);
 
+  public:
+    virtual ~Cta5AVIFile() {}
+    /*
+     * This function is used to parse all main header of specified multimedia files
+     * the result is one or more header offset and size
+     */
+    virtual bool parseHeaders(int fd);
 };
-}
-#endif //__CTA5_AVI_FILE_H__
+}  // namespace android
+#endif  //__CTA5_AVI_FILE_H__

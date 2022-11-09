@@ -26,11 +26,11 @@
 static pthread_once_t initialized = PTHREAD_ONCE_INIT;
 
 #ifdef CL_TRACE
-    #include <log/log.h>
-    #include <cutils/properties.h>
+#include <log/log.h>
+#include <cutils/properties.h>
 
-    cl_bool sCLSystraceEnabled = false;
-    cl_bool sCLTraceLevel = false;
+cl_bool sCLSystraceEnabled = false;
+cl_bool sCLTraceLevel = false;
 #endif
 
 /*
@@ -40,47 +40,39 @@ static pthread_once_t initialized = PTHREAD_ONCE_INIT;
  */
 
 // go through the list of vendors in the two configuration files
-void khrIcdOsVendorsEnumerate(void)
-{
-	const char* libSearchList[] = {
+void khrIcdOsVendorsEnumerate(void) {
+    const char* libSearchList[] = {
 #if defined(__LP64__)
-		"/system/lib64/egl/libGLES_mali.so",
-		"/system/vendor/lib64/egl/libGLES_mali.so",
-		"/system/vendor/lib64/libPVROCL.so",
+        "/system/lib64/egl/libGLES_mali.so",
+        "/system/vendor/lib64/egl/libGLES_mali.so",
+        "/system/vendor/lib64/libPVROCL.so",
 #else
-		"/system/lib/egl/libGLES_mali.so",
-		"/system/vendor/lib/egl/libGLES_mali.so",
-		"/system/vendor/lib/libPVROCL.so",
+        "/system/lib/egl/libGLES_mali.so",
+        "/system/vendor/lib/egl/libGLES_mali.so",
+        "/system/vendor/lib/libPVROCL.so",
 #endif
-	};
+    };
 
-	int i;
-	int size = sizeof(libSearchList) / sizeof(libSearchList[0]);
+    int i;
+    int size = sizeof(libSearchList) / sizeof(libSearchList[0]);
 
-	for (i = 0; i < size; ++i)
-		khrIcdVendorAdd(libSearchList[i]);
+    for (i = 0; i < size; ++i) khrIcdVendorAdd(libSearchList[i]);
 
 #ifdef CL_TRACE
     initCLTraceLevel();
 #endif
-
 }
 
 // go through the list of vendors only once
-void khrIcdOsVendorsEnumerateOnce(void)
-{
-    pthread_once(&initialized, khrIcdOsVendorsEnumerate);
-}
+void khrIcdOsVendorsEnumerateOnce(void) { pthread_once(&initialized, khrIcdOsVendorsEnumerate); }
 
 #ifdef CL_TRACE
-void initCLTraceLevel()
-{
+void initCLTraceLevel() {
     char value[PROPERTY_VALUE_MAX];
-    property_get( "debug.ocl.trace" , value, 0);
+    property_get("debug.ocl.trace", value, 0);
 
     sCLSystraceEnabled = !strcasecmp(value, "systrace");
-    if(sCLSystraceEnabled)
-    {
+    if (sCLSystraceEnabled) {
         sCLTraceLevel = 0;
         ALOGD("initCLTraceLevel sCLSystraceEnabled = %d\n", sCLSystraceEnabled);
         return;
@@ -92,7 +84,6 @@ void initCLTraceLevel()
 }
 #endif
 
-
 /*
  *
  * Dynamic library loading functions
@@ -100,19 +91,12 @@ void initCLTraceLevel()
  */
 
 // dynamically load a library.  returns NULL on failure
-void *khrIcdOsLibraryLoad(const char *libraryName)
-{
-    return dlopen (libraryName, RTLD_NOW);
-}
+void* khrIcdOsLibraryLoad(const char* libraryName) { return dlopen(libraryName, RTLD_NOW); }
 
 // get a function pointer from a loaded library.  returns NULL on failure.
-void *khrIcdOsLibraryGetFunctionAddress(void *library, const char *functionName)
-{
+void* khrIcdOsLibraryGetFunctionAddress(void* library, const char* functionName) {
     return dlsym(library, functionName);
 }
 
 // unload a library
-void khrIcdOsLibraryUnload(void *library)
-{
-    dlclose(library);
-}
+void khrIcdOsLibraryUnload(void* library) { dlclose(library); }

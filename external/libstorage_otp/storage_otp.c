@@ -29,377 +29,350 @@
 #include "storage_otp.h"
 
 /* for boot type usage */
-#define BOOTDEV_NAND            (0)
-#define BOOTDEV_SDMMC           (1)
-#define BOOTDEV_UFS             (2)
+#define BOOTDEV_NAND (0)
+#define BOOTDEV_SDMMC (1)
+#define BOOTDEV_UFS (2)
 static int get_boot_type(void) {
-	int fd;
-	ssize_t s;
-	char boot_type[4] = {'0'};
+    int fd;
+    ssize_t s;
+    char boot_type[4] = {'0'};
 
-	fd = open("/sys/class/BOOT/BOOT/boot/boot_type", O_RDONLY);
-	if (fd < 0) {
-		OTP_LOG("fail to open: %s\n", "/sys/class/BOOT/BOOT/boot/boot_type");
-		return -1;
-	}
+    fd = open("/sys/class/BOOT/BOOT/boot/boot_type", O_RDONLY);
+    if (fd < 0) {
+        OTP_LOG("fail to open: %s\n", "/sys/class/BOOT/BOOT/boot/boot_type");
+        return -1;
+    }
 
-	s = read(fd, (void *)&boot_type, sizeof(boot_type) - 1);
-	close(fd);
+    s = read(fd, (void*)&boot_type, sizeof(boot_type) - 1);
+    close(fd);
 
-	if (s <= 0) {
-		OTP_LOG("could not read boot type sys file\n");
-		return -1;
-	}
+    if (s <= 0) {
+        OTP_LOG("could not read boot type sys file\n");
+        return -1;
+    }
 
-	boot_type[s] = '\0';
+    boot_type[s] = '\0';
 
-	return atoi((char *)&boot_type);
+    return atoi((char*)&boot_type);
 }
 
-static int otp_init(struct otp *otp_device, unsigned int user_id)
-{
-	unsigned int ret = 0;
-	unsigned int i = 0;
-	int mt_boot_type = get_boot_type();
+static int otp_init(struct otp* otp_device, unsigned int user_id) {
+    unsigned int ret = 0;
+    unsigned int i = 0;
+    int mt_boot_type = get_boot_type();
 
-	if (mt_boot_type == BOOTDEV_UFS) {
-		ret = ufs_storage_init(otp_device);
-	} else {
-		/* Use eMMC for default boot type */
-		ret = emmc_storage_init(otp_device);
-	}
+    if (mt_boot_type == BOOTDEV_UFS) {
+        ret = ufs_storage_init(otp_device);
+    } else {
+        /* Use eMMC for default boot type */
+        ret = emmc_storage_init(otp_device);
+    }
 
-	if (ret)
-		return -EINVAL;
+    if (ret) return -EINVAL;
 
-	otp_device->max_user_num = otp_device->otp_size /
-				otp_device->wp_grp_size;
+    otp_device->max_user_num = otp_device->otp_size / otp_device->wp_grp_size;
 
-	if (otp_device->max_user_num < MAX_USER_NUM) {
-		OTP_LOG("OTP partition have no enough space to support %d users\n",
-				MAX_USER_NUM);
-		return -EINVAL;
-	} else {
-		OTP_LOG("Device support %d group, OTP use %d group\n", otp_device->max_user_num,
-				MAX_USER_NUM);
-		otp_device->max_user_num = MAX_USER_NUM;
-	}
+    if (otp_device->max_user_num < MAX_USER_NUM) {
+        OTP_LOG("OTP partition have no enough space to support %d users\n", MAX_USER_NUM);
+        return -EINVAL;
+    } else {
+        OTP_LOG("Device support %d group, OTP use %d group\n", otp_device->max_user_num,
+                MAX_USER_NUM);
+        otp_device->max_user_num = MAX_USER_NUM;
+    }
 
-	if (user_id >= MAX_USER_NUM) {
-		OTP_LOG("user id is beyond max user: %d\n",
-				MAX_USER_NUM);
-		return -EINVAL;
-	}
-	OTP_LOG("otp parition start(block) is 0x%llx, size(block) is 0x%llx\n",
-			otp_device->partition_start / otp_device->blk_sz,
-			otp_device->otp_size / otp_device->blk_sz);
+    if (user_id >= MAX_USER_NUM) {
+        OTP_LOG("user id is beyond max user: %d\n", MAX_USER_NUM);
+        return -EINVAL;
+    }
+    OTP_LOG("otp parition start(block) is 0x%llx, size(block) is 0x%llx\n",
+            otp_device->partition_start / otp_device->blk_sz,
+            otp_device->otp_size / otp_device->blk_sz);
 
-	/* region init
-	 * otp region layer out
-	 *
-	 *  | offset |   part1   |  part2    |  part3    |  partn    |not used|
-	 *  |<------>|<--------->|<--------->|<--------->|<--------->|XXXXXXXX|
-	 *  |        |           |           |           |           |        |
-	 *  region start address are divisible by wp group
-	 *  region size is equal with wp_grp_size
-	 *
-	 * */
+    /* region init
+     * otp region layer out
+     *
+     *  | offset |   part1   |  part2    |  part3    |  partn    |not used|
+     *  |<------>|<--------->|<--------->|<--------->|<--------->|XXXXXXXX|
+     *  |        |           |           |           |           |        |
+     *  region start address are divisible by wp group
+     *  region size is equal with wp_grp_size
+     *
+     * */
 
-	for (i = 0; i < otp_device->max_user_num; i++) {
-		otp_device->region[i].size = otp_device->wp_grp_size;
-		otp_device->region[i].start = otp_device->otp_start +
-					i * otp_device->region[i].size;
-		otp_device->region[i].user_id = i;
-	}
-	otp_device->current_user_id = user_id;
-	OTP_LOG("user%d start(block) is 0x%llx, size(block) is 0x%llx\n", user_id,
-			otp_device->region[user_id].start / otp_device->blk_sz,
-			otp_device->region[user_id].size / otp_device->blk_sz);
+    for (i = 0; i < otp_device->max_user_num; i++) {
+        otp_device->region[i].size = otp_device->wp_grp_size;
+        otp_device->region[i].start = otp_device->otp_start + i * otp_device->region[i].size;
+        otp_device->region[i].user_id = i;
+    }
+    otp_device->current_user_id = user_id;
+    OTP_LOG("user%d start(block) is 0x%llx, size(block) is 0x%llx\n", user_id,
+            otp_device->region[user_id].start / otp_device->blk_sz,
+            otp_device->region[user_id].size / otp_device->blk_sz);
 
-	return 0;
+    return 0;
 }
-struct otp *otp_open(unsigned int user_id)
-{
-	int ret = 0;
-	struct otp *device;
+struct otp* otp_open(unsigned int user_id) {
+    int ret = 0;
+    struct otp* device;
 
-	device = (struct otp *) malloc(sizeof(struct otp));
-	if (NULL == device) {
-		perror("malloc otp device failed\n");
-		return NULL;
-	}
-	memset(device, 0, sizeof(struct otp));
-	ret = otp_init(device, user_id);
-	if (ret < 0) {
-		OTP_LOG("storage otp device init failed\n");
-		free(device);
-		return NULL;
-	}
-	return device;
-
+    device = (struct otp*)malloc(sizeof(struct otp));
+    if (NULL == device) {
+        perror("malloc otp device failed\n");
+        return NULL;
+    }
+    memset(device, 0, sizeof(struct otp));
+    ret = otp_init(device, user_id);
+    if (ret < 0) {
+        OTP_LOG("storage otp device init failed\n");
+        free(device);
+        return NULL;
+    }
+    return device;
 }
-void otp_close(struct otp *otp_device)
-{
-	free(otp_device);
-}
+void otp_close(struct otp* otp_device) { free(otp_device); }
 
-int otp_get_region(struct otp *otp_device, unsigned long long *start, unsigned long long *size)
-{
-	unsigned int i;
-	unsigned int current_user_id;
+int otp_get_region(struct otp* otp_device, unsigned long long* start, unsigned long long* size) {
+    unsigned int i;
+    unsigned int current_user_id;
 
-	current_user_id = otp_device->current_user_id;
+    current_user_id = otp_device->current_user_id;
 
-	for (i = 0; i < MAX_USER_NUM; i++) {
-		if (current_user_id == otp_device->region[i].user_id) {
-			*start = otp_device->region[i].start;
-			*size = otp_device->region[i].size;
-			break;
-		}
-	}
+    for (i = 0; i < MAX_USER_NUM; i++) {
+        if (current_user_id == otp_device->region[i].user_id) {
+            *start = otp_device->region[i].start;
+            *size = otp_device->region[i].size;
+            break;
+        }
+    }
 
-	if (i == MAX_USER_NUM) {
-		OTP_LOG("Can't find current otp region\n");
-		return -EINVAL;
-	}
+    if (i == MAX_USER_NUM) {
+        OTP_LOG("Can't find current otp region\n");
+        return -EINVAL;
+    }
 
-	return 0;
+    return 0;
 }
 
-int otp_ops_read_write(unsigned int type, struct otp *otp_device, char *buffer,
-		unsigned long long offset, unsigned long long size)
-{
-	unsigned long long otp_start;
-	unsigned long long otp_size;
-	unsigned long long otp_start_block;
-	unsigned long long otp_size_block;
-	unsigned offset_block;
-	unsigned block_number;
-	char *buffer_tmp = NULL;
-	unsigned long long offset_tmp;
-	unsigned long long size_tmp;
-	int ret;
+int otp_ops_read_write(unsigned int type, struct otp* otp_device, char* buffer,
+                       unsigned long long offset, unsigned long long size) {
+    unsigned long long otp_start;
+    unsigned long long otp_size;
+    unsigned long long otp_start_block;
+    unsigned long long otp_size_block;
+    unsigned offset_block;
+    unsigned block_number;
+    char* buffer_tmp = NULL;
+    unsigned long long offset_tmp;
+    unsigned long long size_tmp;
+    int ret;
 
-	if (!buffer) {
-		OTP_LOG("input buffer is NULL!\n");
-		return -EINVAL;
-	}
+    if (!buffer) {
+        OTP_LOG("input buffer is NULL!\n");
+        return -EINVAL;
+    }
 
-	if (!otp_device->block_write || !otp_device->block_read) {
-		OTP_LOG("otp_device->block_write/read is NULL!\n");
-		return -EINVAL;
-	}
+    if (!otp_device->block_write || !otp_device->block_read) {
+        OTP_LOG("otp_device->block_write/read is NULL!\n");
+        return -EINVAL;
+    }
 
-	offset_tmp = offset;
-	size_tmp = size;
+    offset_tmp = offset;
+    size_tmp = size;
 
-	if (offset % otp_device->blk_sz) {
-		OTP_LOG("byte offset is not divisible by %llu\n", otp_device->blk_sz);
-		offset_tmp = offset - (offset % otp_device->blk_sz);
-		size_tmp = size + (offset % otp_device->blk_sz);
-	}
-	if (size_tmp % otp_device->blk_sz) {
-		size_tmp += (otp_device->blk_sz - (size_tmp % otp_device->blk_sz));
-	}
+    if (offset % otp_device->blk_sz) {
+        OTP_LOG("byte offset is not divisible by %llu\n", otp_device->blk_sz);
+        offset_tmp = offset - (offset % otp_device->blk_sz);
+        size_tmp = size + (offset % otp_device->blk_sz);
+    }
+    if (size_tmp % otp_device->blk_sz) {
+        size_tmp += (otp_device->blk_sz - (size_tmp % otp_device->blk_sz));
+    }
 
-	if ((size_tmp % otp_device->blk_sz) || (offset_tmp % otp_device->blk_sz)) {
-		printf("parameter error, size_tmp %llu offset_tmp %llu\n", size_tmp, offset_tmp);
-		return -1;
-	}
+    if ((size_tmp % otp_device->blk_sz) || (offset_tmp % otp_device->blk_sz)) {
+        printf("parameter error, size_tmp %llu offset_tmp %llu\n", size_tmp, offset_tmp);
+        return -1;
+    }
 
-	buffer_tmp = malloc(size_tmp);
+    buffer_tmp = malloc(size_tmp);
 
-	offset_block = offset_tmp / otp_device->blk_sz;
-	block_number = size_tmp / otp_device->blk_sz;
+    offset_block = offset_tmp / otp_device->blk_sz;
+    block_number = size_tmp / otp_device->blk_sz;
 
-	otp_get_region(otp_device, &otp_start, &otp_size);
+    otp_get_region(otp_device, &otp_start, &otp_size);
 
-	otp_start_block = otp_start / otp_device->blk_sz;
-	otp_size_block = otp_size / otp_device->blk_sz;
+    otp_start_block = otp_start / otp_device->blk_sz;
+    otp_size_block = otp_size / otp_device->blk_sz;
 
-	/*
-	 * if otp_start_block = 0, we will access "otp partition block device" directly thus
-	 *                         below checking shall be skipped.
-	 * if otp_start_block != 0, it indicates otp partition block device" is not aligned to
-	 *                         write proetct group size.
-	 */
-	if (otp_start_block != 0) {
-		if (offset_block + block_number >= otp_size_block) {
-			OTP_LOG("%s size or offset exceed otp region!\n", __func__);
-			free(buffer_tmp);
-			return -EINVAL;
-		}
-	}
+    /*
+     * if otp_start_block = 0, we will access "otp partition block device" directly thus
+     *                         below checking shall be skipped.
+     * if otp_start_block != 0, it indicates otp partition block device" is not aligned to
+     *                         write proetct group size.
+     */
+    if (otp_start_block != 0) {
+        if (offset_block + block_number >= otp_size_block) {
+            OTP_LOG("%s size or offset exceed otp region!\n", __func__);
+            free(buffer_tmp);
+            return -EINVAL;
+        }
+    }
 
-	if (!type)
-		if (otp_device->write != NULL)
-			ret = otp_device->write(otp_device, buffer,
-				otp_start - otp_device->partition_start + offset,
-				size);
-		else {
-			if (offset % otp_device->blk_sz || size % otp_device->blk_sz) {
-				ret = otp_device->block_read(otp_device, buffer_tmp,
-					otp_start_block + offset_block, block_number);
-			}
-			memcpy(buffer_tmp + (offset % otp_device->blk_sz), buffer, size);
-			ret = otp_device->block_write(otp_device, buffer_tmp,
-				otp_start_block + offset_block,
-				block_number);
-		}
-	else
-		if (otp_device->read != NULL)
-			ret = otp_device->read(otp_device, buffer,
-				otp_start - otp_device->partition_start + offset,
-				size);
-		else {
-			ret = otp_device->block_read(otp_device, buffer_tmp,
-				otp_start_block + offset_block, block_number);
-			memcpy(buffer, buffer_tmp + (offset % otp_device->blk_sz), size);
-		}
-	free(buffer_tmp);
-	return ret;
+    if (!type)
+        if (otp_device->write != NULL)
+            ret = otp_device->write(otp_device, buffer,
+                                    otp_start - otp_device->partition_start + offset, size);
+        else {
+            if (offset % otp_device->blk_sz || size % otp_device->blk_sz) {
+                ret = otp_device->block_read(otp_device, buffer_tmp, otp_start_block + offset_block,
+                                             block_number);
+            }
+            memcpy(buffer_tmp + (offset % otp_device->blk_sz), buffer, size);
+            ret = otp_device->block_write(otp_device, buffer_tmp, otp_start_block + offset_block,
+                                          block_number);
+        }
+    else if (otp_device->read != NULL)
+        ret = otp_device->read(otp_device, buffer, otp_start - otp_device->partition_start + offset,
+                               size);
+    else {
+        ret = otp_device->block_read(otp_device, buffer_tmp, otp_start_block + offset_block,
+                                     block_number);
+        memcpy(buffer, buffer_tmp + (offset % otp_device->blk_sz), size);
+    }
+    free(buffer_tmp);
+    return ret;
 }
 
-int otp_read(struct otp *otp_device, char *buffer,
-		unsigned long long offset, unsigned long long size)
-{
-	if ((NULL == otp_device) || (NULL == buffer)) {
-		OTP_LOG("NULL parameter\n");
-		return -EINVAL;
-	}
-	OTP_LOG("%s offset %llu, size %llu\n", __func__, offset, size);
+int otp_read(struct otp* otp_device, char* buffer, unsigned long long offset,
+             unsigned long long size) {
+    if ((NULL == otp_device) || (NULL == buffer)) {
+        OTP_LOG("NULL parameter\n");
+        return -EINVAL;
+    }
+    OTP_LOG("%s offset %llu, size %llu\n", __func__, offset, size);
 
-	return otp_ops_read_write(1, otp_device, buffer, offset, size);
+    return otp_ops_read_write(1, otp_device, buffer, offset, size);
 }
 
-unsigned int otp_write(struct otp *otp_device, char *buffer,
-		unsigned long long offset, unsigned long long size)
-{
-	unsigned int status = 0;
-	unsigned int type = 0;
+unsigned int otp_write(struct otp* otp_device, char* buffer, unsigned long long offset,
+                       unsigned long long size) {
+    unsigned int status = 0;
+    unsigned int type = 0;
 
-	if ((NULL == otp_device) || (NULL == buffer)) {
-		OTP_LOG("NULL parameter\n");
-		return -EINVAL;
-	}
+    if ((NULL == otp_device) || (NULL == buffer)) {
+        OTP_LOG("NULL parameter\n");
+        return -EINVAL;
+    }
 
-	otp_get_status(otp_device, &status, &type);
-	if (status) {
-		OTP_LOG("Region has already been locked, type is %d\n",
-			type);
-		return -EINVAL;
-	}
-	OTP_LOG("%s offset %llu, size %llu\n", __func__, offset, size);
-	return otp_ops_read_write(0, otp_device, buffer, offset, size);
+    otp_get_status(otp_device, &status, &type);
+    if (status) {
+        OTP_LOG("Region has already been locked, type is %d\n", type);
+        return -EINVAL;
+    }
+    OTP_LOG("%s offset %llu, size %llu\n", __func__, offset, size);
+    return otp_ops_read_write(0, otp_device, buffer, offset, size);
 }
 
+int otp_lock(struct otp* otp_device, unsigned int type) {
+    unsigned long long otp_start;
+    unsigned long long otp_size;
+    unsigned long long otp_start_block;
+    unsigned long long otp_size_block;
+    unsigned int wp_group_count;
 
-int otp_lock(struct otp * otp_device, unsigned int type)
-{
-	unsigned long long otp_start;
-	unsigned long long otp_size;
-	unsigned long long otp_start_block;
-	unsigned long long otp_size_block;
-	unsigned int wp_group_count;
+    if (NULL == otp_device) {
+        OTP_LOG("NULL parameter\n");
+        return -EINVAL;
+    }
 
-	if (NULL == otp_device) {
-		OTP_LOG("NULL parameter\n");
-		return -EINVAL;
-	}
+    if (type == WP_TEMPORARY) {
+        OTP_LOG("Don't Support Temporary Lock\n");
+        return -EINVAL;
+    }
 
-	if (type == WP_TEMPORARY) {
-		OTP_LOG("Don't Support Temporary Lock\n");
-		return -EINVAL;
-	}
+    OTP_LOG("%s parameter: %d\n", __func__, type);
 
-	OTP_LOG("%s parameter: %d\n", __func__, type);
+    otp_get_region(otp_device, &otp_start, &otp_size);
 
-	otp_get_region(otp_device, &otp_start, &otp_size);
+    otp_start_block = otp_start / otp_device->blk_sz;
+    otp_size_block = otp_size / otp_device->blk_sz;
+    wp_group_count = otp_size_block / (otp_device->wp_grp_size / 512);
+    OTP_LOG("%s otp_start_block: %llu\n", __func__, otp_start_block);
 
-	otp_start_block = otp_start / otp_device->blk_sz;
-	otp_size_block = otp_size / otp_device->blk_sz;
-	wp_group_count = otp_size_block / (otp_device->wp_grp_size / 512);
-	OTP_LOG("%s otp_start_block: %llu\n", __func__, otp_start_block);
-
-	if (otp_device->lock)
-		return otp_device->lock(otp_device, type, otp_start_block,
-				wp_group_count, otp_device->wp_grp_size);
-	else
-		return -EINVAL;
+    if (otp_device->lock)
+        return otp_device->lock(otp_device, type, otp_start_block, wp_group_count,
+                                otp_device->wp_grp_size);
+    else
+        return -EINVAL;
 }
 
-int otp_unlock(struct otp *otp_device)
-{
-	unsigned long long otp_start;
-	unsigned long long otp_size;
-	unsigned long long otp_start_block;
-	unsigned long long otp_size_block;
-	unsigned int wp_group_count;
+int otp_unlock(struct otp* otp_device) {
+    unsigned long long otp_start;
+    unsigned long long otp_size;
+    unsigned long long otp_start_block;
+    unsigned long long otp_size_block;
+    unsigned int wp_group_count;
 
-	if (NULL == otp_device) {
-		OTP_LOG("NULL parameter\n");
-		return -EINVAL;
-	}
+    if (NULL == otp_device) {
+        OTP_LOG("NULL parameter\n");
+        return -EINVAL;
+    }
 
-	OTP_LOG("%s\n", __func__);
+    OTP_LOG("%s\n", __func__);
 
-	otp_get_region(otp_device, &otp_start, &otp_size);
+    otp_get_region(otp_device, &otp_start, &otp_size);
 
-	otp_start_block = otp_start / otp_device->blk_sz;
-	otp_size_block = otp_size / otp_device->blk_sz;
-	wp_group_count = otp_size_block / (otp_device->wp_grp_size / 512);
+    otp_start_block = otp_start / otp_device->blk_sz;
+    otp_size_block = otp_size / otp_device->blk_sz;
+    wp_group_count = otp_size_block / (otp_device->wp_grp_size / 512);
 
-	if (otp_device->unlock)
-		return otp_device->unlock(otp_device, otp_start_block,
-				wp_group_count, otp_device->wp_grp_size);
-	else
-		return -EINVAL;
+    if (otp_device->unlock)
+        return otp_device->unlock(otp_device, otp_start_block, wp_group_count,
+                                  otp_device->wp_grp_size);
+    else
+        return -EINVAL;
 }
 
-int otp_get_status(struct otp *otp_device, unsigned int *status, unsigned int *type)
-{
-	unsigned long long otp_start;
-	unsigned long long otp_size;
-	unsigned long long otp_start_block;
-	unsigned long long otp_size_block;
-	unsigned int wp_group_count;
+int otp_get_status(struct otp* otp_device, unsigned int* status, unsigned int* type) {
+    unsigned long long otp_start;
+    unsigned long long otp_size;
+    unsigned long long otp_start_block;
+    unsigned long long otp_size_block;
+    unsigned int wp_group_count;
 
-	if ((NULL == otp_device) || (NULL == status) || (NULL == type)) {
-		OTP_LOG("NULL parameter\n");
-		return -EINVAL;
-	}
+    if ((NULL == otp_device) || (NULL == status) || (NULL == type)) {
+        OTP_LOG("NULL parameter\n");
+        return -EINVAL;
+    }
 
-	OTP_LOG("%s\n", __func__);
+    OTP_LOG("%s\n", __func__);
 
-	otp_get_region(otp_device, &otp_start, &otp_size);
+    otp_get_region(otp_device, &otp_start, &otp_size);
 
-	otp_start_block = otp_start / otp_device->blk_sz;
-	otp_size_block = otp_size / otp_device->blk_sz;
-	wp_group_count = otp_size_block / (otp_device->wp_grp_size / 512);
+    otp_start_block = otp_start / otp_device->blk_sz;
+    otp_size_block = otp_size / otp_device->blk_sz;
+    wp_group_count = otp_size_block / (otp_device->wp_grp_size / 512);
 
-	if (otp_device->get_status)
-		return otp_device->get_status(otp_device, otp_start_block,
-				wp_group_count, status, type);
-	else
-		return -EINVAL;
+    if (otp_device->get_status)
+        return otp_device->get_status(otp_device, otp_start_block, wp_group_count, status, type);
+    else
+        return -EINVAL;
 }
 
-unsigned long long otp_get_size(struct otp *otp_device)
-{
-	unsigned long long otp_start;
-	unsigned long long otp_size;
+unsigned long long otp_get_size(struct otp* otp_device) {
+    unsigned long long otp_start;
+    unsigned long long otp_size;
 
-	if (NULL == otp_device) {
-		OTP_LOG("NULL parameter\n");
-		return -EINVAL;
-	}
+    if (NULL == otp_device) {
+        OTP_LOG("NULL parameter\n");
+        return -EINVAL;
+    }
 
-	OTP_LOG("%s\n", __func__);
+    OTP_LOG("%s\n", __func__);
 
-	otp_get_region(otp_device, &otp_start, &otp_size);
+    otp_get_region(otp_device, &otp_start, &otp_size);
 
-	return otp_size;
-
+    return otp_size;
 }
 
 /*
@@ -409,50 +382,48 @@ unsigned long long otp_get_size(struct otp *otp_device)
  *   1: Legacy version, i.e., /dev/otp is existed.
  *   2: New version (>= 1.0), /dev/otp is not existed.
  */
-unsigned int otp_get_libversion_if_legacy(void)
-{
-	FILE *fp;
+unsigned int otp_get_libversion_if_legacy(void) {
+    FILE* fp;
 
-	fp = fopen("/dev/otp", "r");
+    fp = fopen("/dev/otp", "r");
 
-	if (fp) {
-		OTP_LOG("/dev/otp is existed, legacy version.\n");
-		fclose(fp);
-		return 1;
-	} else
-		OTP_LOG("/dev/otp is not existed, not legacy version.\n");
-		return 0;
+    if (fp) {
+        OTP_LOG("/dev/otp is existed, legacy version.\n");
+        fclose(fp);
+        return 1;
+    } else
+        OTP_LOG("/dev/otp is not existed, not legacy version.\n");
+    return 0;
 }
 
-unsigned int otp_get_libversion(void)
-{
-	struct utsname testbuff;
-	int fb = 0;
-	char c;
+unsigned int otp_get_libversion(void) {
+    struct utsname testbuff;
+    int fb = 0;
+    char c;
 
-	fb = uname(&testbuff);
-	if (fb < 0) {
-		OTP_LOG("get kernel version failed\n");
-	} else {
-		OTP_LOG("Kernel version: %s\n", testbuff.release);
-	}
+    fb = uname(&testbuff);
+    if (fb < 0) {
+        OTP_LOG("get kernel version failed\n");
+    } else {
+        OTP_LOG("Kernel version: %s\n", testbuff.release);
+    }
 
-	/* get first char from kernel version
-	 * for example: 3.18.22 ->  c = 3
-	 *              4.4.0   ->  c = 4
-	 * from kernel version 4.4, we support user space
-	 * otp lib API, lower version can not use this
-	 */
-	c = testbuff.release[0];
+    /* get first char from kernel version
+     * for example: 3.18.22 ->  c = 3
+     *              4.4.0   ->  c = 4
+     * from kernel version 4.4, we support user space
+     * otp lib API, lower version can not use this
+     */
+    c = testbuff.release[0];
 
-	if (c < '4') {
-		return 0;
-	} else {
-		if (otp_get_libversion_if_legacy())
-			return 0;
-		else
-			return 1;
-	}
+    if (c < '4') {
+        return 0;
+    } else {
+        if (otp_get_libversion_if_legacy())
+            return 0;
+        else
+            return 1;
+    }
 }
 
 #if 0

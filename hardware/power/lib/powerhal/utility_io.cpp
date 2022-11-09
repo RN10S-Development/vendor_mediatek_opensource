@@ -28,9 +28,9 @@
 #include "common.h"
 #include "utility_io.h"
 
-#define PATH_BLKDEV_UFS_USER      "/sys/block/sdc/queue/read_ahead_kb"
-#define PATH_BLKDEV_DM_USER       "/sys/block/dm-2/queue/read_ahead_kb"
-#define PATH_BLKDEV_EMMC_USER     "/sys/block/mmcblk0/queue/read_ahead_kb"
+#define PATH_BLKDEV_UFS_USER "/sys/block/sdc/queue/read_ahead_kb"
+#define PATH_BLKDEV_DM_USER "/sys/block/dm-2/queue/read_ahead_kb"
+#define PATH_BLKDEV_EMMC_USER "/sys/block/mmcblk0/queue/read_ahead_kb"
 
 static int blkdev_init = 0;
 static int blkdev_ufsSupport = 0;
@@ -41,8 +41,7 @@ static int blkdev_dmDefault = 0;
 static int blkdev_emmDefault = 0;
 
 /* static function */
-static void check_blkDevSupport(void)
-{
+static void check_blkDevSupport(void) {
     struct stat stat_buf;
 
     if (0 == stat(PATH_BLKDEV_UFS_USER, &stat_buf)) {
@@ -57,11 +56,11 @@ static void check_blkDevSupport(void)
         blkdev_emmcSupport = 1;
         blkdev_emmDefault = get_int_value(PATH_BLKDEV_EMMC_USER);
     }
-    ALOGI("check_blkDevSupport: %d, %d, %d", blkdev_ufsDefault, blkdev_dmDefault, blkdev_emmDefault);
+    ALOGI("check_blkDevSupport: %d, %d, %d", blkdev_ufsDefault, blkdev_dmDefault,
+          blkdev_emmDefault);
 }
 
-int setBlkDev_readAhead(int value, void *scn)
-{
+int setBlkDev_readAhead(int value, void* scn) {
     ALOGV("setBlkDev_readAhead: %p", scn);
     if (!blkdev_init) {
         check_blkDevSupport();
@@ -69,19 +68,13 @@ int setBlkDev_readAhead(int value, void *scn)
     }
 
     if (value != -1) {
-        if (blkdev_ufsSupport)
-            set_value(PATH_BLKDEV_UFS_USER, value);
-        if (blkdev_dmSupport)
-            set_value(PATH_BLKDEV_DM_USER, value);
-        if (blkdev_emmcSupport)
-            set_value(PATH_BLKDEV_EMMC_USER, value);
+        if (blkdev_ufsSupport) set_value(PATH_BLKDEV_UFS_USER, value);
+        if (blkdev_dmSupport) set_value(PATH_BLKDEV_DM_USER, value);
+        if (blkdev_emmcSupport) set_value(PATH_BLKDEV_EMMC_USER, value);
     } else {
-        if (blkdev_ufsSupport)
-            set_value(PATH_BLKDEV_UFS_USER, blkdev_ufsDefault);
-        if (blkdev_dmSupport)
-            set_value(PATH_BLKDEV_DM_USER, blkdev_dmDefault);
-        if (blkdev_emmcSupport)
-            set_value(PATH_BLKDEV_EMMC_USER, blkdev_emmDefault);
+        if (blkdev_ufsSupport) set_value(PATH_BLKDEV_UFS_USER, blkdev_ufsDefault);
+        if (blkdev_dmSupport) set_value(PATH_BLKDEV_DM_USER, blkdev_dmDefault);
+        if (blkdev_emmcSupport) set_value(PATH_BLKDEV_EMMC_USER, blkdev_emmDefault);
     }
     ALOGI("setBlkDev_readAhead: value:%d", value);
     return 0;

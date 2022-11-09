@@ -32,29 +32,27 @@
  *
  */
 struct {
-	const char *testDescription;
-	const char *testPattern;
+    const char* testDescription;
+    const char* testPattern;
 } testcase_set[] = {
-	{"Test SCN Idx 1...",
-	"SCN,1,ON,SLP,100,CHK,2,SLP,100,SCN,1,OFF"},
-	{"Test SCN Idx 2...",
-	"SCN,2,ON,SLP,100,CHK,2,SLP,100,SCN,2,OFF"},
+        {"Test SCN Idx 1...", "SCN,1,ON,SLP,100,CHK,2,SLP,100,SCN,1,OFF"},
+        {"Test SCN Idx 2...", "SCN,2,ON,SLP,100,CHK,2,SLP,100,SCN,2,OFF"},
 #if 0
 	{"Test SCN Idx 3...",
 	"SCN,3,ON,SLP,100,CHK,2,SLP,100,SCN,3,OFF"},
 #endif
-	/* SCN_2_ON -> SCN_1_ON -> SCN_2_OFF -> SCN_1_OFF */
-	{"Test SCN combination (1)...",
-	"SCN,2,ON,SLP,100,SCN,1,ON,SLP,100,CHK,2,SCN,2,OFF,SLP,100,CHK,2,SCN,1,OFF"},
-	/* SCN_2_ON -> SCN_1_ON -> SCN_1_OFF -> SCN_2_OFF */
-	{"Test SCN combination (2)...",
-	"SCN,2,ON,SLP,100,SCN,1,ON,SLP,100,CHK,2,SCN,1,OFF,SLP,100,CHK,2,SCN,2,OFF"},
-	/* SCN_1_ON -> SCN_2_ON -> SCN_1_OFF -> SCN_2_OFF */
-	{"Test SCN combination (3)...",
-	"SCN,1,ON,SLP,100,SCN,2,ON,SLP,100,CHK,2,SCN,1,OFF,SLP,100,CHK,2,SCN,2,OFF"},
-	/* SCN_1_ON -> SCN_2_ON -> SCN_2_OFF -> SCN_1_OFF */
-	{"Test SCN combination (4)...",
-	"SCN,1,ON,SLP,100,SCN,2,ON,SLP,100,CHK,2,SCN,2,OFF,SLP,100,CHK,2,SCN,1,OFF"},
+        /* SCN_2_ON -> SCN_1_ON -> SCN_2_OFF -> SCN_1_OFF */
+        {"Test SCN combination (1)...",
+         "SCN,2,ON,SLP,100,SCN,1,ON,SLP,100,CHK,2,SCN,2,OFF,SLP,100,CHK,2,SCN,1,OFF"},
+        /* SCN_2_ON -> SCN_1_ON -> SCN_1_OFF -> SCN_2_OFF */
+        {"Test SCN combination (2)...",
+         "SCN,2,ON,SLP,100,SCN,1,ON,SLP,100,CHK,2,SCN,1,OFF,SLP,100,CHK,2,SCN,2,OFF"},
+        /* SCN_1_ON -> SCN_2_ON -> SCN_1_OFF -> SCN_2_OFF */
+        {"Test SCN combination (3)...",
+         "SCN,1,ON,SLP,100,SCN,2,ON,SLP,100,CHK,2,SCN,1,OFF,SLP,100,CHK,2,SCN,2,OFF"},
+        /* SCN_1_ON -> SCN_2_ON -> SCN_2_OFF -> SCN_1_OFF */
+        {"Test SCN combination (4)...",
+         "SCN,1,ON,SLP,100,SCN,2,ON,SLP,100,CHK,2,SCN,2,OFF,SLP,100,CHK,2,SCN,1,OFF"},
 #if 0
 	/* SCN_1_ON -> SCN_3_ON -> SCN_1_OFF -> SCN_3_OFF */
 	{"Test SCN combination (5)...",
@@ -69,7 +67,7 @@ struct {
 	{"Test SCN combination (6)...",
 	"SCN,2,ON,SLP,100,SCN,3,ON,SLP,100,CHK,2,SCN,3,OFF,SLP,100,CHK,2,SCN,2,OFF"},
 #endif
-	{NULL,NULL},
+        {NULL, NULL},
 };
 
-#endif //ANDROID_TESTCASE_H
+#endif  // ANDROID_TESTCASE_H

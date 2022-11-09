@@ -18,18 +18,18 @@
 #define DRMTYPEDEF_H_
 
 typedef unsigned long ulong;
-typedef unsigned int  uint;
+typedef unsigned int uint;
 
-typedef char          int8;
+typedef char int8;
 typedef unsigned char uint8;
-typedef unsigned int  uint32;
+typedef unsigned int uint32;
 typedef unsigned long ulong32;
-typedef long          long32;
-typedef int           int32;
-typedef long long     long64;
+typedef long long32;
+typedef int int32;
+typedef long long long64;
 typedef unsigned long long ulong64;
 
 typedef unsigned char BYTE;
-typedef unsigned int  DWORD;
+typedef unsigned int DWORD;
 
 #endif /* DRMTYPEDEF_H_ */

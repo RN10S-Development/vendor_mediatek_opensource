@@ -24,57 +24,57 @@
 
 namespace android {
 
-const unsigned int OMADrmFlag = 0x80; // 128
+const unsigned int OMADrmFlag = 0x80;  // 128
 
 /*
-* this defines those process that can access directly the decrypt content
-* of OMA DRM v1 protected (by encryption) files.
-*/
+ * this defines those process that can access directly the decrypt content
+ * of OMA DRM v1 protected (by encryption) files.
+ */
 class DrmTrustedClient {
-private:
+  private:
     DrmTrustedClient();
     static Vector<String8> TRUSTED_PROC;
     static bool sIsInited;
     static bool init();
 
-public:
+  public:
     static bool IsDrmTrustedClient(const String8& procName);
 };
 
 /*
-* this defines those process that can launch playback for those protected content
-* of OMA DRM v1 while using default mediaplayer.
-* the process which need to play OMA DRM v1 content (video/audio), and is using
-* MediaPlayer instance, should be added to this white list. e.g. com.android.music
-*/
+ * this defines those process that can launch playback for those protected content
+ * of OMA DRM v1 while using default mediaplayer.
+ * the process which need to play OMA DRM v1 content (video/audio), and is using
+ * MediaPlayer instance, should be added to this white list. e.g. com.android.music
+ */
 class DrmTrustedApp {
-private:
+  private:
     DrmTrustedApp();
     static Vector<String8> TRUSTED_APP;
     static bool sIsInited;
     static bool init();
 
-public:
+  public:
     static bool IsDrmTrustedApp(const String8& procName);
 };
 
 /*
-* this is defined for Mediatek default video playback applications (videoplayer)
-* Note: normally you should not modify these
-*/
+ * this is defined for Mediatek default video playback applications (videoplayer)
+ * Note: normally you should not modify these
+ */
 class DrmTrustedVideoApp {
-private:
+  private:
     DrmTrustedVideoApp();
     static Vector<String8> TRUSTED_VIDEO_APP;
     static bool sIsInited;
     static bool init();
 
-public:
+  public:
     static bool IsDrmTrustedVideoApp(const String8& procName);
 };
 
 class DrmMtkDefender {
-private:
+  private:
     DrmMtkDefender();
     static Mutex sLock;
     static Vector<String8> DRM_TRUSTED_PROC;
@@ -84,26 +84,26 @@ private:
     static bool sIsInited;
     static bool init();
 
-public:
+  public:
     static bool isDrmTrustedClient(const String8& procName);
     static bool isDrmConsumeInAppClient(const String8& procName);
     static bool markAsConsumeInAppClient(const String8& procName, const String8& cid);
     static bool isNeedConsume(const String8& cid);
     static bool isCtaTrustedClient(const String8& procName);
 
-private:
+  private:
     static bool sDebug;
 };
 
 /*
-* this is defined for those servers which SNTP time synchronization will use
-* Note: these are deprecated. The actuall definition is in DrmProvider
-*/
+ * this is defined for those servers which SNTP time synchronization will use
+ * Note: these are deprecated. The actuall definition is in DrmProvider
+ */
 class DrmSntpServer {
-private:
+  private:
     DrmSntpServer();
 
-public:
+  public:
     static const char* NTP_SERVER_1;
     static const char* NTP_SERVER_2;
     static const char* NTP_SERVER_3;
@@ -112,13 +112,13 @@ public:
 };
 
 /*
-* defined for OMA DRM v1 file's meta-data keys
-*/
+ * defined for OMA DRM v1 file's meta-data keys
+ */
 class DrmMetaKey {
-private:
+  private:
     DrmMetaKey();
 
-public:
+  public:
     static const char* META_KEY_IS_DRM;
     static const char* META_KEY_CONTENT_URI;
     static const char* META_KEY_OFFSET;
@@ -133,7 +133,7 @@ public:
 };
 
 class CtaTrustedClient {
-private:
+  private:
     CtaTrustedClient();
     static Vector<String8> TRUSTED_PROC;
     static Vector<String8> TRUSTED_GETTOKEN_PROC;
@@ -144,12 +144,11 @@ private:
     static bool initTrustedGetTokenClient();
     static bool initTrustedCheckTokenClient();
 
-public:
+  public:
     static bool IsCtaTrustedClient(const String8& procName);
     static bool IsCtaTrustedGetTokenClient(const String8& procName);
     static bool IsCtaTrustedCheckTokenClient(const String8& procName);
-
 };
-}
+}  // namespace android
 
-#endif // __DRM_MTK_DEF_H__
+#endif  // __DRM_MTK_DEF_H__

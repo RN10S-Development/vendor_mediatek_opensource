@@ -19,17 +19,15 @@
 
 #include <string.h>
 
-namespace android
-{
+namespace android {
 
-class ByteBuffer
-{
-public:
+class ByteBuffer {
+  public:
     ByteBuffer();
     explicit ByteBuffer(char* b, size_t len);
     explicit ByteBuffer(const char* b, size_t len);
-    explicit ByteBuffer(char* str); // the input is treated like a string thus the data after a '\0'
-                                    // character will be cut off.
+    explicit ByteBuffer(char* str);  // the input is treated like a string thus the data after a
+                                     // '\0' character will be cut off.
     explicit ByteBuffer(const char* str);
 
     ByteBuffer(const ByteBuffer& copy);
@@ -38,24 +36,24 @@ public:
 
     ~ByteBuffer();
 
-public:
+  public:
     const char* buffer() const;
     size_t length() const;
 
     void setTo(char* b, size_t len);
     void setTo(const char* b, size_t len);
-    void setTo(char* str); // the input is treated like a string
+    void setTo(char* str);  // the input is treated like a string
     void setTo(const char* str);
 
-private:
+  private:
     void allocate(const char* b, size_t len);
     void cleanUp();
 
-private:
+  private:
     char* mBuffer;
     int mLen;
 };
 
-} // namespace android
+}  // namespace android
 
-#endif // _BYTEBUFFER_H_
+#endif  // _BYTEBUFFER_H_

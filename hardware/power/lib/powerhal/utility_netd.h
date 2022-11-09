@@ -21,15 +21,15 @@
 extern "C" {
 #endif
 
-extern int netd_set_priority_uid(int uid, void *scn);
-extern int netd_clear_priority_uid(int uid, void *scn);
+extern int netd_set_priority_uid(int uid, void* scn);
+extern int netd_clear_priority_uid(int uid, void* scn);
 extern int netd_reset(int power_on_init);
 extern int deleteAllDupPackerLink(void);
-extern int SetOnePacketLink(const char *linkInfo);
-extern int SetDupPacketMultiLink(const char *linkInfo);
+extern int SetOnePacketLink(const char* linkInfo);
+extern int SetDupPacketMultiLink(const char* linkInfo);
 
 #ifdef __cplusplus
 }
 #endif
 
-#endif // _UTILITY_NETD_H
+#endif  // _UTILITY_NETD_H

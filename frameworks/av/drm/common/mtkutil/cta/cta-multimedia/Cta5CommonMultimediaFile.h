@@ -22,8 +22,7 @@
 #include <DrmCtaMultiMediaUtil.h>
 #include <utils/Vector.h>
 
-namespace android
-{
+namespace android {
 
 /**
  * This class is used to construct a CTA5 common multimedia file
@@ -33,57 +32,63 @@ namespace android
  * If you want to convert other multimedia files which have two or more headers,
  * you need to create a new class and implented from Cta5CommonMultimediaFile
  */
-class Cta5CommonMultimediaFile : public Cta5File
-{
-protected:
-
+class Cta5CommonMultimediaFile : public Cta5File {
+  protected:
     // The cta5 multimedia part file header like below:
     // | raw content | cipher | cta header | cta mm header |
     // | raw content | cipher | cta header | header header header ...  size MagicMM |
-    class Header  {
-    public:
+    class Header {
+      public:
         off64_t clear_header_offset;
         off64_t clear_header_size;
         off64_t cipher_header_offset;
         off64_t cipher_header_size;
-    public:
-        Header(): clear_header_offset(-1ll), clear_header_size(-1ll), cipher_header_offset(-1ll),
-        cipher_header_size(-1ll){}
+
+      public:
+        Header()
+            : clear_header_offset(-1ll),
+              clear_header_size(-1ll),
+              cipher_header_offset(-1ll),
+              cipher_header_size(-1ll) {}
     };
-    //TODO: the max size need to decide
+    // TODO: the max size need to decide
     Vector<Header*> mHeaders;
     uint32_t mmHeaderCount = 0;
     uint8_t mMagicMM[CTA_MAGIC_LEN];
     off64_t mmCtaHeaderSize = 0LL;
     bool isCancelDone = false;
 
-public:
-    Cta5CommonMultimediaFile(int fd,String8 key);
+  public:
+    Cta5CommonMultimediaFile(int fd, String8 key);
 
-    //This constructor is useful when you want to get a Cta5 file format
-    //To convert a normal file to a CTA5 file, you may need this version
-    Cta5CommonMultimediaFile(String8 mimeType, String8 cid, String8 dcfFlHeaders, uint64_t datatLen, String8 key);
+    // This constructor is useful when you want to get a Cta5 file format
+    // To convert a normal file to a CTA5 file, you may need this version
+    Cta5CommonMultimediaFile(String8 mimeType, String8 cid, String8 dcfFlHeaders, uint64_t datatLen,
+                             String8 key);
 
-    //Now dcf header is no need
+    // Now dcf header is no need
     Cta5CommonMultimediaFile(String8 mimeType, uint64_t datatLen, String8 key);
 
     bool encryptHeader(int fd, off64_t header_offset, off64_t header_size,
-        off64_t& cipher_header_offset, off64_t& cipher_header_size, const Vector<DrmCtaUtil::Listener> *infoListener,
-        off64_t total_header_size, off64_t& progress);
+                       off64_t& cipher_header_offset, off64_t& cipher_header_size,
+                       const Vector<DrmCtaUtil::Listener>* infoListener, off64_t total_header_size,
+                       off64_t& progress);
 
-    bool decryptHeader(off64_t header_offset, off64_t header_size,
-        off64_t& cipher_header_offset, off64_t& cipher_header_size,
-        const Vector<DrmCtaUtil::Listener> *infoListener, off64_t total_header_size, off64_t& progress);
+    bool decryptHeader(off64_t header_offset, off64_t header_size, off64_t& cipher_header_offset,
+                       off64_t& cipher_header_size,
+                       const Vector<DrmCtaUtil::Listener>* infoListener, off64_t total_header_size,
+                       off64_t& progress);
 
-    void notifyProgress(off64_t total, off64_t progress, int fd, String8 result, const Vector<DrmCtaUtil::Listener> *infoListener);
+    void notifyProgress(off64_t total, off64_t progress, int fd, String8 result,
+                        const Vector<DrmCtaUtil::Listener>* infoListener);
 
     bool recoverClearData(int fd, off64_t original_end_offset);
 
     bool recoverCipherData(int fd, off64_t header_offset, off64_t header_size,
-    off64_t cipher_header_offset, off64_t cipher_header_size);
+                           off64_t cipher_header_offset, off64_t cipher_header_size);
 
     bool overwriteClearHeader(int fd, off64_t header_offset, off64_t header_size,
-    off64_t cipher_header_offset, off64_t cipher_header_size);
+                              off64_t cipher_header_offset, off64_t cipher_header_size);
 
     off64_t getTotalHeaderSize();
 
@@ -93,19 +98,19 @@ public:
 
     bool setCtaMultimediaHeader(int fd);
 
-    ssize_t cipherPread(int fd, void* buffer, ssize_t numBytes, off64_t offset, off64_t cipher_header_offset, off64_t
-    cipher_header_size);
+    ssize_t cipherPread(int fd, void* buffer, ssize_t numBytes, off64_t offset,
+                        off64_t cipher_header_offset, off64_t cipher_header_size);
 
     Header* getCipherHeader(off64_t offset);
 
-    static String8 getOriginalMimetype(int fd, const String8 &key);
+    static String8 getOriginalMimetype(int fd, const String8& key);
 
-public:
-    virtual ~Cta5CommonMultimediaFile(){
+  public:
+    virtual ~Cta5CommonMultimediaFile() {
         ALOGD("~Cta5CommonMultimediaFile() clear headers");
         // delete headers
         Vector<Header*>::iterator iter = mHeaders.begin();
-        for (;iter != mHeaders.end();) {
+        for (; iter != mHeaders.end();) {
             delete *iter;
             iter = mHeaders.erase(iter);
         }
@@ -114,12 +119,12 @@ public:
      * Encrypt fd_in to fd_out, fd_out should include the cta5 file header
      * And notify the encrypt progress by calling infoListener
      */
-    virtual bool encrypt(int fd_in, int fd_out,const Vector<DrmCtaUtil::Listener> *infoListener);
+    virtual bool encrypt(int fd_in, int fd_out, const Vector<DrmCtaUtil::Listener>* infoListener);
     /**
      * Decrypt current cta5 file to fd_out
      * And notify the encrypt progress by calling infoListener
      */
-    virtual bool decrypt(int fd_out,const Vector<DrmCtaUtil::Listener> *infoListener);
+    virtual bool decrypt(int fd_out, const Vector<DrmCtaUtil::Listener>* infoListener);
     /*
      * This function is used for playing a multimedia decrypted file with pre-decrypt
      * Cta5MultimediaFile must implement it
@@ -128,9 +133,9 @@ public:
     virtual int64_t pread(void* buf, uint64_t size, off64_t offset);
 
     /*
-        * This function is used to parse all main header of specified multimedia files
-        * the result is one or more header offset and size
-        */
+     * This function is used to parse all main header of specified multimedia files
+     * the result is one or more header offset and size
+     */
     virtual bool parseHeaders(int fd) = 0;
 
     /**
@@ -140,5 +145,5 @@ public:
 
     virtual bool changeKey(String8 oldKey, String8 newKey);
 };
-}
-#endif //__CTA5_COMMON_MULTIMEDIAFILE_H__
+}  // namespace android
+#endif  //__CTA5_COMMON_MULTIMEDIAFILE_H__

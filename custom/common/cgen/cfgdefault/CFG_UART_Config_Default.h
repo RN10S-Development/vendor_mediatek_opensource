@@ -19,9 +19,6 @@
 
 ///#include "cfgfileinc/CFG_UART_File.h"
 
-ap_nvram_uart_config_struct stUARTConfigDefault =
-{
-    {0x01,0x0,0x0,0x0}
-};
+ap_nvram_uart_config_struct stUARTConfigDefault = {{0x01, 0x0, 0x0, 0x0}};
 
 #endif

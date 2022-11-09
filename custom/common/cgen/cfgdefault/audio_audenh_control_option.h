@@ -17,8 +17,8 @@
 #ifndef AUDIO_AUDENH_CONTROL_OPTION_CUSTOM_H
 #define AUDIO_AUDENH_CONTROL_OPTION_CUSTOM_H
 
-
-//Bit0: Audenh default (Default off for Low Power) , Bit1: BesLoudness default, Bit2: 1st time bootup
+// Bit0: Audenh default (Default off for Low Power) , Bit1: BesLoudness default, Bit2: 1st time
+// bootup
 #define DEFAULT_AUDIO_AUDENH_CONTROL_OPTION_Coeff (0x00000006)
 
 #endif

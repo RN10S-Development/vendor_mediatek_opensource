@@ -33,28 +33,28 @@
 #include "libhwm.h"
 /*---------------------------------------------------------------------------*/
 void* NVRAM_ACC(void* arg) {
-	int err = 0;
-	int fd = -1;
-	HwmData dat;
+    int err = 0;
+    int fd = -1;
+    HwmData dat;
 
-	gsensor_open(&fd);
-	if (fd < 0) {
-		NVRAM_LOG("null gsensor file handle pointer: %p!\n", fd);
-		err = -EFAULT;
-	}
+    gsensor_open(&fd);
+    if (fd < 0) {
+        NVRAM_LOG("null gsensor file handle pointer: %p!\n", fd);
+        err = -EFAULT;
+    }
 
-	if (err) {
-		NVRAM_LOG("stop due to err\n");
-	} else if (err = gsensor_read_nvram(&dat)) {
-		NVRAM_LOG("read nvram fail: %d(%s)\n", errno, strerror(errno));
-	} else if (err = gsensor_set_cali(fd, &dat)) {
-		NVRAM_LOG("set calibration fail: %d(%s)\n", errno, strerror(errno));
-	} else {
-		NVRAM_LOG("write calibration done\n");
-	}
-	if (fd > 0) {
-		gsensor_close(fd);
-	}
-	pthread_exit(NULL);
-	return NULL;
+    if (err) {
+        NVRAM_LOG("stop due to err\n");
+    } else if (err = gsensor_read_nvram(&dat)) {
+        NVRAM_LOG("read nvram fail: %d(%s)\n", errno, strerror(errno));
+    } else if (err = gsensor_set_cali(fd, &dat)) {
+        NVRAM_LOG("set calibration fail: %d(%s)\n", errno, strerror(errno));
+    } else {
+        NVRAM_LOG("write calibration done\n");
+    }
+    if (fd > 0) {
+        gsensor_close(fd);
+    }
+    pthread_exit(NULL);
+    return NULL;
 }

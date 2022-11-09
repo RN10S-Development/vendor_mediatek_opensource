@@ -61,9 +61,7 @@ Return<void> Wifi::registerEventCallback_1_5(const sp<V1_5::IWifiEventCallback>&
                            event_callback);
 }
 
-Return<bool> Wifi::isStarted() {
-    return run_state_ != RunState::STOPPED;
-}
+Return<bool> Wifi::isStarted() { return run_state_ != RunState::STOPPED; }
 
 Return<void> Wifi::start(start_cb hidl_status_cb) {
     return validateAndCall(this, WifiStatusCode::ERROR_UNKNOWN, &Wifi::startInternal,

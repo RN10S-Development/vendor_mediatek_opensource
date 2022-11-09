@@ -13,4 +13,4 @@ void dumpUBRD(PUBRD pUBRD);
 #ifdef __cplusplus
 }
 #endif
-#endif //#ifndef SIG_HANDLER_H
+#endif  //#ifndef SIG_HANDLER_H

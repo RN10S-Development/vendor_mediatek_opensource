@@ -34,12 +34,11 @@
 #include "ccci_common.h"
 
 int curr_md_id;
-int  system_ch_handle = 0;
+int system_ch_handle = 0;
 
-#define BOOT_PROF_FILE      "/proc/bootprof"
+#define BOOT_PROF_FILE "/proc/bootprof"
 static int boot_prof_fd;
-int update_inf_to_bootprof(char str[])
-{
+int update_inf_to_bootprof(char str[]) {
     int ret = -1, size;
     char msg[64];
 
@@ -51,8 +50,7 @@ int update_inf_to_bootprof(char str[])
     return ret;
 }
 
-int main(int argc, char **argv)
-{
+int main(int argc, char** argv) {
     int drv_ver;
 
     curr_md_id = 0;
@@ -93,12 +91,11 @@ int main(int argc, char **argv)
     drv_ver = get_ccci_drv_ver();
     if (drv_ver == 2)
         main_v2(curr_md_id, 0);
-    else if(drv_ver == 1)
+    else if (drv_ver == 1)
         main_v1(curr_md_id, 1);
     else
         main_v1(curr_md_id, 0);
 
-    if (boot_prof_fd >= 0)
-        close(boot_prof_fd);
+    if (boot_prof_fd >= 0) close(boot_prof_fd);
     return 0;
 }

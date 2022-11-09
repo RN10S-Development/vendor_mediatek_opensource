@@ -30,13 +30,11 @@ enum {
     MSG_TIMER_SCN_BASE = 200,
 };
 
-
 // prototype
 extern pthread_mutex_t g_mutex;
-extern pthread_cond_t  g_cond;
+extern pthread_cond_t g_cond;
 extern bool powerd_done;
 extern int powerd_core_pre_init(void);
-extern void* mtkPowerManager(void *data);
+extern void* mtkPowerManager(void* data);
 
 #endif  // ANDROID_HARDWARE_POWER_V2_0_MANAGER_H
-

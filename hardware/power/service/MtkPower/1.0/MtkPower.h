@@ -34,26 +34,27 @@ namespace mtkpower {
 namespace V1_0 {
 namespace implementation {
 
-using ::vendor::mediatek::hardware::mtkpower::V1_0::IMtkPower;
+using ::android::sp;
 using ::android::hardware::hidl_array;
 using ::android::hardware::hidl_memory;
 using ::android::hardware::hidl_string;
 using ::android::hardware::hidl_vec;
+using ::android::hardware::IPCThreadState;
 using ::android::hardware::Return;
 using ::android::hardware::Void;
-using ::android::hardware::IPCThreadState;
-using ::android::sp;
+using ::vendor::mediatek::hardware::mtkpower::V1_0::IMtkPower;
 
 struct MtkPower : public IMtkPower {
     MtkPower();
     ~MtkPower();
 
-    Return<void> mtkPowerHint(int32_t hint, int32_t data)  override;
-    Return<void> mtkCusPowerHint(int32_t hint, int32_t data)  override;
-    Return<void> notifyAppState(const hidl_string& packName, const hidl_string& actName, int32_t pid, int32_t state, int32_t uid)  override;
-    Return<int32_t> querySysInfo(int32_t cmd, int32_t param)  override;
-    Return<int32_t> setSysInfo(int32_t type, const hidl_string& data)  override;
-    Return<void> setSysInfoAsync(int32_t type, const hidl_string& data)  override;
+    Return<void> mtkPowerHint(int32_t hint, int32_t data) override;
+    Return<void> mtkCusPowerHint(int32_t hint, int32_t data) override;
+    Return<void> notifyAppState(const hidl_string& packName, const hidl_string& actName,
+                                int32_t pid, int32_t state, int32_t uid) override;
+    Return<int32_t> querySysInfo(int32_t cmd, int32_t param) override;
+    Return<int32_t> setSysInfo(int32_t type, const hidl_string& data) override;
+    Return<void> setSysInfoAsync(int32_t type, const hidl_string& data) override;
 };
 
 extern "C" IMtkPower* HIDL_FETCH_IMtkPower(const char* name);

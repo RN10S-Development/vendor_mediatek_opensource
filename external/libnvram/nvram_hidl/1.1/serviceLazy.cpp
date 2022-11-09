@@ -23,18 +23,16 @@
 #include <log/log.h>
 #include <hidl/LegacySupport.h>
 
-using vendor::mediatek::hardware::nvram::V1_1::INvram;
 using android::hardware::defaultLazyPassthroughServiceImplementation;
+using vendor::mediatek::hardware::nvram::V1_1::INvram;
 
-int
-main(void)
-{
+int main(void) {
     int ret = 0;
     try {
-    NVRAM_LOG("Nvram hidle service is now ready");
-      ret =defaultLazyPassthroughServiceImplementation<INvram>();
-    } catch (const std::__1::system_error & e) {
-      NVRAM_LOG("Nvram hidle service error");
+        NVRAM_LOG("Nvram hidle service is now ready");
+        ret = defaultLazyPassthroughServiceImplementation<INvram>();
+    } catch (const std::__1::system_error& e) {
+        NVRAM_LOG("Nvram hidle service error");
     }
     return ret;
 }

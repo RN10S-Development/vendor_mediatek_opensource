@@ -19,7 +19,6 @@
 
 #include <system/audio.h>
 
-
 typedef enum {
     TAG_CAPTURE_DATA_PROVIDER = 0,
     TAG_FAST_CATTURE,
@@ -51,12 +50,11 @@ typedef enum {
     TAG_MAX
 } PULSE_TAG;
 
-
 namespace android {
 
-void detectPulse(const int TagNum, const int pulseLevel, const int dump, void *ptr,
-                 const size_t desiredFrames, const audio_format_t format,
-                 const int channels, const int sampleRate, const int precision);
+void detectPulse(const int TagNum, const int pulseLevel, const int dump, void* ptr,
+                 const size_t desiredFrames, const audio_format_t format, const int channels,
+                 const int sampleRate, const int precision);
 }
 
 #endif

@@ -25,7 +25,6 @@
 
 #include "map_info.h"
 
-
 #ifdef __cplusplus
 extern "C" {
 #endif
@@ -102,4 +101,4 @@ bool try_get_word_stack(uintptr_t ptr, uint32_t* out_value);
 }
 #endif
 
-#endif // _CORKSCREW_PTRACE_H
+#endif  // _CORKSCREW_PTRACE_H

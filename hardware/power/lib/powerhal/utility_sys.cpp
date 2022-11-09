@@ -28,16 +28,13 @@
 #include "common.h"
 #include "utility_sys.h"
 
-
-//using namespace std;
+// using namespace std;
 
 /* variable */
 static int cpu_prefer_support = 0;
 
-
 /* function */
-int initTaskPreferCpu(int power_on)
-{
+int initTaskPreferCpu(int power_on) {
     struct stat stat_buf;
 
     ALOGV("cpu_prefer_init: %d", power_on);
@@ -45,50 +42,42 @@ int initTaskPreferCpu(int power_on)
     return 0;
 }
 
-int setTaskPreferCpu_big(int tid, void *scn)
-{
+int setTaskPreferCpu_big(int tid, void* scn) {
     char str[64];
-    if(!cpu_prefer_support)
-        return -1;
+    if (!cpu_prefer_support) return -1;
 
     ALOGI("setTaskPreferCpu_big:%d", tid);
-    snprintf(str, sizeof(str)-1, "%d 1", tid);
+    snprintf(str, sizeof(str) - 1, "%d 1", tid);
     set_value(PATH_TASK_PREFER_CPU, str);
     return 0;
 }
 
-int unsetTaskPreferCpu_big(int tid, void *scn)
-{
+int unsetTaskPreferCpu_big(int tid, void* scn) {
     char str[64];
-    if(!cpu_prefer_support)
-        return -1;
+    if (!cpu_prefer_support) return -1;
 
     ALOGI("unsetTaskPreferCpu_big:%d", tid);
-    snprintf(str, sizeof(str)-1, "%d 0", tid);
+    snprintf(str, sizeof(str) - 1, "%d 0", tid);
     set_value(PATH_TASK_PREFER_CPU, str);
     return 0;
 }
 
-int setTaskPreferCpu_little(int tid, void *scn)
-{
+int setTaskPreferCpu_little(int tid, void* scn) {
     char str[64];
-    if(!cpu_prefer_support)
-        return -1;
+    if (!cpu_prefer_support) return -1;
 
     ALOGI("setTaskPreferCpu_little:%d", tid);
-    snprintf(str, sizeof(str)-1, "%d 2", tid);
+    snprintf(str, sizeof(str) - 1, "%d 2", tid);
     set_value(PATH_TASK_PREFER_CPU, str);
     return 0;
 }
 
-int unsetTaskPreferCpu_little(int tid, void *scn)
-{
+int unsetTaskPreferCpu_little(int tid, void* scn) {
     char str[64];
-    if(!cpu_prefer_support)
-        return -1;
+    if (!cpu_prefer_support) return -1;
 
     ALOGI("unsetTaskPreferCpu_little:%d", tid);
-    snprintf(str, sizeof(str)-1, "%d 0", tid);
+    snprintf(str, sizeof(str) - 1, "%d 0", tid);
     set_value(PATH_TASK_PREFER_CPU, str);
     return 0;
 }

@@ -17,21 +17,29 @@
 #ifndef __CCCI_LOG_H__
 #define __CCCI_LOG_H__
 
+void ccci_log_print(int lvl, int md_id, const char* fmt, ...);
 
-void ccci_log_print(int lvl, int md_id, const char *fmt, ...);
+enum CCCI_LOG_LV { LV_V = 0, LV_D, LV_I, LV_W, LV_E };
 
-enum CCCI_LOG_LV {
-    LV_V = 0,
-    LV_D,
-    LV_I,
-    LV_W,
-    LV_E
-};
-
-#define CCCI_LOGV(...)    do{ccci_log_print(LV_V, curr_md_id, __VA_ARGS__);}while(0)
-#define CCCI_LOGD(...)    do{ccci_log_print(LV_D, curr_md_id, __VA_ARGS__);}while(0)
-#define CCCI_LOGI(...)    do{ccci_log_print(LV_I, curr_md_id, __VA_ARGS__);}while(0)
-#define CCCI_LOGW(...)    do{ccci_log_print(LV_W, curr_md_id, __VA_ARGS__);}while(0)
-#define CCCI_LOGE(...)    do{ccci_log_print(LV_E, curr_md_id, __VA_ARGS__);}while(0)
+#define CCCI_LOGV(...)                                 \
+    do {                                               \
+        ccci_log_print(LV_V, curr_md_id, __VA_ARGS__); \
+    } while (0)
+#define CCCI_LOGD(...)                                 \
+    do {                                               \
+        ccci_log_print(LV_D, curr_md_id, __VA_ARGS__); \
+    } while (0)
+#define CCCI_LOGI(...)                                 \
+    do {                                               \
+        ccci_log_print(LV_I, curr_md_id, __VA_ARGS__); \
+    } while (0)
+#define CCCI_LOGW(...)                                 \
+    do {                                               \
+        ccci_log_print(LV_W, curr_md_id, __VA_ARGS__); \
+    } while (0)
+#define CCCI_LOGE(...)                                 \
+    do {                                               \
+        ccci_log_print(LV_E, curr_md_id, __VA_ARGS__); \
+    } while (0)
 
 #endif

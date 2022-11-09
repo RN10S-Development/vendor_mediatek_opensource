@@ -36,36 +36,39 @@ namespace power {
 namespace V1_3 {
 namespace implementation {
 
-//using ::android::hardware::power::V1_0::PowerHint;
-using ::android::hardware::power::V1_3::IPower;
+// using ::android::hardware::power::V1_0::PowerHint;
+using ::android::sp;
+using ::android::hardware::hidl_array;
+using ::android::hardware::hidl_memory;
+using ::android::hardware::hidl_string;
+using ::android::hardware::hidl_vec;
+using ::android::hardware::IPCThreadState;
+using ::android::hardware::Return;
+using ::android::hardware::Void;
 using ::android::hardware::power::V1_0::Feature;
 using ::android::hardware::power::V1_0::PowerStatePlatformSleepState;
 using ::android::hardware::power::V1_0::Status;
 using ::android::hardware::power::V1_1::PowerStateSubsystem;
 using ::android::hardware::power::V1_1::PowerStateSubsystemSleepState;
+using ::android::hardware::power::V1_3::IPower;
 using ::vendor::mediatek::hardware::mtkpower::V1_0::IMtkPerf;
 using ::vendor::mediatek::hardware::mtkpower::V1_0::IMtkPower;
-using ::android::hardware::hidl_array;
-using ::android::hardware::hidl_memory;
-using ::android::hardware::hidl_string;
-using ::android::hardware::hidl_vec;
-using ::android::hardware::Return;
-using ::android::hardware::Void;
-using ::android::hardware::IPCThreadState;
-using ::android::sp;
 
 struct Power : public IPower {
-    //Power(power_module_t* module);
+    // Power(power_module_t* module);
     Power();
     ~Power();
-    Return<void> setInteractive(bool interactive)  override;
-    Return<void> powerHint(::android::hardware::power::V1_0::PowerHint hint, int32_t data)  override;
-    Return<void> powerHintAsync(::android::hardware::power::V1_0::PowerHint hint, int32_t data) override;
-    Return<void> powerHintAsync_1_2(::android::hardware::power::V1_2::PowerHint hint, int32_t data) override;
-    Return<void> setFeature(Feature feature, bool activate)  override;
-    Return<void> getPlatformLowPowerStats(getPlatformLowPowerStats_cb _hidl_cb)  override;
+    Return<void> setInteractive(bool interactive) override;
+    Return<void> powerHint(::android::hardware::power::V1_0::PowerHint hint, int32_t data) override;
+    Return<void> powerHintAsync(::android::hardware::power::V1_0::PowerHint hint,
+                                int32_t data) override;
+    Return<void> powerHintAsync_1_2(::android::hardware::power::V1_2::PowerHint hint,
+                                    int32_t data) override;
+    Return<void> setFeature(Feature feature, bool activate) override;
+    Return<void> getPlatformLowPowerStats(getPlatformLowPowerStats_cb _hidl_cb) override;
     Return<void> getSubsystemLowPowerStats(getSubsystemLowPowerStats_cb _hidl_cb) override;
-    Return<void> powerHintAsync_1_3(::android::hardware::power::V1_3::PowerHint hint, int32_t data) override;
+    Return<void> powerHintAsync_1_3(::android::hardware::power::V1_3::PowerHint hint,
+                                    int32_t data) override;
 
 #if 0
   private:
@@ -78,7 +81,7 @@ struct Power : public IPower {
 
 extern "C" IPower* HIDL_FETCH_IPower(const char* name);
 
-} // namespace implementation
+}  // namespace implementation
 }  // namespace V1_3
 }  // namespace power
 }  // namespace hardware

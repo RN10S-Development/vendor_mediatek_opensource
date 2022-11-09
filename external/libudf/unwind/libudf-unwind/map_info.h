@@ -34,7 +34,7 @@ typedef struct map_info {
     bool is_readable;
     bool is_writable;
     bool is_executable;
-    void* data; // arbitrary data associated with the map by the user, initially NULL
+    void* data;  // arbitrary data associated with the map by the user, initially NULL
     char name[];
 } map_info_t;
 
@@ -61,4 +61,4 @@ void release_my_map_info_list(map_info_t* milist);
 }
 #endif
 
-#endif // _CORKSCREW_MAP_INFO_H
+#endif  // _CORKSCREW_MAP_INFO_H

@@ -45,44 +45,42 @@ static String8 keyMTK_GET_AUDIO_DUMP_FILE_LIST = String8("MTK_GET_AUDIO_DUMP_FIL
 static String8 keyMTK_GET_AUDIO_DUMP_FILE_CONTENT = String8("MTK_GET_AUDIO_DUMP_FILE_CONTENT");
 static String8 keyMTK_DEL_AUDIO_DUMP_FILE = String8("MTK_DEL_AUDIO_DUMP_FILE");
 
-
 //---------- implementation of base64 encode/decode--------------
 // function for encode/decode string
-static const char table_base64[] = {'A', 'B', 'C', 'D', 'E', 'F', 'G', 'H',
-                                    'I', 'J', 'K', 'L', 'M', 'N', 'O', 'P',
-                                    'Q', 'R', 'S', 'T', 'U', 'V', 'W', 'X',
-                                    'Y', 'Z', 'a', 'b', 'c', 'd', 'e', 'f',
-                                    'g', 'h', 'i', 'j', 'k', 'l', 'm', 'n',
-                                    'o', 'p', 'q', 'r', 's', 't', 'u', 'v',
-                                    'w', 'x', 'y', 'z', '0', '1', '2', '3',
-                                    '4', '5', '6', '7', '8', '9', '+', '/'
-                                   };
+static const char table_base64[] = {'A', 'B', 'C', 'D', 'E', 'F', 'G', 'H', 'I', 'J', 'K', 'L', 'M',
+                                    'N', 'O', 'P', 'Q', 'R', 'S', 'T', 'U', 'V', 'W', 'X', 'Y', 'Z',
+                                    'a', 'b', 'c', 'd', 'e', 'f', 'g', 'h', 'i', 'j', 'k', 'l', 'm',
+                                    'n', 'o', 'p', 'q', 'r', 's', 't', 'u', 'v', 'w', 'x', 'y', 'z',
+                                    '0', '1', '2', '3', '4', '5', '6', '7', '8', '9', '+', '/'};
 static const int table_mod[] = {0, 2, 1};
-static char *decoding_table = NULL;
+static char* decoding_table = NULL;
 
-//Base64_Encode: output_length = 4 * ((input_length + 2) / 3);
-//Base64_Decode: output_length =  input_length / 4 * 3;
+// Base64_Encode: output_length = 4 * ((input_length + 2) / 3);
+// Base64_Decode: output_length =  input_length / 4 * 3;
 size_t Base64_OutputSize(bool bEncode, size_t input_length) {
     size_t output_length = 0;
 
     if (bEncode) {
         output_length = 4 * ((input_length + 2) / 3);
     } else {
-        output_length =  input_length / 4 * 3;
+        output_length = input_length / 4 * 3;
     }
-    ALOGV("-%s(), bEncode(%d), input_length= %zu, output_length=%zu", __FUNCTION__, bEncode, input_length, output_length);
+    ALOGV("-%s(), bEncode(%d), input_length= %zu, output_length=%zu", __FUNCTION__, bEncode,
+          input_length, output_length);
     return output_length;
 }
 
-size_t Base64_Encode(const unsigned char *data_input, char *data_encoded, size_t input_length) {
+size_t Base64_Encode(const unsigned char* data_input, char* data_encoded, size_t input_length) {
     size_t output_length = 4 * ((input_length + 2) / 3);
-    ALOGV("+%s(), data_input(%p), data_encoded(%p), input_length= %zu", __FUNCTION__, data_input, data_encoded, input_length);
+    ALOGV("+%s(), data_input(%p), data_encoded(%p), input_length= %zu", __FUNCTION__, data_input,
+          data_encoded, input_length);
 
     //    char *encoded_data = malloc(*output_length);
-    if (data_encoded == NULL) {return 0;}
+    if (data_encoded == NULL) {
+        return 0;
+    }
 
     for (size_t i = 0, j = 0; i < input_length;) {
-
         uint32_t octet_a = i < input_length ? (unsigned char)data_input[i++] : 0;
         uint32_t octet_b = i < input_length ? (unsigned char)data_input[i++] : 0;
         uint32_t octet_c = i < input_length ? (unsigned char)data_input[i++] : 0;
@@ -103,10 +101,10 @@ size_t Base64_Encode(const unsigned char *data_input, char *data_encoded, size_t
 
 void build_decoding_table() {
     if (decoding_table == NULL) {
-        decoding_table = new char [256];
+        decoding_table = new char[256];
 
         for (int i = 0; i < 64; i++) {
-            decoding_table[(unsigned char) table_base64[i]] = i;
+            decoding_table[(unsigned char)table_base64[i]] = i;
         }
     } else {
         ALOGV("-%s(), decoding_table already exist", __FUNCTION__);
@@ -122,33 +120,46 @@ void base64_cleanup() {
     ALOGV("-%s()", __FUNCTION__);
 }
 
-size_t Base64_Decode(const char *data_input, unsigned char *data_decoded, size_t input_length) {
-    ALOGV("+%s(), data_input(%p), data_decoded(%p), input_length= %zu", __FUNCTION__, data_input, data_decoded, input_length);
+size_t Base64_Decode(const char* data_input, unsigned char* data_decoded, size_t input_length) {
+    ALOGV("+%s(), data_input(%p), data_decoded(%p), input_length= %zu", __FUNCTION__, data_input,
+          data_decoded, input_length);
     if ((input_length % 4 != 0) || (data_decoded == NULL)) {
         return 0;
     }
     build_decoding_table();
 
     size_t output_length = input_length / 4 * 3;
-    if (data_input[input_length - 1] == '-') { (output_length)--; }
-    if (data_input[input_length - 2] == '-') { (output_length)--; }
+    if (data_input[input_length - 1] == '-') {
+        (output_length)--;
+    }
+    if (data_input[input_length - 2] == '-') {
+        (output_length)--;
+    }
 
-    //unsigned char *decoded_data = malloc(*output_length);
+    // unsigned char *decoded_data = malloc(*output_length);
 
     for (size_t i = 0, j = 0; i < input_length;) {
-        uint32_t sextet_a = data_input[i] == '-' ? 0 & i++ : decoding_table[(unsigned char)data_input[i++]];
-        uint32_t sextet_b = data_input[i] == '-' ? 0 & i++ : decoding_table[(unsigned char)data_input[i++]];
-        uint32_t sextet_c = data_input[i] == '-' ? 0 & i++ : decoding_table[(unsigned char)data_input[i++]];
-        uint32_t sextet_d = data_input[i] == '-' ? 0 & i++ : decoding_table[(unsigned char)data_input[i++]];
+        uint32_t sextet_a =
+                data_input[i] == '-' ? 0 & i++ : decoding_table[(unsigned char)data_input[i++]];
+        uint32_t sextet_b =
+                data_input[i] == '-' ? 0 & i++ : decoding_table[(unsigned char)data_input[i++]];
+        uint32_t sextet_c =
+                data_input[i] == '-' ? 0 & i++ : decoding_table[(unsigned char)data_input[i++]];
+        uint32_t sextet_d =
+                data_input[i] == '-' ? 0 & i++ : decoding_table[(unsigned char)data_input[i++]];
 
-        uint32_t triple = (sextet_a << 3 * 6)
-                          + (sextet_b << 2 * 6)
-                          + (sextet_c << 1 * 6)
-                          + (sextet_d << 0 * 6);
+        uint32_t triple = (sextet_a << 3 * 6) + (sextet_b << 2 * 6) + (sextet_c << 1 * 6) +
+                          (sextet_d << 0 * 6);
 
-        if (j < output_length) { data_decoded[j++] = (triple >> 2 * 8) & 0xFF; }
-        if (j < output_length) { data_decoded[j++] = (triple >> 1 * 8) & 0xFF; }
-        if (j < output_length) { data_decoded[j++] = (triple >> 0 * 8) & 0xFF; }
+        if (j < output_length) {
+            data_decoded[j++] = (triple >> 2 * 8) & 0xFF;
+        }
+        if (j < output_length) {
+            data_decoded[j++] = (triple >> 1 * 8) & 0xFF;
+        }
+        if (j < output_length) {
+            data_decoded[j++] = (triple >> 0 * 8) & 0xFF;
+        }
         ALOGV("%s(), i(%zu), j(%zu)", __FUNCTION__, i, j);
     }
     base64_cleanup();
@@ -157,39 +168,37 @@ size_t Base64_Decode(const char *data_input, unsigned char *data_decoded, size_t
     return output_length;
 }
 
-status_t AudioToolKit_GetDecodedData(String8 strPara, size_t len, void *ptr)
-{
+status_t AudioToolKit_GetDecodedData(String8 strPara, size_t len, void* ptr) {
     size_t sz_in = strPara.size();
     size_t sz_needed = Base64_OutputSize(false, sz_in);
     size_t sz_dec;
     status_t ret = NO_ERROR;
 
-    if (sz_in <= 0)
-        return NO_ERROR;
+    if (sz_in <= 0) return NO_ERROR;
 
     ALOGD("%s in, len = %zu", __FUNCTION__, len);
-    unsigned char *buf_dec = new unsigned char[sz_needed];
+    unsigned char* buf_dec = new unsigned char[sz_needed];
     sz_dec = Base64_Decode(strPara.string(), buf_dec, sz_in);
 
-    if (sz_dec > sz_needed || sz_dec <= sz_needed -3) {
+    if (sz_dec > sz_needed || sz_dec <= sz_needed - 3) {
         ALOGE("%s(), Decode Error!!!after decode (%s), sz_in(%zu), sz_needed(%zu), sz_dec(%zu)",
-            __FUNCTION__, buf_dec, sz_in, sz_needed, sz_dec);
-    }  else {
+              __FUNCTION__, buf_dec, sz_in, sz_needed, sz_dec);
+    } else {
         // sz_needed-3 < sz_dec <= sz_needed
     }
 
-    if( (len == 0) || (len == sz_dec-sizeof(ret)) ) {
-       if ( len ) {
-           ret = (status_t) *(buf_dec);
-           unsigned char *buff = (buf_dec+4);
-           memcpy(ptr, buff, len);
-       } else {
-          const char * IntPtr = (char *)buf_dec;
-          ret = atoi(IntPtr);
-          ALOGD("%s len = 0 ret(%d)", __FUNCTION__, ret);
-       }
+    if ((len == 0) || (len == sz_dec - sizeof(ret))) {
+        if (len) {
+            ret = (status_t) * (buf_dec);
+            unsigned char* buff = (buf_dec + 4);
+            memcpy(ptr, buff, len);
+        } else {
+            const char* IntPtr = (char*)buf_dec;
+            ret = atoi(IntPtr);
+            ALOGD("%s len = 0 ret(%d)", __FUNCTION__, ret);
+        }
     } else {
-       ALOGD("%s decoded buffer isn't right format", __FUNCTION__);
+        ALOGD("%s decoded buffer isn't right format", __FUNCTION__);
     }
 
     if (buf_dec != NULL) {
@@ -199,7 +208,7 @@ status_t AudioToolKit_GetDecodedData(String8 strPara, size_t len, void *ptr)
     return ret;
 }
 
-String8 base64Encode(const unsigned char *dataInput, size_t inputLength) {
+String8 base64Encode(const unsigned char* dataInput, size_t inputLength) {
     ALOGV("%s(), dataInput = %p, inputLength = %zu\n", __FUNCTION__, dataInput, inputLength);
 
     if (dataInput == NULL || inputLength == 0) {
@@ -208,17 +217,20 @@ String8 base64Encode(const unsigned char *dataInput, size_t inputLength) {
 
     size_t outputLength = Base64_OutputSize(true, inputLength);
 
-    char *bufEnc = new char[outputLength + 1];
+    char* bufEnc = new char[outputLength + 1];
     memset(bufEnc, 0, outputLength + 1);
     size_t encSize = Base64_Encode(dataInput, bufEnc, inputLength);
 
     if (encSize == 0) {
-        ALOGW("%s(), Encode Error!!!after encode (%s), inputLength(%zu), outputLength(%zu), encSize(%zu)", __FUNCTION__, bufEnc, inputLength, outputLength, encSize);
+        ALOGW("%s(), Encode Error!!!after encode (%s), inputLength(%zu), outputLength(%zu), "
+              "encSize(%zu)",
+              __FUNCTION__, bufEnc, inputLength, outputLength, encSize);
     } else {
-        ALOGV("%s(), after encode (0x%p), inputLength(%zu), encSize(%zu)", __FUNCTION__, bufEnc, inputLength, encSize);
+        ALOGV("%s(), after encode (0x%p), inputLength(%zu), encSize(%zu)", __FUNCTION__, bufEnc,
+              inputLength, encSize);
     }
 
-    //char to string8
+    // char to string8
     String8 encStr = String8(bufEnc, encSize);
 
     if (bufEnc != NULL) {
@@ -228,7 +240,7 @@ String8 base64Encode(const unsigned char *dataInput, size_t inputLength) {
     return encStr;
 }
 
-unsigned char* base64Decode(String8 encStr, size_t *decSize) {
+unsigned char* base64Decode(String8 encStr, size_t* decSize) {
     size_t encSize = encStr.length();
 
     ALOGV("%s(), encStr = %s, encSize = %zu\n", __FUNCTION__, encStr.string(), encSize);
@@ -240,13 +252,14 @@ unsigned char* base64Decode(String8 encStr, size_t *decSize) {
 
     *decSize = Base64_OutputSize(false, encSize);
 
-    unsigned char *decBuffer = new unsigned char[(*decSize) + 1];
+    unsigned char* decBuffer = new unsigned char[(*decSize) + 1];
     memset(decBuffer, 0, (*decSize) + 1);
 
     *decSize = Base64_Decode(encStr.string(), decBuffer, encSize);
 
     if (*decSize == 0) {
-        ALOGW("%s(), Decode Error!!!after decode (%p), encSize(%zu), decodeSize(%zu)", __FUNCTION__, decBuffer, encSize, *decSize);
+        ALOGW("%s(), Decode Error!!!after decode (%p), encSize(%zu), decodeSize(%zu)", __FUNCTION__,
+              decBuffer, encSize, *decSize);
         if (decBuffer != NULL) {
             delete[] decBuffer;
             decBuffer = NULL;
@@ -256,13 +269,11 @@ unsigned char* base64Decode(String8 encStr, size_t *decSize) {
     return decBuffer;
 }
 
-
 #ifdef SYS_IMPL
 
-String8 getAudioHalDumpFileList()
-{
+String8 getAudioHalDumpFileList() {
     String8 retKeyValPair = AudioSystem::getParameters(0, keyMTK_GET_AUDIO_DUMP_FILE_LIST);
-    const char *val = strstr(retKeyValPair.string(), "=");
+    const char* val = strstr(retKeyValPair.string(), "=");
     if (val) {
         return String8(val + 1);
     } else {
@@ -270,12 +281,13 @@ String8 getAudioHalDumpFileList()
     }
 }
 
-size_t readAudioHalDumpFileContent(char* fileName, unsigned char** buf, size_t readFrom, size_t readSize)
-{
+size_t readAudioHalDumpFileContent(char* fileName, unsigned char** buf, size_t readFrom,
+                                   size_t readSize) {
     size_t retSize = 0;
     String8 readFromStr = String8(std::to_string(readFrom).c_str());
     String8 readSizeStr = String8(std::to_string(readSize).c_str());
-    String8 queryStr = keyMTK_GET_AUDIO_DUMP_FILE_CONTENT + "#" + fileName + "#" + readFromStr + "#" + readSizeStr;
+    String8 queryStr = keyMTK_GET_AUDIO_DUMP_FILE_CONTENT + "#" + fileName + "#" + readFromStr +
+                       "#" + readSizeStr;
 
     String8 retKeyValPair = AudioSystem::getParameters(0, queryStr);
 
@@ -287,7 +299,7 @@ size_t readAudioHalDumpFileContent(char* fileName, unsigned char** buf, size_t r
         if (readSize != retSize) {
             ALOGW("%s(), retSize(%zu) is not readSize(%zu)!\n", __FUNCTION__, retSize, readSize);
             retSize = 0;
-            delete[] (*buf);
+            delete[](*buf);
             *buf = NULL;
         }
     } else {
@@ -308,7 +320,7 @@ bool delAudioHalDumpFile(const char* fileName) {
 
 String8 getAudioHalDumpFileList() {
     String8 fileList = String8("");
-    struct dirent **nameList;
+    struct dirent** nameList;
     int i = 0;
     int total = scandir(DUMP_PATH, &nameList, 0, alphasort);
 
@@ -333,11 +345,12 @@ String8 getAudioHalDumpFileList() {
     return fileList;
 }
 
-size_t readAudioHalDumpFileContent(char* fileName, unsigned char** buf, size_t readFrom, size_t readSize) {
-    String8 filePath = String8 (DUMP_PATH) + fileName;
+size_t readAudioHalDumpFileContent(char* fileName, unsigned char** buf, size_t readFrom,
+                                   size_t readSize) {
+    String8 filePath = String8(DUMP_PATH) + fileName;
     size_t encSize = 0;
     unsigned char* buffer = NULL;
-    char *bufEnc = NULL;
+    char* bufEnc = NULL;
 
     if (readSize == 0) {
         ALOGW("%s(), readSize = 0\n", __FUNCTION__);
@@ -360,9 +373,11 @@ size_t readAudioHalDumpFileContent(char* fileName, unsigned char** buf, size_t r
             if (encSize == 0) {
                 delete[] bufEnc;
                 bufEnc = NULL;
-                ALOGW("%s(), Encode Error!!! input size(%zu), encSize(%zu)", __FUNCTION__, readSize, encSize);
+                ALOGW("%s(), Encode Error!!! input size(%zu), encSize(%zu)", __FUNCTION__, readSize,
+                      encSize);
             } else {
-                ALOGV("%s(), after encode (0x%p), input size(%zu), encSize(%zu)", __FUNCTION__, bufEnc, readSize, encSize);
+                ALOGV("%s(), after encode (0x%p), input size(%zu), encSize(%zu)", __FUNCTION__,
+                      bufEnc, readSize, encSize);
             }
         } else {
             ALOGW("%s(), malloc fail (%zu)\n", __FUNCTION__, readSize);
@@ -372,13 +387,13 @@ size_t readAudioHalDumpFileContent(char* fileName, unsigned char** buf, size_t r
         ALOGW("%s(), fopen fail (file = %s, fp = %p)\n", __FUNCTION__, filePath.string(), fp);
     }
 
-    ALOGV("%s(), Real readed file size = %zu, encodeSize = %zu, bufEnc = %p\n", __FUNCTION__, readSize, encSize, bufEnc);
+    ALOGV("%s(), Real readed file size = %zu, encodeSize = %zu, bufEnc = %p\n", __FUNCTION__,
+          readSize, encSize, bufEnc);
 
     *buf = (unsigned char*)bufEnc;
 
     return encSize;
 }
-
 
 bool delAudioHalDumpFile(const char* fileName) {
     String8 filePath = String8(DUMP_PATH) + "/" + fileName;
@@ -393,4 +408,4 @@ bool delAudioHalDumpFile(const char* fileName) {
 
 #endif
 
-}
+}  // namespace android

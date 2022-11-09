@@ -25,203 +25,122 @@
 
 using namespace android;
 
-String8 DrmDef::getPermissionPath(int permissionIndex)
-{
-    if (permissionIndex == PERMISSION_PLAY_INDEX)
-    {
+String8 DrmDef::getPermissionPath(int permissionIndex) {
+    if (permissionIndex == PERMISSION_PLAY_INDEX) {
         return PATH_PLAY;
-    }
-    else if (permissionIndex == PERMISSION_DISPLAY_INDEX)
-    {
+    } else if (permissionIndex == PERMISSION_DISPLAY_INDEX) {
         return PATH_DISPLAY;
-    }
-    else if (permissionIndex == PERMISSION_EXECUTE_INDEX)
-    {
+    } else if (permissionIndex == PERMISSION_EXECUTE_INDEX) {
         return PATH_EXECUTE;
-    }
-    else if (permissionIndex == PERMISSION_PRINT_INDEX)
-    {
+    } else if (permissionIndex == PERMISSION_PRINT_INDEX) {
         return PATH_PRINT;
-    }
-    else
-    {
+    } else {
         ALOGE("DrmDef::getPermissionPath : Invalid permissionIndex.");
         return String8();
     }
 }
 
-String8 DrmDef::getConstraintStr(int constraintType)
-{
-    if (constraintType == CONSTRAINT_COUNT)
-    {
+String8 DrmDef::getConstraintStr(int constraintType) {
+    if (constraintType == CONSTRAINT_COUNT) {
         return CONSTRAINT_COUNT_STR;
-    }
-    else if (constraintType == CONSTRAINT_DATETIME)
-    {
+    } else if (constraintType == CONSTRAINT_DATETIME) {
         return CONSTRAINT_DATETIME_STR;
-    }
-    else if (constraintType == CONSTRAINT_INTERVAL)
-    {
+    } else if (constraintType == CONSTRAINT_INTERVAL) {
         return CONSTRAINT_INTERVAL_STR;
-    }
-    else if (constraintType == CONSTRAINT_NONE)
-    {
+    } else if (constraintType == CONSTRAINT_NONE) {
         return CONSTRAINT_NONE_STR;
-    }
-    else
-    {
+    } else {
         ALOGE("DrmDef::getConstraintStr : Invalid constraintType.");
         return String8();
     }
 }
 
-String8 DrmDef::getPermissionStr(int permissionIndex)
-{
-    if (permissionIndex == PERMISSION_PLAY_INDEX)
-    {
+String8 DrmDef::getPermissionStr(int permissionIndex) {
+    if (permissionIndex == PERMISSION_PLAY_INDEX) {
         return PERMISSION_PLAY_STR;
-    }
-    else if (permissionIndex == PERMISSION_DISPLAY_INDEX)
-    {
+    } else if (permissionIndex == PERMISSION_DISPLAY_INDEX) {
         return PERMISSION_DISPLAY_STR;
-    }
-    else if (permissionIndex == PERMISSION_EXECUTE_INDEX)
-    {
+    } else if (permissionIndex == PERMISSION_EXECUTE_INDEX) {
         return PERMISSION_EXECUTE_STR;
-    }
-    else if (permissionIndex == PERMISSION_PRINT_INDEX)
-    {
+    } else if (permissionIndex == PERMISSION_PRINT_INDEX) {
         return PERMISSION_PRINT_STR;
-    }
-    else
-    {
+    } else {
         ALOGE("DrmDef::getPermissionStr : Invalid permissionIndex.");
         return String8();
     }
 }
 
-String8 DrmDef::getMetaDataStr(int metaIndex)
-{
-    if (metaIndex == META_CONTENTURI_INDEX)
-    {
+String8 DrmDef::getMetaDataStr(int metaIndex) {
+    if (metaIndex == META_CONTENTURI_INDEX) {
         return String8(DrmMetaKey::META_KEY_CONTENT_URI);
-    }
-    else if (metaIndex == META_RIGHTS_ISSUER_INDEX)
-    {
+    } else if (metaIndex == META_RIGHTS_ISSUER_INDEX) {
         return String8(DrmMetaKey::META_KEY_RIGHTS_ISSUER);
-    }
-    else if (metaIndex == META_CONTENT_NAME_INDEX)
-    {
+    } else if (metaIndex == META_CONTENT_NAME_INDEX) {
         return String8(DrmMetaKey::META_KEY_CONTENT_NAME);
-    }
-    else if (metaIndex == META_CONTENT_DESCRIPTION_INDEX)
-    {
+    } else if (metaIndex == META_CONTENT_DESCRIPTION_INDEX) {
         return String8(DrmMetaKey::META_KEY_CONTENT_DESCRIPTION);
-    }
-    else if (metaIndex == META_CONTENT_VENDOR_INDEX)
-    {
+    } else if (metaIndex == META_CONTENT_VENDOR_INDEX) {
         return String8(DrmMetaKey::META_KEY_CONTENT_VENDOR);
-    }
-    else if (metaIndex == META_ICON_URI_INDEX)
-    {
+    } else if (metaIndex == META_ICON_URI_INDEX) {
         return String8(DrmMetaKey::META_KEY_ICON_URI);
-    }
-    else
-    {
+    } else {
         ALOGE("DrmDef::getMetaDataStr : Invalid metaIndex.");
         return String8();
     }
 }
 
-String8 DrmDef::getMetaTokenStr(int metaIndex)
-{
-    if (metaIndex == META_CONTENTURI_INDEX)
-    {
+String8 DrmDef::getMetaTokenStr(int metaIndex) {
+    if (metaIndex == META_CONTENTURI_INDEX) {
         return TOKEN_CONTENTURI;
-    }
-    else if (metaIndex == META_RIGHTS_ISSUER_INDEX)
-    {
+    } else if (metaIndex == META_RIGHTS_ISSUER_INDEX) {
         return TOKEN_RIGHTS_ISSUER;
-    }
-    else if (metaIndex == META_CONTENT_NAME_INDEX)
-    {
+    } else if (metaIndex == META_CONTENT_NAME_INDEX) {
         return TOKEN_CONTENT_NAME;
-    }
-    else if (metaIndex == META_CONTENT_DESCRIPTION_INDEX)
-    {
+    } else if (metaIndex == META_CONTENT_DESCRIPTION_INDEX) {
         return TOKEN_CONTENT_DESCRIPTION;
-    }
-    else if (metaIndex == META_CONTENT_VENDOR_INDEX)
-    {
+    } else if (metaIndex == META_CONTENT_VENDOR_INDEX) {
         return TOKEN_CONTENT_VENDOR;
-    }
-    else if (metaIndex == META_ICON_URI_INDEX)
-    {
+    } else if (metaIndex == META_ICON_URI_INDEX) {
         return TOKEN_ICON_URI;
-    }
-    else
-    {
+    } else {
         ALOGE("DrmDef::getMetaTokenStr : Invalid metaIndex.");
         return String8();
     }
 }
 
-int DrmDef::getPermissionIndex(int permission)
-{
-    if (permission == PERMISSION_PLAY)
-    {
+int DrmDef::getPermissionIndex(int permission) {
+    if (permission == PERMISSION_PLAY) {
         return PERMISSION_PLAY_INDEX;
-    }
-    else if (permission == PERMISSION_DISPLAY)
-    {
-        return PERMISSION_DISPLAY_INDEX ;
-    }
-    else if (permission == PERMISSION_EXECUTE)
-    {
-        return PERMISSION_EXECUTE_INDEX ;
-    }
-    else if (permission == PERMISSION_PRINT)
-    {
-        return PERMISSION_PRINT_INDEX ;
-    }
-    else
-    {
+    } else if (permission == PERMISSION_DISPLAY) {
+        return PERMISSION_DISPLAY_INDEX;
+    } else if (permission == PERMISSION_EXECUTE) {
+        return PERMISSION_EXECUTE_INDEX;
+    } else if (permission == PERMISSION_PRINT) {
+        return PERMISSION_PRINT_INDEX;
+    } else {
         ALOGE("DrmDef::getPermissionIndex : Invalid permission.");
         return PERMISSION_NONE_INDEX;
     }
 }
 
-
-int DrmDef::getPermission(int permissionIndex)
-{
-    if (permissionIndex == PERMISSION_PLAY_INDEX)
-    {
+int DrmDef::getPermission(int permissionIndex) {
+    if (permissionIndex == PERMISSION_PLAY_INDEX) {
         return PERMISSION_PLAY;
-    }
-    else if (permissionIndex == PERMISSION_DISPLAY_INDEX)
-    {
+    } else if (permissionIndex == PERMISSION_DISPLAY_INDEX) {
         return PERMISSION_DISPLAY;
-    }
-    else if (permissionIndex == PERMISSION_EXECUTE_INDEX)
-    {
+    } else if (permissionIndex == PERMISSION_EXECUTE_INDEX) {
         return PERMISSION_EXECUTE;
-    }
-    else if (permissionIndex == PERMISSION_PRINT_INDEX)
-    {
+    } else if (permissionIndex == PERMISSION_PRINT_INDEX) {
         return PERMISSION_PRINT;
-    }
-    else
-    {
+    } else {
         ALOGE("DrmDef::getPermission : Invalid permissionIndex.");
         return PERMISSION_NONE;
     }
 }
 
-int DrmDef::getPermissionFromAction(int action)
-{
+int DrmDef::getPermissionFromAction(int action) {
     int permission = PERMISSION_NONE;
-    switch (action)
-    {
+    switch (action) {
         case Action::PLAY:
             permission = PERMISSION_PLAY;
             break;
@@ -311,7 +230,7 @@ const String8 DrmDef::MTK_CD_HEADER(
 
 const String8 DrmDef::ENCODING_BASE64("base64");
 
-//Add to support cta5
+// Add to support cta5
 const String8 DrmDef::CTA5_PLUGIN_DESCRIPTION("CTA5 DRM plug-in");
 const String8 DrmDef::MIME_CTA5_MESSAGE("application/vnd.mtk.cta5.message");
 const String8 DrmDef::EXT_CTA5_FILE(".mudp");

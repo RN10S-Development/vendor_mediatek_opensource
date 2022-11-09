@@ -17,23 +17,17 @@
 #ifndef __CCCI_FS_H__
 #define __CCCI_FS_H__
 
+#define CCCI_FS_MAX_BUF_SIZE (16384)
+#define CCCI_FS_MAX_BUFFERS (5)
 
-#define  CCCI_FS_MAX_BUF_SIZE   (16384)
-#define  CCCI_FS_MAX_BUFFERS    (5)
-
-
-typedef struct
-{
+typedef struct {
     unsigned length;
     unsigned index;
 } fs_stream_msg_t;
 
-
-typedef struct
-{
+typedef struct {
     unsigned fs_ops;
     unsigned char buffer[CCCI_FS_MAX_BUF_SIZE];
 } fs_stream_buffer_t;
 
-
-#endif // __CCCI_FS_H__
+#endif  // __CCCI_FS_H__

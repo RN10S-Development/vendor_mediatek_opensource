@@ -25,20 +25,20 @@ int socketConnect();
 int socketDisconnect(int sock);
 int sendData(int socket, int argCount, char** data);
 int notify_rild_game_event(int gameMode, int lowLatencyMode);
-int update_packet(const char * packet);
+int update_packet(const char* packet);
 int notify_rild_opt_info(int lowLatencyMode, int period);
 int reset_rild_opt_info(int power_on_init);
-int notify_rild_opt_update(int lowLatencyMode, void *scn);
+int notify_rild_opt_update(int lowLatencyMode, void* scn);
 int notify_rild_app_status(int pid, int status);
 int query_capability(int pid, const char* featureName);
-int notify_rild_cert_pid_set(int pid, void *scn);
-int notify_rild_cert_pid_reset(int pid, void *scn);
-int notify_rild_crash_pid_set(int pid, void *scn);
-int notify_rild_crash_pid_reset(int pid, void *scn);
-int notify_rild_weak_sig_opt_set(int enable, void *scn);
+int notify_rild_cert_pid_set(int pid, void* scn);
+int notify_rild_cert_pid_reset(int pid, void* scn);
+int notify_rild_crash_pid_set(int pid, void* scn);
+int notify_rild_crash_pid_reset(int pid, void* scn);
+int notify_rild_weak_sig_opt_set(int enable, void* scn);
 
 #ifdef __cplusplus
 }
 #endif
 
-#endif  /* _RIL_UTILITY_ */
+#endif /* _RIL_UTILITY_ */

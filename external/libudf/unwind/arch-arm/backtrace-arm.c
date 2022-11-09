@@ -30,7 +30,6 @@
 #include "../ptrace-arch.h"
 #include "../libudf-unwind/ptrace.h"
 
-
 #if !defined(__BIONIC_HAVE_UCONTEXT_T)
 /* Old versions of the Android <signal.h> didn't define ucontext_t. */
 #include <asm/sigcontext.h> /* Ensure 'struct sigcontext' is defined. */
@@ -72,7 +71,7 @@ static const uint32_t EXIDX_CANTUNWIND = 1;
  * handles both cases, so we use that here.
  */
 typedef long unsigned int* _Unwind_Ptr;
-extern _Unwind_Ptr __gnu_Unwind_Find_exidx(_Unwind_Ptr pc, int *pcount);
+extern _Unwind_Ptr __gnu_Unwind_Find_exidx(_Unwind_Ptr pc, int* pcount);
 
 static uintptr_t find_exidx(uintptr_t pc, size_t* out_exidx_size) {
     int count;
@@ -87,10 +86,10 @@ static uintptr_t prel_to_absolute(uintptr_t place, uint32_t prel_offset) {
     return place + (((int32_t)(prel_offset << 1)) >> 1);
 }
 
-static uintptr_t get_exception_handler(const memory_t* memory,
-        const map_info_t* map_info_list, uintptr_t pc) {
+static uintptr_t get_exception_handler(const memory_t* memory, const map_info_t* map_info_list,
+                                       uintptr_t pc) {
     if (!pc) {
-      LIBUDF_LOG("get_exception_handler: pc is zero, no handler");
+        LIBUDF_LOG("get_exception_handler: pc is zero, no handler");
         return 0;
     }
 
@@ -151,7 +150,7 @@ static uintptr_t get_exception_handler(const memory_t* memory,
                 break;
             }
             if (entry_handler & (1L << 31)) {
-                handler = entry_handler_ptr; // in-place handler data
+                handler = entry_handler_ptr;  // in-place handler data
             } else if (entry_handler != EXIDX_CANTUNWIND) {
                 handler = prel_to_absolute(entry_handler_ptr, entry_handler);
             }
@@ -160,13 +159,15 @@ static uintptr_t get_exception_handler(const memory_t* memory,
         }
     }
     if (mi) {
-        LIBUDF_LOG("get_exception_handler: pc=0x%08x, module='%s', module_start=0x%08x, "
-                   "exidx_start=0x%08x, exidx_size=%d, handler=0x%08x, handler_index=%d",
-                   pc, mi->name, mi->start, exidx_start, exidx_size, handler, handler_index);
+        LIBUDF_LOG(
+                "get_exception_handler: pc=0x%08x, module='%s', module_start=0x%08x, "
+                "exidx_start=0x%08x, exidx_size=%d, handler=0x%08x, handler_index=%d",
+                pc, mi->name, mi->start, exidx_start, exidx_size, handler, handler_index);
     } else {
-        LIBUDF_LOG("get_exception_handler: pc=0x%08x, "
-                   "exidx_start=0x%08x, exidx_size=%d, handler=0x%08x, handler_index=%d",
-                   pc, exidx_start, exidx_size, handler, handler_index);
+        LIBUDF_LOG(
+                "get_exception_handler: pc=0x%08x, "
+                "exidx_start=0x%08x, exidx_size=%d, handler=0x%08x, handler_index=%d",
+                pc, exidx_start, exidx_size, handler, handler_index);
     }
     return handler;
 }
@@ -179,25 +180,25 @@ typedef struct {
 static bool try_next_byte(const memory_t* memory, byte_stream_t* stream, uint8_t* out_value) {
     uint8_t result;
     switch (stream->ptr & 3) {
-    case 0:
-        if (!try_get_word(memory, stream->ptr, &stream->word)) {
-            *out_value = 0;
-            return false;
-        }
-        *out_value = stream->word >> 24;
-        break;
+        case 0:
+            if (!try_get_word(memory, stream->ptr, &stream->word)) {
+                *out_value = 0;
+                return false;
+            }
+            *out_value = stream->word >> 24;
+            break;
 
-    case 1:
-        *out_value = stream->word >> 16;
-        break;
+        case 1:
+            *out_value = stream->word >> 16;
+            break;
 
-    case 2:
-        *out_value = stream->word >> 8;
-        break;
+        case 2:
+            *out_value = stream->word >> 8;
+            break;
 
-    default:
-        *out_value = stream->word;
-        break;
+        default:
+            *out_value = stream->word;
+            break;
     }
 
     LIBUDF_LOG("next_byte: ptr=0x%08x, value=0x%02x", stream->ptr, *out_value);
@@ -232,47 +233,40 @@ static bool try_pop_registers(unwind_state_t* state, uint32_t mask) {
     return true;
 }
 
-static bool try_pop_Stack_ForNotSaveInASM(unwind_state_t* state,size_t frames __attribute__((unused)))
-{
+static bool try_pop_Stack_ForNotSaveInASM(unwind_state_t* state,
+                                          size_t frames __attribute__((unused))) {
     uint32_t sp = state->gregs[R_SP];
     bool sp_updated = false;
     uint32_t TempValue = 0;
 
-    if (!try_get_word_stack(state->gregs[R_SP]-4, &TempValue))
-    {
+    if (!try_get_word_stack(state->gregs[R_SP] - 4, &TempValue)) {
         return false;
     }
 
-    //check PC equal the current sp-4 value?if yes,needn't remove vsp
-    if(TempValue==state->gregs[R_PC])
-    {
+    // check PC equal the current sp-4 value?if yes,needn't remove vsp
+    if (TempValue == state->gregs[R_PC]) {
         LIBUDF_LOG("Need not to remove VSP");
         return true;
     }
-    //try to force to move vsp to the correct site,for not .save in ASM
-    for (int i = 0; i < 16; i++)
-    {
+    // try to force to move vsp to the correct site,for not .save in ASM
+    for (int i = 0; i < 16; i++) {
         uint32_t value;
-        if (!try_get_word_stack(sp, &value))
-        {
+        if (!try_get_word_stack(sp, &value)) {
             return false;
         }
-        if (value == state->gregs[R_PC]  )
-        {
+        if (value == state->gregs[R_PC]) {
             sp_updated = true;
             break;
         }
         sp += 4;
     }
 
-    if (sp_updated)
-    {
-        LIBUDF_LOG("try_pop_Stack_ForNotSaveInASM frame:%d,sp=0x%08x", (int)frames, sp+4);
-        set_reg(state, R_SP, sp+4);
+    if (sp_updated) {
+        LIBUDF_LOG("try_pop_Stack_ForNotSaveInASM frame:%d,sp=0x%08x", (int)frames, sp + 4);
+        set_reg(state, R_SP, sp + 4);
     }
     return true;
 }
-
 
 /* Executes a built-in personality routine as defined in the EHABI.
  * Returns true if unwinding should continue.
@@ -287,24 +281,24 @@ static bool try_pop_Stack_ForNotSaveInASM(unwind_state_t* state,size_t frames __
  * virtual register state (including the stack pointer) such that
  * the call frame is unwound and the PC register points to the call site.
  */
-static bool execute_personality_routine(const memory_t* memory,
-    unwind_state_t* state, byte_stream_t* stream, int pr_index) {
+static bool execute_personality_routine(const memory_t* memory, unwind_state_t* state,
+                                        byte_stream_t* stream, int pr_index) {
     size_t size;
     switch (pr_index) {
-    case 0: // Personality routine #0, short frame, descriptors have 16-bit scope.
-        size = 3;
-        break;
-    case 1: // Personality routine #1, long frame, descriptors have 16-bit scope.
-    case 2: { // Personality routine #2, long frame, descriptors have 32-bit scope.
-        uint8_t size_byte;
-        if (!try_next_byte(memory, stream, &size_byte)) {
-            return false;
+        case 0:  // Personality routine #0, short frame, descriptors have 16-bit scope.
+            size = 3;
+            break;
+        case 1:    // Personality routine #1, long frame, descriptors have 16-bit scope.
+        case 2: {  // Personality routine #2, long frame, descriptors have 32-bit scope.
+            uint8_t size_byte;
+            if (!try_next_byte(memory, stream, &size_byte)) {
+                return false;
+            }
+            size = (uint32_t)size_byte * sizeof(uint32_t) + 2;
+            break;
         }
-        size = (uint32_t)size_byte * sizeof(uint32_t) + 2;
-        break;
-    }
-    default: // Unknown personality routine.  Stop here.
-        return false;
+        default:  // Unknown personality routine.  Stop here.
+            return false;
     }
 
     bool pc_was_set = false;
@@ -485,11 +479,9 @@ uintptr_t rewind_pc_arch(const memory_t* memory, uintptr_t pc) {
          * 18898:       b001            add     sp, #4
          */
         uint16_t prev1, prev2;
-        if (try_get_half_word(memory, pc - 5, &prev1)
-            && ((prev1 & 0xf000) == 0xf000)
-            && try_get_half_word(memory, pc - 3, &prev2)
-            && ((prev2 & 0xe000) == 0xe000)) {
-            pc -= 4; // long offset
+        if (try_get_half_word(memory, pc - 5, &prev1) && ((prev1 & 0xf000) == 0xf000) &&
+            try_get_half_word(memory, pc - 3, &prev2) && ((prev2 & 0xe000) == 0xe000)) {
+            pc -= 4;  // long offset
         } else {
             pc -= 2;
         }
@@ -500,31 +492,28 @@ uintptr_t rewind_pc_arch(const memory_t* memory, uintptr_t pc) {
     return pc;
 }
 
-static ssize_t unwind_backtrace_common(const memory_t* memory,
-        const map_info_t* map_info_list,
-        unwind_state_t* state, backtrace_frame_t* backtrace,
-        size_t ignore_depth, size_t max_depth) {
+static ssize_t unwind_backtrace_common(const memory_t* memory, const map_info_t* map_info_list,
+                                       unwind_state_t* state, backtrace_frame_t* backtrace,
+                                       size_t ignore_depth, size_t max_depth) {
     size_t ignored_frames = 0;
     size_t returned_frames = 0;
 
     for (size_t index = 0; returned_frames < max_depth; index++) {
-		//work around for NE after check java/native process maps
-		if (state->gregs[R_PC] < 0x100000) {
-			break;
-		}
+        // work around for NE after check java/native process maps
+        if (state->gregs[R_PC] < 0x100000) {
+            break;
+        }
 
-        uintptr_t pc = index ? rewind_pc_arch(memory, state->gregs[R_PC])
-                : state->gregs[R_PC];
-        backtrace_frame_t* frame = add_backtrace_entry(pc,
-                backtrace, ignore_depth, max_depth, &ignored_frames, &returned_frames);
+        uintptr_t pc = index ? rewind_pc_arch(memory, state->gregs[R_PC]) : state->gregs[R_PC];
+        backtrace_frame_t* frame = add_backtrace_entry(pc, backtrace, ignore_depth, max_depth,
+                                                       &ignored_frames, &returned_frames);
 
         uintptr_t handler = get_exception_handler(memory, map_info_list, pc);
         if (!handler) {
             // If there is no handler for the PC and this is the first frame,
             // then the program may have branched to an invalid address.
             // Try starting from the LR instead, otherwise stop unwinding.
-            if (index == 0 && state->gregs[R_LR]
-                    && state->gregs[R_LR] != state->gregs[R_PC]) {
+            if (index == 0 && state->gregs[R_LR] && state->gregs[R_LR] != state->gregs[R_PC]) {
                 set_reg(state, R_PC, state->gregs[R_LR]);
                 continue;
             } else {
@@ -551,8 +540,8 @@ static ssize_t unwind_backtrace_common(const memory_t* memory,
         if (!execute_personality_routine(memory, state, &stream, pr & 0x0f)) {
             break;
         }
-        if(returned_frames==1)//only for the second layer backtrace
-                try_pop_Stack_ForNotSaveInASM(state,returned_frames);
+        if (returned_frames == 1)  // only for the second layer backtrace
+            try_pop_Stack_ForNotSaveInASM(state, returned_frames);
         if (!state->gregs[R_PC]) {
             break;
         }
@@ -560,52 +549,50 @@ static ssize_t unwind_backtrace_common(const memory_t* memory,
 
     // Ran out of frames that we could unwind using handlers.
     // Add a final entry for the LR if it looks sane and call it good.
-    if (returned_frames < max_depth
-            && state->gregs[R_LR]
-            && state->gregs[R_LR] != state->gregs[R_PC]
-            && is_executable_map(map_info_list, state->gregs[R_LR])) {
+    if (returned_frames < max_depth && state->gregs[R_LR] &&
+        state->gregs[R_LR] != state->gregs[R_PC] &&
+        is_executable_map(map_info_list, state->gregs[R_LR])) {
         // We don't know where the stack for this extra frame starts so we
         // don't return any stack information for it.
-        add_backtrace_entry(rewind_pc_arch(memory, state->gregs[R_LR]),
-                backtrace, ignore_depth, max_depth, &ignored_frames, &returned_frames);
+        add_backtrace_entry(rewind_pc_arch(memory, state->gregs[R_LR]), backtrace, ignore_depth,
+                            max_depth, &ignored_frames, &returned_frames);
     }
     return returned_frames;
 }
 
 #ifdef SELF_UNWIND_NO_GCC
-ssize_t unwind_backtrace_signal_arch_selfnogcc(
-        const map_info_t* map_info_list,
-        backtrace_frame_t* backtrace, size_t ignore_depth, size_t max_depth) {
-
+ssize_t unwind_backtrace_signal_arch_selfnogcc(const map_info_t* map_info_list,
+                                               backtrace_frame_t* backtrace, size_t ignore_depth,
+                                               size_t max_depth) {
     unwind_state_t state;
     int loop = 0;
-    asm ("mov %0, r0;" :"=r"(state.gregs[loop++]) : : );
-    asm ("mov %0, r1;" :"=r"(state.gregs[loop++]) : : );
-    asm ("mov %0, r2;" :"=r"(state.gregs[loop++]) : : );
-    asm ("mov %0, r3;" :"=r"(state.gregs[loop++]) : : );
-    asm ("mov %0, r4;" :"=r"(state.gregs[loop++]) : : );
-    asm ("mov %0, r5;" :"=r"(state.gregs[loop++]) : : );
-    asm ("mov %0, r6;" :"=r"(state.gregs[loop++]) : : );
-    asm ("mov %0, r7;" :"=r"(state.gregs[loop++]) : : );
-    asm ("mov %0, r8;" :"=r"(state.gregs[loop++]) : : );
-    asm ("mov %0, r9;" :"=r"(state.gregs[loop++]) : : );
-    asm ("mov %0, r10;" :"=r"(state.gregs[loop++]) : : );
-    asm ("mov %0, r11;" :"=r"(state.gregs[loop++]) : : );
-    asm ("mov %0, r12;" :"=r"(state.gregs[loop++]) : : );
-    asm ("mov %0, sp;" :"=r"(state.gregs[loop++]) : : );
-    asm ("mov %0, lr;" :"=r"(state.gregs[loop++]) : : );
-    asm ("mov %0, pc;" :"=r"(state.gregs[loop++]) : : );
+    asm("mov %0, r0;" : "=r"(state.gregs[loop++]) : :);
+    asm("mov %0, r1;" : "=r"(state.gregs[loop++]) : :);
+    asm("mov %0, r2;" : "=r"(state.gregs[loop++]) : :);
+    asm("mov %0, r3;" : "=r"(state.gregs[loop++]) : :);
+    asm("mov %0, r4;" : "=r"(state.gregs[loop++]) : :);
+    asm("mov %0, r5;" : "=r"(state.gregs[loop++]) : :);
+    asm("mov %0, r6;" : "=r"(state.gregs[loop++]) : :);
+    asm("mov %0, r7;" : "=r"(state.gregs[loop++]) : :);
+    asm("mov %0, r8;" : "=r"(state.gregs[loop++]) : :);
+    asm("mov %0, r9;" : "=r"(state.gregs[loop++]) : :);
+    asm("mov %0, r10;" : "=r"(state.gregs[loop++]) : :);
+    asm("mov %0, r11;" : "=r"(state.gregs[loop++]) : :);
+    asm("mov %0, r12;" : "=r"(state.gregs[loop++]) : :);
+    asm("mov %0, sp;" : "=r"(state.gregs[loop++]) : :);
+    asm("mov %0, lr;" : "=r"(state.gregs[loop++]) : :);
+    asm("mov %0, pc;" : "=r"(state.gregs[loop++]) : :);
 
     memory_t memory;
     init_memory(&memory, map_info_list);
-    return unwind_backtrace_common(&memory, map_info_list, &state,
-            backtrace, ignore_depth, max_depth);
+    return unwind_backtrace_common(&memory, map_info_list, &state, backtrace, ignore_depth,
+                                   max_depth);
 }
 #endif
 
-ssize_t unwind_backtrace_signal_arch(siginfo_t* siginfo __attribute__ ((unused)), void* sigcontext,
-        const map_info_t* map_info_list,
-        backtrace_frame_t* backtrace, size_t ignore_depth, size_t max_depth) {
+ssize_t unwind_backtrace_signal_arch(siginfo_t* siginfo __attribute__((unused)), void* sigcontext,
+                                     const map_info_t* map_info_list, backtrace_frame_t* backtrace,
+                                     size_t ignore_depth, size_t max_depth) {
     const ucontext_t* uc = (const ucontext_t*)sigcontext;
 
     unwind_state_t state;
@@ -629,12 +616,13 @@ ssize_t unwind_backtrace_signal_arch(siginfo_t* siginfo __attribute__ ((unused))
 
     memory_t memory;
     init_memory(&memory, map_info_list);
-    return unwind_backtrace_common(&memory, map_info_list, &state,
-            backtrace, ignore_depth, max_depth);
+    return unwind_backtrace_common(&memory, map_info_list, &state, backtrace, ignore_depth,
+                                   max_depth);
 }
 
 ssize_t unwind_backtrace_ptrace_arch(pid_t tid, const ptrace_context_t* context,
-        backtrace_frame_t* backtrace, size_t ignore_depth, size_t max_depth) {
+                                     backtrace_frame_t* backtrace, size_t ignore_depth,
+                                     size_t max_depth) {
     struct pt_regs regs;
     if (ptrace(PTRACE_GETREGS, tid, 0, &regs)) {
         return -1;
@@ -647,6 +635,6 @@ ssize_t unwind_backtrace_ptrace_arch(pid_t tid, const ptrace_context_t* context,
 
     memory_t memory;
     init_memory_ptrace(&memory, tid);
-    return unwind_backtrace_common(&memory, context->map_info_list, &state,
-            backtrace, ignore_depth, max_depth);
+    return unwind_backtrace_common(&memory, context->map_info_list, &state, backtrace, ignore_depth,
+                                   max_depth);
 }

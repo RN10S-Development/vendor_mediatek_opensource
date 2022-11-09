@@ -36,37 +36,27 @@ namespace power {
 namespace V1_3 {
 namespace implementation {
 
-enum spm_mode {
-    DEEPIDLE = 0,
-    SODI3 = 1,
-    SPM_MODE_NUM
-};
+enum spm_mode { DEEPIDLE = 0, SODI3 = 1, SPM_MODE_NUM };
 
-enum spm_voter {
-    AP = 0,
-    SPM_VOTER_NUM
-};
+enum spm_voter { AP = 0, SPM_VOTER_NUM };
 
-enum sub_spm {
-    CONSYS = 0,
-    SUB_SPM_NUM
-};
+enum sub_spm { CONSYS = 0, SUB_SPM_NUM };
 
 static int suspend_count = 0;
 struct timespec suspend_t;
 
 struct input_event {
-	struct timeval time;
-	__u16 type;
-	__u16 code;
-	__s32 value;
+    struct timeval time;
+    __u16 type;
+    __u16 code;
+    __s32 value;
 };
 
 Power::Power() {}
 
 Power::~Power() {}
 
-//std::string PowerHintToString(::android::hardware::power::V1_0::PowerHint hint, int32_t data) {
+// std::string PowerHintToString(::android::hardware::power::V1_0::PowerHint hint, int32_t data) {
 std::string PowerHintToString(int32_t hint, int32_t data) {
     char powerHintString[50];
     switch (hint) {
@@ -129,7 +119,6 @@ std::string PowerHintToString(int32_t hint, int32_t data) {
                      data ? "start" : "end");
             break;
 
-
         default:
             snprintf(powerHintString, sizeof(powerHintString), "%s", "UNKNOWN");
             break;
@@ -138,67 +127,64 @@ std::string PowerHintToString(int32_t hint, int32_t data) {
 }
 
 // Methods from ::android::hardware::power::V1.0::IPower follow.
-Return<void> Power::setInteractive(bool interactive)  {
+Return<void> Power::setInteractive(bool interactive) {
     /*if (mModule->setInteractive)
         mModule->setInteractive(mModule, interactive ? 1 : 0);
     */
     struct tPowerData vPowerData;
-    struct tPowerData *vpRspData = NULL;
+    struct tPowerData* vpRspData = NULL;
     struct tScnData vScnData;
 
     if (interactive) {
-      ALOGI("%s %s", __func__, "Restore All");
-      vPowerData.msg  = POWER_MSG_SCN_RESTORE_ALL;
+        ALOGI("%s %s", __func__, "Restore All");
+        vPowerData.msg = POWER_MSG_SCN_RESTORE_ALL;
     } else {
-      vPowerData.msg  = POWER_MSG_SCN_DISABLE_ALL;
-      suspend_count++;
-      clock_gettime(CLOCK_BOOTTIME, &suspend_t);
-      ALOGI("%s %s %d %ld", __func__, "Disable All", suspend_count, suspend_t.tv_sec);
+        vPowerData.msg = POWER_MSG_SCN_DISABLE_ALL;
+        suspend_count++;
+        clock_gettime(CLOCK_BOOTTIME, &suspend_t);
+        ALOGI("%s %s %d %ld", __func__, "Disable All", suspend_count, suspend_t.tv_sec);
     }
     vPowerData.pBuf = (void*)&vScnData;
 
-    power_msg(&vPowerData, (void **) &vpRspData);
+    power_msg(&vPowerData, (void**)&vpRspData);
 
     if (vpRspData) {
-        if(vpRspData->pBuf)
-            free(vpRspData->pBuf);
+        if (vpRspData->pBuf) free(vpRspData->pBuf);
         free(vpRspData);
     }
 
     return Void();
 }
 
-void Power::powerHintInternal(int32_t hint, int32_t data)
-{
+void Power::powerHintInternal(int32_t hint, int32_t data) {
     int32_t param = data;
     struct tPowerData vPowerData;
-    struct tHintData  vHintData;
-    struct tPowerData *vpRspData = NULL;
+    struct tHintData vHintData;
+    struct tPowerData* vpRspData = NULL;
 
-    switch(hint) {
+    switch (hint) {
+        /* Add switch case here to support more hint */
+        case (int32_t)::android::hardware::power::V1_0::PowerHint::INTERACTION:
+        case (int32_t)::android::hardware::power::V1_2::PowerHint::CAMERA_LAUNCH:
+        case (int32_t)::android::hardware::power::V1_3::PowerHint::EXPENSIVE_RENDERING:
+            ALOGD("powerHintInternal hint:%d, data:%d", hint, data);
+            if (param > 0)
+                vHintData.data = param;
+            else
+                vHintData.data = 0;
+            break;
 
-    /* Add switch case here to support more hint */
-    case (int32_t)::android::hardware::power::V1_0::PowerHint::INTERACTION:
-    case (int32_t)::android::hardware::power::V1_2::PowerHint::CAMERA_LAUNCH:
-    case (int32_t)::android::hardware::power::V1_3::PowerHint::EXPENSIVE_RENDERING:
-        ALOGD("powerHintInternal hint:%d, data:%d", hint, data);
-        if (param > 0)
-            vHintData.data = param;
-        else
-            vHintData.data = 0;
-        break;
+        case (int32_t)::android::hardware::power::V1_0::PowerHint::LAUNCH:
+            ALOGI("powerHintInternal hint:%d, data:%d", hint, data);
+            if (param > 0)
+                vHintData.data = MTKPOWER_HINT_ALWAYS_ENABLE;
+            else
+                vHintData.data = 0;
+            break;
 
-    case (int32_t)::android::hardware::power::V1_0::PowerHint::LAUNCH:
-        ALOGI("powerHintInternal hint:%d, data:%d", hint, data);
-        if (param > 0)
-            vHintData.data = MTKPOWER_HINT_ALWAYS_ENABLE;
-        else
-            vHintData.data = 0;
-        break;
-
-    default:
-        ALOGD("powerHintInternal hint:%d data:%d, not support", hint, data);
-        return;
+        default:
+            ALOGD("powerHintInternal hint:%d data:%d, not support", hint, data);
+            return;
     }
 
     if (ATRACE_ENABLED()) {
@@ -206,26 +192,25 @@ void Power::powerHintInternal(int32_t hint, int32_t data)
     }
 
     vHintData.hint = (int)hint;
-    vPowerData.msg  = POWER_MSG_AOSP_HINT;
+    vPowerData.msg = POWER_MSG_AOSP_HINT;
     vPowerData.pBuf = (void*)&vHintData;
 
-    power_msg(&vPowerData, (void **) &vpRspData);
+    power_msg(&vPowerData, (void**)&vpRspData);
 
     ATRACE_END();
 
     if (vpRspData) {
-        if(vpRspData->pBuf)
-            free(vpRspData->pBuf);
+        if (vpRspData->pBuf) free(vpRspData->pBuf);
         free(vpRspData);
     }
 }
 
-Return<void> Power::powerHint(::android::hardware::power::V1_0::PowerHint hint, int32_t data)  {
+Return<void> Power::powerHint(::android::hardware::power::V1_0::PowerHint hint, int32_t data) {
     powerHintInternal((int32_t)hint, data);
     return Void();
 }
 
-Return<void> Power::setFeature(Feature feature, bool activate)  {
+Return<void> Power::setFeature(Feature feature, bool activate) {
 #if 0
     if (mModule->setFeature)
         mModule->setFeature(mModule, static_cast<feature_t>(feature),
@@ -247,10 +232,10 @@ Return<void> Power::setFeature(Feature feature, bool activate)  {
             event.code = 1;
             event.value = activate ? 5 : 4;
             ret = write(fd, &event, sizeof(event));
-            if (ret < (ssize_t) sizeof(event)) {
+            if (ret < (ssize_t)sizeof(event)) {
                 ALOGI("setFeature feature:%d; failed to write event", (int)feature);
             }
-	    break;
+            break;
         }
         default:
             break;
@@ -260,9 +245,9 @@ Return<void> Power::setFeature(Feature feature, bool activate)  {
     return Void();
 }
 
-Return<void> Power::getPlatformLowPowerStats(getPlatformLowPowerStats_cb _hidl_cb)  {
+Return<void> Power::getPlatformLowPowerStats(getPlatformLowPowerStats_cb _hidl_cb) {
     hidl_vec<PowerStatePlatformSleepState> states;
-    struct PowerStatePlatformSleepState *state;
+    struct PowerStatePlatformSleepState* state;
 
     states.resize(spm_mode::SPM_MODE_NUM);
 
@@ -286,7 +271,8 @@ Return<void> Power::getPlatformLowPowerStats(getPlatformLowPowerStats_cb _hidl_c
         stats[platform_param_id::XO_ACCUMULATED_DURATION_APSS] / RPM_CLK;
     state->voters[0].totalNumberOfTimesVotedSinceBoot = stats[platform_param_id::XO_COUNT_APSS];
     */
-    state->voters[spm_voter::AP].totalTimeInMsecVotedForSinceBoot = ((uint64_t)suspend_t.tv_sec * 1000);
+    state->voters[spm_voter::AP].totalTimeInMsecVotedForSinceBoot =
+            ((uint64_t)suspend_t.tv_sec * 1000);
     state->voters[spm_voter::AP].totalNumberOfTimesVotedSinceBoot = suspend_count;
 
     state = &states[spm_mode::SODI3];
@@ -301,9 +287,8 @@ Return<void> Power::getPlatformLowPowerStats(getPlatformLowPowerStats_cb _hidl_c
     return Void();
 }
 
-static int get_consys_low_power_stats(struct PowerStateSubsystem &subsystem) {
-
-    struct PowerStateSubsystemSleepState *state;
+static int get_consys_low_power_stats(struct PowerStateSubsystem& subsystem) {
+    struct PowerStateSubsystemSleepState* state;
 
     subsystem.name = "CONSYS";
     subsystem.states.resize(spm_mode::SPM_MODE_NUM);
@@ -334,13 +319,13 @@ Return<void> Power::getSubsystemLowPowerStats(getSubsystemLowPowerStats_cb _hidl
 
     subsystems.resize(sub_spm::SUB_SPM_NUM);
 
-    //We currently have only one Subsystem for WLAN
+    // We currently have only one Subsystem for WLAN
     ret = get_consys_low_power_stats(subsystems[sub_spm::CONSYS]);
     if (ret != 0) {
         goto done;
     }
 
-    //Add query for other subsystems here
+    // Add query for other subsystems here
 
 done:
     _hidl_cb(subsystems, Status::SUCCESS);
@@ -353,25 +338,24 @@ Return<void> Power::powerHintAsync(::android::hardware::power::V1_0::PowerHint h
 }
 
 // Methods from ::android::hardware::power::V1_2::IPower follow.
-Return<void> Power::powerHintAsync_1_2(::android::hardware::power::V1_2::PowerHint hint, int32_t data) {
+Return<void> Power::powerHintAsync_1_2(::android::hardware::power::V1_2::PowerHint hint,
+                                       int32_t data) {
     ALOGD("powerHintAsync_1_2 hint:%d, data:%d", hint, data);
     powerHintInternal((int32_t)hint, data);
     return Void();
 }
 
 // Methods from ::android::hardware::power::V1_2::IPower follow.
-Return<void> Power::powerHintAsync_1_3(::android::hardware::power::V1_3::PowerHint hint, int32_t data) {
+Return<void> Power::powerHintAsync_1_3(::android::hardware::power::V1_3::PowerHint hint,
+                                       int32_t data) {
     ALOGD("powerHintAsync_1_3 hint:%d, data:%d", hint, data);
     powerHintInternal((int32_t)hint, data);
     return Void();
 }
 
+IPower* HIDL_FETCH_IPower(const char* /* name */) { return new Power(); }
 
-IPower* HIDL_FETCH_IPower(const char* /* name */) {
-    return new Power();
-}
-
-} // namespace implementation
+}  // namespace implementation
 }  // namespace V1_3
 }  // namespace power
 }  // namespace hardware

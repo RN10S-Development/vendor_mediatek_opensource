@@ -30,16 +30,16 @@ class DecryptHandle;
 class DrmManagerClient;
 
 class DrmMtkUtil {
-private:
+  private:
     DrmMtkUtil();
 
-public:
+  public:
     static bool installDrmMsg(const String8& filePath);
     static String8 getContentId(const DrmRights& rights);
-    //M: Add to avoid writing sdcard in native layer
+    // M: Add to avoid writing sdcard in native layer
     static bool installDrmMsg(int fd_dm, int fd_dcf);
 
-private:
+  private:
     static bool getNextNELineContain(FILE* fp, String8& line, String8 contained);
     static int getNextNELine(FILE* fp, char* line);
     static bool getNextNELineTrimR(FILE* fp, String8& line);
@@ -55,24 +55,26 @@ private:
     static bool getRoIndex(FILE* fp, const String8 boundary, long& startIndex, long& endIndex);
     static bool installCd(FILE* fp_dm, const String8 boundary, FILE* fp_dcf);
     static bool installContent(FILE* fp_dm, long contentOffset, long contentLength,
-            const String8 mime, const char* cid, const String8 headers, FILE * fp_dcf);
+                               const String8 mime, const char* cid, const String8 headers,
+                               FILE* fp_dcf);
     static bool installFl(FILE* fp_dm, const String8 boundary, const String8 encoding,
-            const String8 mime, FILE* fp_dcf);
+                          const String8 mime, FILE* fp_dcf);
     static bool installFlDcf(FILE* fp_dm, const String8 boundary, const String8 encoding,
-            FILE* fp_dcf);
+                             FILE* fp_dcf);
     static bool installRo(FILE* fp, long offset, long length, char* cid);
     static bool isForwardlockSet();
     static bool parseHeaders(const Vector<String8> headers, String8& encoding, String8& mime,
-            int& drmMethod);
+                             int& drmMethod);
     static bool preInstall(FILE* fp, const String8 boundary, const String8 encoding,
-            long& contentOffset, long& contentLength);
-    //M: Add to avoid writing sdcard in native layer
+                           long& contentOffset, long& contentLength);
+    // M: Add to avoid writing sdcard in native layer
     static bool correctDcf(int fd_dm, int fd_dcf);
     static bool copyFile(int fd_in, int fd_out, int length);
-public:
+
+  public:
     static Mutex mROLock;
 
-public:
+  public:
     static int saveIMEI(const String8& imei);
     static int saveId(const String8& id);
     static String8 loadId();
@@ -95,6 +97,6 @@ public:
     static long getContentLength(DecryptHandle* handle, DrmManagerClient* client);
 };
 
-}
+}  // namespace android
 
-#endif // __DRM_MTK_UTIL_H__
+#endif  // __DRM_MTK_UTIL_H__

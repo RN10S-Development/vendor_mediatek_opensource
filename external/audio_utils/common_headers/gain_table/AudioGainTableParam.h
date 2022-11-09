@@ -33,10 +33,10 @@
 #define HP_IMPEDANCE_AUDIOTYPE_NAME "HpImpedance"
 
 // VOLUME INDEX
-#define GAIN_MAX_VOL_INDEX (15) // index will change from 0~18 total 19 step
+#define GAIN_MAX_VOL_INDEX (15)  // index will change from 0~18 total 19 step
 #define GAIN_VOL_INDEX_SIZE (GAIN_MAX_VOL_INDEX + 1)
 
-#define GAIN_MAX_SPEECH_VOL_INDEX (7) // for voice stream, policy index range = 0~7, set 7 here.
+#define GAIN_MAX_SPEECH_VOL_INDEX (7)  // for voice stream, policy index range = 0~7, set 7 here.
 
 // STREAM TYPE
 #define GAIN_MIN_STREAM_TYPE (AUDIO_STREAM_VOICE_CALL)
@@ -66,28 +66,23 @@ enum GAIN_DEVICE {
     GAIN_DEVICE_BT_A2DP,
     GAIN_DEVICE_BT_A2DP_HP,
     GAIN_DEVICE_BT_A2DP_SPK,
-    GAIN_DEVICE_RCV_EV,//super volume mode
-    GAIN_DEVICE_SPK_EV,//super volume mode
+    GAIN_DEVICE_RCV_EV,  // super volume mode
+    GAIN_DEVICE_SPK_EV,  // super volume mode
     NUM_GAIN_DEVICE,
 };
 
 // GAIN_ANA_TYPE
 enum GAIN_ANA_TYPE {
     GAIN_ANA_NONE = -1,
-    GAIN_ANA_HANDSET = 0,   // mtk codec voice buffer
-    GAIN_ANA_HEADPHONE,     // mtk codec audio buffer
-    GAIN_ANA_SPEAKER,       // mtk codec speaker amp
-    GAIN_ANA_LINEOUT,       // mtk codec linout buffer
+    GAIN_ANA_HANDSET = 0,  // mtk codec voice buffer
+    GAIN_ANA_HEADPHONE,    // mtk codec audio buffer
+    GAIN_ANA_SPEAKER,      // mtk codec speaker amp
+    GAIN_ANA_LINEOUT,      // mtk codec linout buffer
     NUM_GAIN_ANA_TYPE
 };
 
 // SPEECH
-enum GAIN_SPEECH_BAND {
-    GAIN_SPEECH_NB,
-    GAIN_SPEECH_WB,
-    GAIN_SPEECH_SWB,
-    NUM_GAIN_SPEECH_BAND
-};
+enum GAIN_SPEECH_BAND { GAIN_SPEECH_NB, GAIN_SPEECH_WB, GAIN_SPEECH_SWB, NUM_GAIN_SPEECH_BAND };
 
 enum GAIN_SPEECH_NETWORK {
     GAIN_SPEECH_NETWORK_GSM,
@@ -112,32 +107,34 @@ enum GAIN_MIC_MODE {
     GAIN_MIC_AAUDIO,
     NUM_GAIN_MIC_MODE,
     /* the following is DEPRECATED, DO NOT USE!!! */
-    Idle_Normal_Record,         // Record, AUDIO_SOURCE_MIC, Sound recording, rcv  (else)
-    Idle_Headset_Record,        // Record, AUDIO_SOURCE_MIC, Sound recording, hs   (else)
-    Voice_Rec_Mic_Handset,      // Record, AUDIO_SOURCE_VOICE_RECOGNITION, Voice recognition & verifier, rcv
-    Voice_Rec_Mic_Headset,      // Record, AUDIO_SOURCE_VOICE_RECOGNITION, Voice recognition & verifier, hs
-    Idle_Video_Record_Handset,  // Record, AUDIO_SOURCE_CAMCORDER, Camera recording, rcv
-    Idle_Video_Record_Headset,  // Record, AUDIO_SOURCE_CAMCORDER, Camera recording, hs
-    Normal_Mic,                 // Speech, NB, RCV
-    Headset_Mic,                // Speech, NB, HS
-    Handfree_Mic,               // Speech, NB, SPK
-    Normal_WB_Mic,              // Speech, WB, RCV
-    Headset_WB_Mic,             // Speech, WB, HS
-    Handfree_WB_Mic,            // Speech, WB, SPK
-    VOIP_Normal_Mic,            // VoIP, Handset
-    VOIP_Headset_Mic,           // VoIP, Headset
-    VOIP_Handfree_Mic,          // VoIP, Hands-free
-    TTY_CTM_Mic,                // Record,
-    Level_Shift_Buffer_Gain,    // Record,
-    Analog_PLay_Gain,           // Record,
-    Voice_UnLock_Mic_Handset,   // Record, AUDIO_SOURCE_VOICE_UNLOCK, , rcv
-    Voice_UnLock_Mic_Headset,   // Record, AUDIO_SOURCE_VOICE_UNLOCK, ,hs
-    Customization1_Mic_Handset, // Record, AUDIO_SOURCE_CUSTOMIZATION1, ASR improvement,rcv
-    Customization1_Mic_Headset, // Record, AUDIO_SOURCE_CUSTOMIZATION1, ASR improvement,hs
-    Customization2_Mic_Handset, // Record, AUDIO_SOURCE_CUSTOMIZATION2, , rcv
-    Customization2_Mic_Headset, // Record, AUDIO_SOURCE_CUSTOMIZATION2, ,hs
-    Customization3_Mic_Handset, // Record, AUDIO_SOURCE_CUSTOMIZATION3, ,rcv
-    Customization3_Mic_Headset, // Record, AUDIO_SOURCE_CUSTOMIZATION3, , hs
+    Idle_Normal_Record,     // Record, AUDIO_SOURCE_MIC, Sound recording, rcv  (else)
+    Idle_Headset_Record,    // Record, AUDIO_SOURCE_MIC, Sound recording, hs   (else)
+    Voice_Rec_Mic_Handset,  // Record, AUDIO_SOURCE_VOICE_RECOGNITION, Voice recognition & verifier,
+                            // rcv
+    Voice_Rec_Mic_Headset,  // Record, AUDIO_SOURCE_VOICE_RECOGNITION, Voice recognition & verifier,
+                            // hs
+    Idle_Video_Record_Handset,   // Record, AUDIO_SOURCE_CAMCORDER, Camera recording, rcv
+    Idle_Video_Record_Headset,   // Record, AUDIO_SOURCE_CAMCORDER, Camera recording, hs
+    Normal_Mic,                  // Speech, NB, RCV
+    Headset_Mic,                 // Speech, NB, HS
+    Handfree_Mic,                // Speech, NB, SPK
+    Normal_WB_Mic,               // Speech, WB, RCV
+    Headset_WB_Mic,              // Speech, WB, HS
+    Handfree_WB_Mic,             // Speech, WB, SPK
+    VOIP_Normal_Mic,             // VoIP, Handset
+    VOIP_Headset_Mic,            // VoIP, Headset
+    VOIP_Handfree_Mic,           // VoIP, Hands-free
+    TTY_CTM_Mic,                 // Record,
+    Level_Shift_Buffer_Gain,     // Record,
+    Analog_PLay_Gain,            // Record,
+    Voice_UnLock_Mic_Handset,    // Record, AUDIO_SOURCE_VOICE_UNLOCK, , rcv
+    Voice_UnLock_Mic_Headset,    // Record, AUDIO_SOURCE_VOICE_UNLOCK, ,hs
+    Customization1_Mic_Handset,  // Record, AUDIO_SOURCE_CUSTOMIZATION1, ASR improvement,rcv
+    Customization1_Mic_Headset,  // Record, AUDIO_SOURCE_CUSTOMIZATION1, ASR improvement,hs
+    Customization2_Mic_Handset,  // Record, AUDIO_SOURCE_CUSTOMIZATION2, , rcv
+    Customization2_Mic_Headset,  // Record, AUDIO_SOURCE_CUSTOMIZATION2, ,hs
+    Customization3_Mic_Handset,  // Record, AUDIO_SOURCE_CUSTOMIZATION3, ,rcv
+    Customization3_Mic_Headset,  // Record, AUDIO_SOURCE_CUSTOMIZATION3, , hs
 };
 
 struct GainTableUnit {
@@ -162,16 +159,18 @@ struct GainTableForScene {
     GainTableMicUnit micGain[NUM_GAIN_MIC_MODE][NUM_GAIN_DEVICE];
 };
 
-struct GainTableForNonScene{
-    GainTableUnit speechGain[NUM_GAIN_SPEECH_BAND][NUM_GAIN_SPEECH_NETWORK][NUM_GAIN_DEVICE][GAIN_VOL_INDEX_SIZE];
-    GainTableSidetoneUnit sidetoneGain[NUM_GAIN_SPEECH_BAND][NUM_GAIN_SPEECH_NETWORK][NUM_GAIN_DEVICE];
+struct GainTableForNonScene {
+    GainTableUnit speechGain[NUM_GAIN_SPEECH_BAND][NUM_GAIN_SPEECH_NETWORK][NUM_GAIN_DEVICE]
+                            [GAIN_VOL_INDEX_SIZE];
+    GainTableSidetoneUnit sidetoneGain[NUM_GAIN_SPEECH_BAND][NUM_GAIN_SPEECH_NETWORK]
+                                      [NUM_GAIN_DEVICE];
     GainTableMicUnit speechMicGain[NUM_GAIN_SPEECH_BAND][NUM_GAIN_SPEECH_NETWORK][NUM_GAIN_DEVICE];
     GainTableRingbackToneUnit ringbackToneGain[NUM_GAIN_DEVICE][GAIN_VOL_INDEX_SIZE];
 };
 
 struct GainTableParam {
     int sceneCount;
-    GainTableForScene *sceneGain;
+    GainTableForScene* sceneGain;
     GainTableForNonScene nonSceneGain;
 };
 
@@ -240,4 +239,4 @@ struct GainTableSpec {
     std::vector<short> hpImpCompensateList;
 };
 
-#endif   //_AUDIO_GAIN_TABLE_PARAM_H_
+#endif  //_AUDIO_GAIN_TABLE_PARAM_H_

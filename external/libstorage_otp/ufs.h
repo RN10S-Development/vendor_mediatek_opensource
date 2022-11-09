@@ -23,7 +23,7 @@ extern "C" {
 
 #include "storage_otp.h"
 
-int ufs_storage_init(struct otp *otp_device);
+int ufs_storage_init(struct otp* otp_device);
 
 #ifdef __cplusplus
 }

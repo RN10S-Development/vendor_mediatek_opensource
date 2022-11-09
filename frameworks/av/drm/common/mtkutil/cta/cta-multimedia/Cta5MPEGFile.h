@@ -20,8 +20,7 @@
 #include <Cta5File.h>
 #include <Cta5CommonMultimediaFile.h>
 
-namespace android
-{
+namespace android {
 
 /**
  * This class is used to construct a CTA5 common multimedia file
@@ -31,25 +30,25 @@ namespace android
  * If you want to convert other multimedia files which have two or more headers,
  * you need to create a new class and implented from Cta5CommonMultimediaFile
  */
-class Cta5MPEGFile : public Cta5CommonMultimediaFile
-{
-public:
-    Cta5MPEGFile(int fd,String8 key);
+class Cta5MPEGFile : public Cta5CommonMultimediaFile {
+  public:
+    Cta5MPEGFile(int fd, String8 key);
 
-    //This constructor is useful when you want to get a Cta5 file format
-    //To convert a normal file to a CTA5 file, you may need this version
-    Cta5MPEGFile(String8 mimeType, String8 cid, String8 dcfFlHeaders, uint64_t datatLen, String8 key);
+    // This constructor is useful when you want to get a Cta5 file format
+    // To convert a normal file to a CTA5 file, you may need this version
+    Cta5MPEGFile(String8 mimeType, String8 cid, String8 dcfFlHeaders, uint64_t datatLen,
+                 String8 key);
 
-    //Now dcf header is no need
+    // Now dcf header is no need
     Cta5MPEGFile(String8 mimeType, uint64_t datatLen, String8 key);
-public:
-    virtual ~Cta5MPEGFile(){}
-    /*
-        * This function is used to parse all main header of specified multimedia files
-        * the result is one or more header offset and size
-        */
-    virtual bool parseHeaders(int fd);
 
+  public:
+    virtual ~Cta5MPEGFile() {}
+    /*
+     * This function is used to parse all main header of specified multimedia files
+     * the result is one or more header offset and size
+     */
+    virtual bool parseHeaders(int fd);
 };
-}
-#endif //__CTA5_MPEG_FILE_H__
+}  // namespace android
+#endif  //__CTA5_MPEG_FILE_H__

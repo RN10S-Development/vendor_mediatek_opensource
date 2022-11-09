@@ -20,8 +20,8 @@
 #include "backtrace-helper.h"
 
 backtrace_frame_t* add_backtrace_entry(uintptr_t pc, backtrace_frame_t* backtrace,
-        size_t ignore_depth, size_t max_depth,
-        size_t* ignored_frames, size_t* returned_frames) {
+                                       size_t ignore_depth, size_t max_depth,
+                                       size_t* ignored_frames, size_t* returned_frames) {
     if (*ignored_frames < ignore_depth) {
         *ignored_frames += 1;
         return NULL;

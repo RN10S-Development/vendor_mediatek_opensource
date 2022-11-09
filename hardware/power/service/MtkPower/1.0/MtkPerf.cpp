@@ -37,17 +37,16 @@ namespace mtkpower {
 namespace V1_0 {
 namespace implementation {
 
-MtkPerf::MtkPerf() {
-}
+MtkPerf::MtkPerf() {}
 
-MtkPerf::~MtkPerf() {
-}
+MtkPerf::~MtkPerf() {}
 
-Return<int32_t> MtkPerf::perfLockAcquire(int32_t hdl, uint32_t duration, const hidl_vec<int32_t>& boostList, int32_t reserved)  {
+Return<int32_t> MtkPerf::perfLockAcquire(int32_t hdl, uint32_t duration,
+                                         const hidl_vec<int32_t>& boostList, int32_t reserved) {
     ALOGI("perfLockAcquire hdl:%d, duration:%d, reserved:%d", hdl, duration, reserved);
 
     struct tPowerData vPowerData;
-    struct tPowerData *vpRspData = NULL;
+    struct tPowerData* vpRspData = NULL;
     struct tPerfLockData vPerfLockData;
     const int pid = IPCThreadState::self()->getCallingPid();
     const int uid = IPCThreadState::self()->getCallingUid();
@@ -60,7 +59,7 @@ Return<int32_t> MtkPerf::perfLockAcquire(int32_t hdl, uint32_t duration, const h
     vPerfLockData.reserved = reserved;
     vPerfLockData.pid = pid;
     vPerfLockData.uid = uid;
-    vPowerData.msg  = POWER_MSG_PERF_LOCK_ACQ;
+    vPowerData.msg = POWER_MSG_PERF_LOCK_ACQ;
     vPowerData.pBuf = (void*)&vPerfLockData;
 
     ALOGD("%s data size:%d", __func__, vPerfLockData.size);
@@ -69,15 +68,15 @@ Return<int32_t> MtkPerf::perfLockAcquire(int32_t hdl, uint32_t duration, const h
         return -1;
     }
 
-    for (i=0; i<vPerfLockData.size; i+=2)
-        ALOGD("rsc:0x%08x, value:%d", vPerfLockData.rscList[i], vPerfLockData.rscList[i+1]);
+    for (i = 0; i < vPerfLockData.size; i += 2)
+        ALOGD("rsc:0x%08x, value:%d", vPerfLockData.rscList[i], vPerfLockData.rscList[i + 1]);
 
-    //ALOGI("%s %p", __func__, &vPowerData);
-    power_msg(&vPowerData, (void **) &vpRspData);
+    // ALOGI("%s %p", __func__, &vPowerData);
+    power_msg(&vPowerData, (void**)&vpRspData);
 
-    //ALOGI("%s %p", __func__, vpRspData);
+    // ALOGI("%s %p", __func__, vpRspData);
     if (vpRspData) {
-        if(vpRspData->pBuf) {
+        if (vpRspData->pBuf) {
             vPerfLockData.hdl = ((tPerfLockData*)(vpRspData->pBuf))->hdl;
             free(vpRspData->pBuf);
         }
@@ -85,27 +84,27 @@ Return<int32_t> MtkPerf::perfLockAcquire(int32_t hdl, uint32_t duration, const h
     }
 
     return vPerfLockData.hdl;
-    //return 0;
+    // return 0;
 }
 
 Return<void> MtkPerf::perfLockRelease(int32_t hdl, int32_t reserved) {
     ALOGI("perfLockRelease hdl:%d reserved:%d", hdl, reserved);
 
     struct tPowerData vPowerData;
-    struct tPowerData *vpRspData = NULL;
+    struct tPowerData* vpRspData = NULL;
     struct tPerfLockData vPerfLockData;
 
     vPerfLockData.hdl = hdl;
     vPerfLockData.reserved = reserved;
-    vPowerData.msg  = POWER_MSG_PERF_LOCK_REL;
+    vPowerData.msg = POWER_MSG_PERF_LOCK_REL;
     vPowerData.pBuf = (void*)&vPerfLockData;
 
-    //ALOGI("%s %p", __func__, &vPowerData);
-    power_msg(&vPowerData, (void **) &vpRspData);
+    // ALOGI("%s %p", __func__, &vPowerData);
+    power_msg(&vPowerData, (void**)&vpRspData);
 
-    //ALOGI("%s %p", __func__, vpRspData);
+    // ALOGI("%s %p", __func__, vpRspData);
     if (vpRspData) {
-        if(vpRspData->pBuf) {
+        if (vpRspData->pBuf) {
             vPerfLockData.hdl = ((tPerfLockData*)(vpRspData->pBuf))->hdl;
             free(vpRspData->pBuf);
         }
@@ -120,7 +119,7 @@ IMtkPerf* HIDL_FETCH_IMtkPerf(const char* /* name */) {
     return new MtkPerf();
 }
 
-} // namespace implementation
+}  // namespace implementation
 }  // namespace V1_0
 }  // namespace mtkpower
 }  // namespace hardware

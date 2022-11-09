@@ -17,17 +17,14 @@
 #ifndef STRUTIL_H_
 #define STRUTIL_H_
 
-
 #include <utils/String8.h>
 #include <time.h>
 
-namespace android
-{
+namespace android {
 
-class StrUtil
-{
-public:
-    static const char* toString(long l); // need not to delete the returned string buffer
+class StrUtil {
+  public:
+    static const char* toString(long l);  // need not to delete the returned string buffer
     static const char* toString(int i);
 
     static void toLower(char* p);
@@ -40,11 +37,12 @@ public:
     static char* strrpl(char* s, const char* s1, const char* s2);
     static String8& trimRCRLF(String8& str);
     static String8 getContentUri(String8 cid);
-private:
+
+  private:
     static bool validateDatetime(const struct tm& time);
-    static bool validateDatetimeStr(const char* ptr,const int& len);
+    static bool validateDatetimeStr(const char* ptr, const int& len);
 };
 
-}
+}  // namespace android
 
 #endif /* STRUTIL_H_ */

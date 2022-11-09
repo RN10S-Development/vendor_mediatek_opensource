@@ -20,16 +20,15 @@
 /**
  * Copy define from OEMCryptoCENC.h which will be used by SRM, need upgrade when changed
  */
-#define OEMCrypto_SUCCESS                  0
-#define OEMCrypto_ERROR_NOT_IMPLEMENTED   25
-#define OEMCrypto_ERROR_UNKNOWN_FAILURE   28
-#define OEMCrypto_ERROR_INVALID_CONTEXT   29
+#define OEMCrypto_SUCCESS 0
+#define OEMCrypto_ERROR_NOT_IMPLEMENTED 25
+#define OEMCrypto_ERROR_UNKNOWN_FAILURE 28
+#define OEMCrypto_ERROR_INVALID_CONTEXT 29
 #define OEMCrypto_ERROR_SIGNATURE_FAILURE 30
-#define OEMCrypto_ERROR_BUFFER_TOO_LARGE  39
+#define OEMCrypto_ERROR_BUFFER_TOO_LARGE 39
 
 #ifdef __cplusplus
-extern "C"
-{
+extern "C" {
 #endif
 
 bool WvHdcpExt_IsSRMUpdateSupported();
@@ -41,4 +40,4 @@ uint32_t WvHdcpExt_RemoveSRM();
 }
 #endif
 
-#endif // WV_DHDCP_EXT_H_
+#endif  // WV_DHDCP_EXT_H_

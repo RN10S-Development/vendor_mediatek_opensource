@@ -31,12 +31,12 @@
 /*******************************************************************************
  * Public Function Declaration
  *******************************************************************************/
-typedef enum {fft_false, fft_true} kal_bool;
-typedef signed char  kal_int8;
-typedef unsigned char  kal_uint8;
-typedef signed short  kal_int16;
-typedef unsigned short  kal_uint16;
-typedef signed int    kal_int32;
-typedef unsigned int  kal_uint32;
+typedef enum { fft_false, fft_true } kal_bool;
+typedef signed char kal_int8;
+typedef unsigned char kal_uint8;
+typedef signed short kal_int16;
+typedef unsigned short kal_uint16;
+typedef signed int kal_int32;
+typedef unsigned int kal_uint32;
 
 #endif /*AUDIO_FFT_H*/

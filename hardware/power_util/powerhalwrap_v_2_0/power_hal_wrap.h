@@ -22,12 +22,14 @@ extern int PowerHal_Wrap_mtkPowerHint(uint32_t hint, int32_t data);
 extern int PowerHal_Wrap_mtkCusPowerHint(uint32_t hint, int32_t data);
 extern int PowerHal_Wrap_querySysInfo(uint32_t cmd, int32_t param);
 extern int PowerHal_Wrap_scnReg(void);
-extern int PowerHal_Wrap_scnConfig(int32_t hdl, int32_t cmd, int32_t param1, int32_t param2, int32_t param3, int32_t param4);
+extern int PowerHal_Wrap_scnConfig(int32_t hdl, int32_t cmd, int32_t param1, int32_t param2,
+                                   int32_t param3, int32_t param4);
 extern int PowerHal_Wrap_scnUnreg(int32_t hdl);
 extern int PowerHal_Wrap_scnEnable(int32_t hdl, int32_t timeout);
 extern int PowerHal_Wrap_scnDisable(int32_t hdl);
-extern int PowerHal_Wrap_scnUltraCfg(int32_t hdl, int32_t ultracmd, int32_t param1, int32_t param2, int32_t param3, int32_t param4);
-extern int PowerHal_Wrap_setSysInfo(int32_t type, const char *data);
+extern int PowerHal_Wrap_scnUltraCfg(int32_t hdl, int32_t ultracmd, int32_t param1, int32_t param2,
+                                     int32_t param3, int32_t param4);
+extern int PowerHal_Wrap_setSysInfo(int32_t type, const char* data);
 __END_DECLS
 
-#endif // ANDROID_POWERHALWRAP_H
+#endif  // ANDROID_POWERHALWRAP_H

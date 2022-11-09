@@ -19,12 +19,10 @@
 
 #include <utils/String8.h>
 
-namespace android
-{
+namespace android {
 
-class DrmDef
-{
-public:
+class DrmDef {
+  public:
     static String8 getPermissionPath(int permissionIndex);
     static String8 getConstraintStr(int constraintType);
     static String8 getPermissionStr(int permissionIndex);
@@ -34,7 +32,7 @@ public:
     static int getPermission(int permissionIndex);
     static int getPermissionFromAction(int action);
 
-public:
+  public:
     // ----------------------------------------------------------------------------
     // DRM method in OMA DRM v1
     const static int METHOD_NONE = 0;
@@ -107,7 +105,7 @@ public:
 
     // ----------------------------------------------------------------------------
     // DRM constraint type on protected content
-    const static String8 CONSTRAINT_COUNT_STR; // FOR LOG ONLY
+    const static String8 CONSTRAINT_COUNT_STR;  // FOR LOG ONLY
     const static String8 CONSTRAINT_DATETIME_STR;
     const static String8 CONSTRAINT_DATETIME_START_STR;
     const static String8 CONSTRAINT_DATETIME_END_STR;
@@ -161,12 +159,12 @@ public:
     const static String8 EXT_DRM_CONTENT;
     const static String8 EXT_DRM_MESSAGE;
 
-    const static String8 CONTENT_DIRECTORY; // the directory to store content
-    const static String8 RO_DIRECTORY;      // the directory to store RO files
+    const static String8 CONTENT_DIRECTORY;  // the directory to store content
+    const static String8 RO_DIRECTORY;       // the directory to store RO files
     const static String8 ST_DIR;
-    const static String8 ST_FILE;           // the secure timer file
+    const static String8 ST_FILE;  // the secure timer file
     const static String8 IMEI_DIR;
-    const static String8 IMEI_FILE;         // the file stores IMEI number
+    const static String8 IMEI_FILE;  // the file stores IMEI number
 
     // ----------------------------------------------------------------------------
     // installing .dm message to .dcf format
@@ -194,7 +192,7 @@ public:
     const static int DT_SEC_PER_HOUR = 60 * DT_SEC_PER_MIN;
     const static int DT_SEC_PER_DAY = 24 * DT_SEC_PER_HOUR;
 
-    //Add to support CTA5
+    // Add to support CTA5
     const static String8 CTA5_PLUGIN_DESCRIPTION;
     const static String8 MIME_CTA5_MESSAGE;
     const static String8 EXT_CTA5_FILE;
@@ -210,25 +208,23 @@ public:
     const static int CTA5_CALLBACK = 10001;
 };
 
-class OmaDrmAction
-{
-private:
+class OmaDrmAction {
+  private:
     OmaDrmAction();
-public:
+
+  public:
     static const int PRINT = 0x08;
-    static const int WALLPAPER = 0x09; // for FL only
-
+    static const int WALLPAPER = 0x09;  // for FL only
 };
 
-class OmaDrmRightsStatus
-{
-private:
+class OmaDrmRightsStatus {
+  private:
     OmaDrmRightsStatus();
-public:
-    static const int SECURE_TIMER_INVALID = 0x04;
 
+  public:
+    static const int SECURE_TIMER_INVALID = 0x04;
 };
 
-}
+}  // namespace android
 
 #endif /* DRMDEF_H_ */

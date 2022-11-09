@@ -20,16 +20,14 @@
 #include "DrmDef.h"
 #include <utils/String8.h>
 
-namespace android
-{
+namespace android {
 
-class Entry
-{
-public:
+class Entry {
+  public:
     Entry();
     void dump();
 
-public:
+  public:
     int next;
     int type;
     long used_count;
@@ -41,15 +39,14 @@ public:
     long end_intv;
 };
 
-class Rights
-{
-public:
+class Rights {
+  public:
     Rights();
     ~Rights();
     void dump();
     String8 getGeneralStr();
 
-public:
+  public:
     char cid[DrmDef::DRM_MAX_META_LENGTH];
     char key[DrmDef::DRM_MAX_KEY_LENGTH];
     int permission;
@@ -59,9 +56,8 @@ public:
 };
 
 // this is a dummy class only for old RO format compatibility purpose
-class OldRights
-{
-public:
+class OldRights {
+  public:
     // the old Rights format: the DrmDef::DRM_MAX_META_LENGTH == 100
     char cid[100];
     char key[DrmDef::DRM_MAX_KEY_LENGTH];
@@ -71,15 +67,14 @@ public:
     Entry* entryPtr;
 };
 
-class RO
-{
-public:
+class RO {
+  public:
     void dump();
 
-public:
-    Rights rights; // store in RO file
+  public:
+    Rights rights;  // store in RO file
 };
 
-} // namespace android
+}  // namespace android
 
 #endif /* RO_H_ */

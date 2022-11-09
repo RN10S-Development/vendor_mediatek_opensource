@@ -20,40 +20,36 @@
 #include <stdlib.h>
 #include "ccci_lib_platform.h"
 
+#define AB_PROPERTY_NAME "ro.boot.slot_suffix"
 
-#define AB_PROPERTY_NAME        "ro.boot.slot_suffix"
-
-void AB_image_get(char *buf)
-{
-    if (property_get(AB_PROPERTY_NAME, buf, NULL) == 0)
-        buf[0] = 0;
+void AB_image_get(char* buf) {
+    if (property_get(AB_PROPERTY_NAME, buf, NULL) == 0) buf[0] = 0;
 }
 
-int query_prj_cfg_setting_platform(char name[], char val[], int size)
-{
+int query_prj_cfg_setting_platform(char name[], char val[], int size) {
     char prop_value[PROPERTY_VALUE_MAX] = {0};
 
-    //-- For MTK_ECCCI_C2K
-    #ifdef MTK_ECCCI_C2K
-    if(strcmp(name, "MTK_ECCCI_C2K")==0) {
+//-- For MTK_ECCCI_C2K
+#ifdef MTK_ECCCI_C2K
+    if (strcmp(name, "MTK_ECCCI_C2K") == 0) {
         snprintf(val, size, "1");
         return 0;
     }
-    #endif
+#endif
 
-    #ifdef MD_SBP_CUSTOM_VALUE
-    if(strcmp(name, "MTK_MD_SBP_CUSTOM_VALUE")==0) {
+#ifdef MD_SBP_CUSTOM_VALUE
+    if (strcmp(name, "MTK_MD_SBP_CUSTOM_VALUE") == 0) {
         snprintf(val, size, "%d", MD_SBP_CUSTOM_VALUE);
         return 0;
     }
-    #endif
+#endif
 
-    #ifdef MD2_SBP_CUSTOM_VALUE
-    if(strcmp(name, "MTK_MD2_SBP_CUSTOM_VALUE")==0) {
+#ifdef MD2_SBP_CUSTOM_VALUE
+    if (strcmp(name, "MTK_MD2_SBP_CUSTOM_VALUE") == 0) {
         snprintf(val, size, "%d", MD2_SBP_CUSTOM_VALUE);
         return 0;
     }
-    #endif
+#endif
 
     return -1;
 }

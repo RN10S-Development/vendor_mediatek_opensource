@@ -38,57 +38,45 @@ static const int HEX_STR_MAX_OUTPUT_SIZE = 2049;
 
 // ==== local constants defination end =========================================
 
-const char* StrUtil::toString(long l)
-{
+const char* StrUtil::toString(long l) {
     static char loc_buf[20]; /* not thread safe */
     bzero(loc_buf, sizeof(loc_buf));
-    if (snprintf(loc_buf, sizeof(loc_buf), "%ld", l) == -1)
-    {
+    if (snprintf(loc_buf, sizeof(loc_buf), "%ld", l) == -1) {
         ALOGE("toString(long l): fail");
         return NULL; /* or whatever */
     }
     return loc_buf;
 }
 
-const char* StrUtil::toString(int i)
-{
+const char* StrUtil::toString(int i) {
     static char loc_buf[20]; /* not thread safe */
     bzero(loc_buf, sizeof(loc_buf));
-    if (snprintf(loc_buf, sizeof(loc_buf), "%d", i) == -1)
-    {
+    if (snprintf(loc_buf, sizeof(loc_buf), "%d", i) == -1) {
         ALOGE("toString(int i): fail");
         return NULL; /* or whatever */
     }
     return loc_buf;
 }
 
-void StrUtil::toLower(char* p)
-{
-    if (NULL == p)
-    {
+void StrUtil::toLower(char* p) {
+    if (NULL == p) {
         return;
     }
     int i = 0;
-    while ('\0' != p[i])
-    {
+    while ('\0' != p[i]) {
         p[i] = tolower(p[i]);
         i++;
     }
 }
 
-String8 StrUtil::toHexStr(String8 str)
-{
-    return toHexStr((char*)str.string(), str.length());
-}
+String8 StrUtil::toHexStr(String8 str) { return toHexStr((char*)str.string(), str.length()); }
 
 // {num} is limited to HEX_STR_MAX_SIZE bytes
-String8 StrUtil::toHexStr(char* ptr, int num)
-{
+String8 StrUtil::toHexStr(char* ptr, int num) {
     char ch[HEX_STR_MAX_OUTPUT_SIZE];
     bzero(ch, sizeof(ch));
 
-    for (int i = 0; i < num; i++)
-    {
+    for (int i = 0; i < num; i++) {
         sprintf(&ch[i * 2], "%02X", ptr[i]);
     }
 
@@ -97,10 +85,8 @@ String8 StrUtil::toHexStr(char* ptr, int num)
 }
 
 // returns an empty string or the valid time string in "%Y-%m-%d_%H%M%S" format
-String8 StrUtil::toTimeStr(time_t* t)
-{
-    if (*t == 0)
-    {
+String8 StrUtil::toTimeStr(time_t* t) {
+    if (*t == 0) {
         return String8("");
     }
 
@@ -113,15 +99,14 @@ String8 StrUtil::toTimeStr(time_t* t)
 
 // the interval string is in "P2Y10M15DT10H30M20S" format
 // the reduced format, according to 3.2.6 of [XMLSchema] (ISO8601) should also be supported
-bool StrUtil::intervalStrToTick(char* ptr, time_t& tick)
-{
+bool StrUtil::intervalStrToTick(char* ptr, time_t& tick) {
     size_t len = strlen(ptr);
     char* p = new char[len + 1];
     bzero(p, len + 1);
     memcpy(p, ptr, len);
 
-    char* pP = strrchr(p, 'P'); // 'P' tag for date string must exist
-    char* pT = strrchr(p, 'T'); // 'T' tag for time string
+    char* pP = strrchr(p, 'P');  // 'P' tag for date string must exist
+    char* pT = strrchr(p, 'T');  // 'T' tag for time string
 
     int year = 0;  // by default these are all 0
     int month = 0;
@@ -130,7 +115,7 @@ bool StrUtil::intervalStrToTick(char* ptr, time_t& tick)
     int minute = 0;
     int second = 0;
 
-    if (NULL == pP) // the 'P' character should be present
+    if (NULL == pP)  // the 'P' character should be present
     {
         ALOGE("intervalStrToTick : invalid interval string format, tag 'P' not found");
         delete[] p;
@@ -140,189 +125,173 @@ bool StrUtil::intervalStrToTick(char* ptr, time_t& tick)
     char* pDateStr = NULL;
     char* pTimeStr = NULL;
 
-    if (NULL == pT) // if there's no 'T' tag then there's no time string
+    if (NULL == pT)  // if there's no 'T' tag then there's no time string
     {
         size_t len_p = strlen(p);
-        pDateStr = new char[len_p + 1]; // the whole string is date string, pTimeStr remains NULL
+        pDateStr = new char[len_p + 1];  // the whole string is date string, pTimeStr remains NULL
         bzero(pDateStr, len_p + 1);
         memcpy(pDateStr, p, len_p);
         ALOGD("intervalStrToTick : there's no 'T' tag and no time info present");
-    }
-    else // 'T' tag and 'P' tag both exist
+    } else  // 'T' tag and 'P' tag both exist
     {
-        if ((pT - pP - 1) <= 0)
-        {
+        if ((pT - pP - 1) <= 0) {
             // there's no date info. pDateStr remains NULL
             ALOGD("intervalStrToTick : there's no date info present");
-        }
-        else
-        {
+        } else {
             size_t len_date = (size_t)(pT - pP);
-            pDateStr = new char[len_date + 1]; // the date string is available
+            pDateStr = new char[len_date + 1];  // the date string is available
             bzero(pDateStr, len_date + 1);
             memcpy(pDateStr, pP, len_date);
         }
 
         size_t len_time = strlen(p) - (size_t)(pT - pP);
-        pTimeStr = new char[len_time + 1]; // the time string is available
+        pTimeStr = new char[len_time + 1];  // the time string is available
         bzero(pTimeStr, len_time + 1);
         memcpy(pTimeStr, pT, len_time);
     }
     delete[] p;
-    p = NULL;   // release original p string
+    p = NULL;  // release original p string
 
     char temp[11];
-    char* ps = NULL; // the start point
-    char* pe = NULL; // the end point
+    char* ps = NULL;  // the start point
+    char* pe = NULL;  // the end point
 
-    if (NULL != pDateStr) // now deal with date string
+    if (NULL != pDateStr)  // now deal with date string
     {
         ALOGV("intervalStrToTick : the Date string [%s]", pDateStr);
         ps = pDateStr;
         char* pYr = strrchr(pDateStr, 'Y');
-        if (NULL != pYr) // year is kept as 0 if no 'Y' tag found
+        if (NULL != pYr)  // year is kept as 0 if no 'Y' tag found
         {
             pe = pYr;
             bzero(temp, sizeof(temp));
-            if ((pe-ps) > MAX_DATETIME_STR)
-            {
+            if ((pe - ps) > MAX_DATETIME_STR) {
                 ALOGE("intervalStrToTick: the year string is too long.");
                 goto ERROR;
             }
-            memcpy(temp, ps+1, pe - ps);
+            memcpy(temp, ps + 1, pe - ps);
             // M: @{
             // ALPS00540302 make sure the year string is valid
-            if (!validateDatetimeStr(temp, pe - ps -1))
-            {
-                ALOGE("intervalStrToTick: the date [%s] include invalid year string[%s].",pDateStr,temp);
+            if (!validateDatetimeStr(temp, pe - ps - 1)) {
+                ALOGE("intervalStrToTick: the date [%s] include invalid year string[%s].", pDateStr,
+                      temp);
                 goto ERROR;
             }
             // M: @}
             year = atoi(temp);
-            ps = pYr; // move the start point after Year
+            ps = pYr;  // move the start point after Year
         }
 
         char* pMon = strrchr(pDateStr, 'M');
-        if (NULL != pMon)
-        {
+        if (NULL != pMon) {
             pe = pMon;
             bzero(temp, sizeof(temp));
-            if ((pe-ps) > MAX_DATETIME_STR)
-            {
+            if ((pe - ps) > MAX_DATETIME_STR) {
                 ALOGE("intervalStrToTick: the month string is too long.");
                 goto ERROR;
             }
-            memcpy(temp, ps+1, pe - ps);
+            memcpy(temp, ps + 1, pe - ps);
             // M: @{
             // ALPS00540302 make sure the month string is valid
-            if (!validateDatetimeStr(temp, pe - ps -1))
-            {
-                ALOGE("intervalStrToTick: the date[%s] include invalid month string[%s].",pDateStr,temp);
+            if (!validateDatetimeStr(temp, pe - ps - 1)) {
+                ALOGE("intervalStrToTick: the date[%s] include invalid month string[%s].", pDateStr,
+                      temp);
                 goto ERROR;
             }
             // M: @}
             month = atoi(temp);
-            ps = pMon; // move the start point after Month
+            ps = pMon;  // move the start point after Month
         }
 
         char* pDay = strrchr(pDateStr, 'D');
-        if (NULL != pDay)
-        {
+        if (NULL != pDay) {
             pe = pDay;
             bzero(temp, sizeof(temp));
-            if ((pe-ps) > MAX_DATETIME_STR)
-            {
+            if ((pe - ps) > MAX_DATETIME_STR) {
                 ALOGE("intervalStrToTick: the day string is too long.");
                 goto ERROR;
             }
-            memcpy(temp, ps+1, pe - ps);
+            memcpy(temp, ps + 1, pe - ps);
             // M: @{
             // ALPS00540302 make sure the day string is valid
-            if (!validateDatetimeStr(temp, pe - ps -1))
-            {
-                ALOGE("intervalStrToTick: the Date String include invalid day string[%s].",temp);
+            if (!validateDatetimeStr(temp, pe - ps - 1)) {
+                ALOGE("intervalStrToTick: the Date String include invalid day string[%s].", temp);
                 goto ERROR;
             }
             // M: @}
             day = atoi(temp);
-            ps = pDay; // move the start point after Day
+            ps = pDay;  // move the start point after Day
         }
 
         delete[] pDateStr;
         pDateStr = NULL;
     }
 
-    if (NULL != pTimeStr) // now deal with time string
+    if (NULL != pTimeStr)  // now deal with time string
     {
         ALOGV("intervalStrToTick : the Time string [%s]", pTimeStr);
         ps = pTimeStr;
         char* pHr = strrchr(pTimeStr, 'H');
-        if (NULL != pHr)
-        {
+        if (NULL != pHr) {
             pe = pHr;
             bzero(temp, sizeof(temp));
-            if ((pe-ps) > MAX_DATETIME_STR)
-            {
+            if ((pe - ps) > MAX_DATETIME_STR) {
                 ALOGE("intervalStrToTick: the hour string is too long.");
                 goto ERROR;
             }
-            memcpy(temp, ps+1, pe - ps);
+            memcpy(temp, ps + 1, pe - ps);
             // M: @{
             // ALPS00540302 make sure the hour string is valid
-            if (!validateDatetimeStr(temp, pe - ps -1))
-            {
-                ALOGE("intervalStrToTick: the time[%s] include invalid hour string[%s].",pTimeStr,temp);
+            if (!validateDatetimeStr(temp, pe - ps - 1)) {
+                ALOGE("intervalStrToTick: the time[%s] include invalid hour string[%s].", pTimeStr,
+                      temp);
                 goto ERROR;
             }
             // M: @}
             hour = atoi(temp);
-            ps = pHr; // move the start point after Hour
+            ps = pHr;  // move the start point after Hour
         }
 
         char* pMin = strrchr(pTimeStr, 'M');
-        if (NULL != pMin)
-        {
+        if (NULL != pMin) {
             pe = pMin;
             bzero(temp, sizeof(temp));
-            if ((pe-ps) > MAX_DATETIME_STR)
-            {
+            if ((pe - ps) > MAX_DATETIME_STR) {
                 ALOGE("intervalStrToTick: the minute string is too long.");
                 goto ERROR;
             }
-            memcpy(temp, ps+1, pe - ps);
+            memcpy(temp, ps + 1, pe - ps);
             // M: @{
             // ALPS00540302 make sure the minute string is valid
-            if (!validateDatetimeStr(temp, pe - ps -1))
-            {
-                ALOGE("intervalStrToTick: the time[%s] include invalid minute string[%s].",pTimeStr,temp);
+            if (!validateDatetimeStr(temp, pe - ps - 1)) {
+                ALOGE("intervalStrToTick: the time[%s] include invalid minute string[%s].",
+                      pTimeStr, temp);
                 goto ERROR;
             }
             // M: @}
             minute = atoi(temp);
-            ps = pMin; // move the start point after Minute
+            ps = pMin;  // move the start point after Minute
         }
 
         char* pSec = strrchr(pTimeStr, 'S');
-        if (NULL != pSec)
-        {
+        if (NULL != pSec) {
             pe = pSec;
             bzero(temp, sizeof(temp));
-            if ((pe-ps) > MAX_DATETIME_STR)
-            {
+            if ((pe - ps) > MAX_DATETIME_STR) {
                 ALOGE("intervalStrToTick: the second string is too long.");
                 goto ERROR;
             }
-            memcpy(temp, ps+1, pe - ps);
+            memcpy(temp, ps + 1, pe - ps);
             // M: @{
             // ALPS00540302 make sure the second string is valid
-            if (!validateDatetimeStr(temp, pe - ps -1))
-            {
-                ALOGE("intervalStrToTick: the time[%s] include invalid second string[%s].",pTimeStr,temp);
+            if (!validateDatetimeStr(temp, pe - ps - 1)) {
+                ALOGE("intervalStrToTick: the time[%s] include invalid second string[%s].",
+                      pTimeStr, temp);
                 goto ERROR;
             }
             // M: @}
             second = atoi(temp);
-            ps = pSec; // move the start point after Second
+            ps = pSec;  // move the start point after Second
         }
 
         delete[] pTimeStr;
@@ -330,13 +299,10 @@ bool StrUtil::intervalStrToTick(char* ptr, time_t& tick)
     }
 
     ALOGV("intervalStrToTick : year:[%d], month:[%d], day:[%d], hour:[%d], min:[%d], sec:[%d]",
-            year, month, day, hour, minute, second);
-    tick = year * 365 * DrmDef::DT_SEC_PER_DAY
-           + month * 30 * DrmDef::DT_SEC_PER_DAY
-           + day * DrmDef::DT_SEC_PER_DAY
-           + hour * DrmDef::DT_SEC_PER_HOUR
-           + minute * DrmDef::DT_SEC_PER_MIN
-           + second;
+          year, month, day, hour, minute, second);
+    tick = year * 365 * DrmDef::DT_SEC_PER_DAY + month * 30 * DrmDef::DT_SEC_PER_DAY +
+           day * DrmDef::DT_SEC_PER_DAY + hour * DrmDef::DT_SEC_PER_HOUR +
+           minute * DrmDef::DT_SEC_PER_MIN + second;
     ALOGV("intervalStrToTick : tick: [%ld]", tick);
     return true;
 // M: @{
@@ -348,18 +314,16 @@ ERROR:
     pDateStr = NULL;
     pTimeStr = NULL;
     return false;
-// M: @}
+    // M: @}
 }
 
 // the date-time string is in "2007-10-18T00:00:00" format
 // the TimeZone is already considered in mktime()!
 // used while parsing dr, drc files
-bool StrUtil::datetimeStrToTick(char* ptr, time_t& tick)
-{
+bool StrUtil::datetimeStrToTick(char* ptr, time_t& tick) {
     size_t len = strlen(ptr);
 
-    if (len == 0)
-    {
+    if (len == 0) {
         ALOGV("datetimeStrToTick : DT string is empty string");
         return true;
     }
@@ -369,11 +333,11 @@ bool StrUtil::datetimeStrToTick(char* ptr, time_t& tick)
     memcpy(p, ptr, len);
     // check the datetime string format as "2013-03-04T09:08:20" valid
     // but "2013;03-04U09:08.20" invalid
-    if (strlen(p) != 19 || (p[4] != '-' || p[7] != '-' || p[10] != 'T' || p[13] != ':' || p[16] != ':')
-        || (!validateDatetimeStr(p,4) || !validateDatetimeStr(p + 5,2) ||
-            !validateDatetimeStr(p + 8,2) || !validateDatetimeStr(p + 11,2) ||
-            !validateDatetimeStr(p + 14,2) || !validateDatetimeStr(p + 17,2)))
-    {
+    if (strlen(p) != 19 ||
+        (p[4] != '-' || p[7] != '-' || p[10] != 'T' || p[13] != ':' || p[16] != ':') ||
+        (!validateDatetimeStr(p, 4) || !validateDatetimeStr(p + 5, 2) ||
+         !validateDatetimeStr(p + 8, 2) || !validateDatetimeStr(p + 11, 2) ||
+         !validateDatetimeStr(p + 14, 2) || !validateDatetimeStr(p + 17, 2))) {
         ALOGE("datetimeStrToTick : DT string: [%s] is not an valid format", p);
         delete[] p;
         return false;
@@ -394,8 +358,7 @@ bool StrUtil::datetimeStrToTick(char* ptr, time_t& tick)
     p[4] = '\0';
     time.tm_year = atoi(&p[0]) - 1900;
 
-    if (!validateDatetime(time))
-    {
+    if (!validateDatetime(time)) {
         ALOGE("datetimeStrToTick : validateDatatime failed");
         delete[] p;
         return false;
@@ -403,8 +366,7 @@ bool StrUtil::datetimeStrToTick(char* ptr, time_t& tick)
 
     tick = mktime(&time);
     ALOGV("datetimeStrToTick : tick: [%ld]", tick);
-    if (tick == -1)
-    {
+    if (tick == -1) {
         ALOGE("datetimeStrToTick : fail");
         delete[] p;
         return false;
@@ -415,39 +377,33 @@ bool StrUtil::datetimeStrToTick(char* ptr, time_t& tick)
 }
 
 // remove those space characters at the beginning /
-String8& StrUtil::trimLRSpace(String8 &str)
-{
+String8& StrUtil::trimLRSpace(String8& str) {
     int len = str.length();
     int start = 0;
     int end = 0;
-    for (int i = 0; i < len - 1; i++)
-    {
+    for (int i = 0; i < len - 1; i++) {
         if (str[i] != ' ')  // space
         {
             start = i;
             break;
         }
     }
-    for (int i = len - 1; i >= 0; i--)
-    {
-        if (str[i] != ' ')
-        {
+    for (int i = len - 1; i >= 0; i--) {
+        if (str[i] != ' ') {
             end = i;
             break;
         }
     }
-    if (str.setTo(str.string() + start, end - start + 1) != NO_ERROR)
-    {
+    if (str.setTo(str.string() + start, end - start + 1) != NO_ERROR) {
         ALOGE("trimLRSpace: fail");
     }
     return str;
 }
 
 // in string s, replace s1 with s2 (if found s1 in s) and returns the modifed s
-char* StrUtil::strrpl(char* s, const char* s1, const char* s2)
-{
+char* StrUtil::strrpl(char* s, const char* s1, const char* s2) {
     char* ptr = strstr(s, s1);
-    if (ptr != NULL) // found s1 in s
+    if (ptr != NULL)  // found s1 in s
     {
         memmove(ptr + strlen(s2), ptr + strlen(s1), strlen(ptr) - strlen(s1) + 1);
         memcpy(ptr, s2, strlen(s2));
@@ -456,32 +412,27 @@ char* StrUtil::strrpl(char* s, const char* s1, const char* s2)
 }
 
 // the input string is modified to remove the CR, LF, and is also returned as reference
-String8& StrUtil::trimRCRLF(String8 &str)
-{
+String8& StrUtil::trimRCRLF(String8& str) {
     int end = str.length();
-    for (int i = end - 1; i >= 0; i--)
-    {
-        if (str[i] != 0x0a && str[i] != 0x0d && str[i] != 0x00) // not NULL, \n, \r
+    for (int i = end - 1; i >= 0; i--) {
+        if (str[i] != 0x0a && str[i] != 0x0d && str[i] != 0x00)  // not NULL, \n, \r
         {
-            if (str.setTo(str.string(), i + 1) != NO_ERROR)
-            {
+            if (str.setTo(str.string(), i + 1) != NO_ERROR) {
                 ALOGE("trimRCRLF: fail");
             }
             return str;
         }
     }
 
-    str.setTo(""); // otherwise case: there's no valid char other than \n, \r, NULL
-    return str;    // then it is modified to an empty string
+    str.setTo("");  // otherwise case: there's no valid char other than \n, \r, NULL
+    return str;     // then it is modified to an empty string
 }
 
 // returns an empty string or the valid Content Uri string (cid)
 // "cid:123456789" -> "1234567889", removes "cid:"
-String8 StrUtil::getContentUri(String8 cid)
-{
+String8 StrUtil::getContentUri(String8 cid) {
     int index = (int)cid.find(":");
-    if (index == -1)
-    {
+    if (index == -1) {
         ALOGE("getContentUri: failed to find ':' separator.");
         return String8("");
     }
@@ -493,39 +444,33 @@ String8 StrUtil::getContentUri(String8 cid)
 bool StrUtil::validateDatetime(const struct tm& time) {
     ALOGV("validate date time >>>>");
 
-    if (time.tm_sec < 0 || time.tm_sec >= 60)
-    {
-        ALOGE("validateDatetime: date time sec[%d] invalid",time.tm_sec);
+    if (time.tm_sec < 0 || time.tm_sec >= 60) {
+        ALOGE("validateDatetime: date time sec[%d] invalid", time.tm_sec);
         return false;
     }
 
-    if (time.tm_min < 0 || time.tm_min >= 60)
-    {
-        ALOGE("validateDatetime: date time min[%d] invalid",time.tm_min);
+    if (time.tm_min < 0 || time.tm_min >= 60) {
+        ALOGE("validateDatetime: date time min[%d] invalid", time.tm_min);
         return false;
     }
 
-    if (time.tm_hour < 0 || time.tm_hour >= 24)
-    {
-        ALOGE("validateDatetime: date time hour[%d] invalid",time.tm_hour);
+    if (time.tm_hour < 0 || time.tm_hour >= 24) {
+        ALOGE("validateDatetime: date time hour[%d] invalid", time.tm_hour);
         return false;
     }
 
-    if (time.tm_mday < 1 || time.tm_mday > 31)
-    {
-        ALOGE("validateDatetime: date time day[%d] invalid",time.tm_mday);
+    if (time.tm_mday < 1 || time.tm_mday > 31) {
+        ALOGE("validateDatetime: date time day[%d] invalid", time.tm_mday);
         return false;
     }
 
-    if (time.tm_mon < 0 || time.tm_mon > 11)
-    {
-        ALOGE("validateDatetime: date time mon[%d] invalid",time.tm_mon + 1);
+    if (time.tm_mon < 0 || time.tm_mon > 11) {
+        ALOGE("validateDatetime: date time mon[%d] invalid", time.tm_mon + 1);
         return false;
     }
 
-    if (time.tm_year < 0)
-    {
-        ALOGE("validateDatetime: date time mon[%d] invalid",time.tm_year);
+    if (time.tm_year < 0) {
+        ALOGE("validateDatetime: date time mon[%d] invalid", time.tm_year);
         return false;
     }
     return true;
@@ -535,18 +480,14 @@ bool StrUtil::validateDatetime(const struct tm& time) {
 // check whether the year string "2Y", or second string "20S" includes non-digit char
 // except the last symbolic char.
 bool StrUtil::validateDatetimeStr(const char* ptr, const int& len) {
-
-    if (!ptr || strlen(ptr) == 0 || strlen(ptr) < (unsigned int)len)
-    {
+    if (!ptr || strlen(ptr) == 0 || strlen(ptr) < (unsigned int)len) {
         ALOGE("validateDatetimeStr: date time string is null or empty");
         return false;
     }
 
-    for(unsigned int i = 0;i < (unsigned int)len; i++)
-    {
-        if (!isdigit(ptr[i]))
-        {
-            ALOGE("validateDatetimeStr: date time string[%s] include non-digit[%c].",ptr,ptr[i]);
+    for (unsigned int i = 0; i < (unsigned int)len; i++) {
+        if (!isdigit(ptr[i])) {
+            ALOGE("validateDatetimeStr: date time string[%s] include non-digit[%c].", ptr, ptr[i]);
             return false;
         }
     }

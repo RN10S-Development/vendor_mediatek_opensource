@@ -23,18 +23,15 @@ namespace {
 ** disabled, then build error occurs
 */
 #ifdef CONFIG_WAPI_SUPPORT
-void processConfigUpdate(struct wpa_supplicant* wpa_s, uint32_t changed_param)
-{
+void processConfigUpdate(struct wpa_supplicant* wpa_s, uint32_t changed_param) {
     wpa_s->conf->changed_parameters |= changed_param;
     wpa_supplicant_update_config(wpa_s);
 }
 
 // Free any existing pointer stored in |dst| and store the provided string value
 // there.
-int freeAndSetStringConfigParam(
-    struct wpa_supplicant* wpa_s, const std::string& value, uint32_t max_size,
-    uint32_t changed_param, char** dst)
-{
+int freeAndSetStringConfigParam(struct wpa_supplicant* wpa_s, const std::string& value,
+                                uint32_t max_size, uint32_t changed_param, char** dst) {
     if (value.size() > max_size) {
         return -1;
     }
@@ -59,14 +56,11 @@ using android::hardware::wifi::supplicant::V1_0::SupplicantStatus;
 using android::hardware::wifi::supplicant::V1_0::SupplicantStatusCode;
 
 /* WAPI start */
-SupplicantStatus setWapiCertList(
-    struct wpa_supplicant* wpa_s, const std::string& list)
-{
+SupplicantStatus setWapiCertList(struct wpa_supplicant* wpa_s, const std::string& list) {
     WPA_ASSERT(wpa_s);
 #ifdef CONFIG_WAPI_SUPPORT
-    if (freeAndSetStringConfigParam(
-        wpa_s, list, 1024,
-        CFG_CHANGED_WAPI_CERT_ALIAS_LIST, &wpa_s->conf->wapi_cert_alias_list)) {
+    if (freeAndSetStringConfigParam(wpa_s, list, 1024, CFG_CHANGED_WAPI_CERT_ALIAS_LIST,
+                                    &wpa_s->conf->wapi_cert_alias_list)) {
         return {SupplicantStatusCode::FAILURE_ARGS_INVALID, ""};
     }
     return {SupplicantStatusCode::SUCCESS, ""};
@@ -78,8 +72,8 @@ SupplicantStatus setWapiCertList(
 }  // namespace iface_config_utils
 }  // namespace implementation
 }  // namespace V2_1
-}  // namespace wifi
 }  // namespace supplicant
+}  // namespace wifi
 }  // namespace hardware
 }  // namespace mediatek
-}  //namespace vendor
+}  // namespace vendor

@@ -19,11 +19,11 @@
 
 extern int vpu_init(int power_on_init);
 extern int mdla_init(int power_on_init);
-extern int setVpuFreqMin_core_0(int value, void *scn);
-extern int setVpuFreqMax_core_0(int value, void *scn);
-extern int setVpuFreqMin_core_1(int value, void *scn);
-extern int setVpuFreqMax_core_1(int value, void *scn);
-extern int setMdlaFreqMin(int value, void *scn);
-extern int setMdlaFreqMax(int value, void *scn);
+extern int setVpuFreqMin_core_0(int value, void* scn);
+extern int setVpuFreqMax_core_0(int value, void* scn);
+extern int setVpuFreqMin_core_1(int value, void* scn);
+extern int setVpuFreqMax_core_1(int value, void* scn);
+extern int setMdlaFreqMin(int value, void* scn);
+extern int setMdlaFreqMax(int value, void* scn);
 
-#endif // ANDROID_UTILITY_VPU_H
+#endif  // ANDROID_UTILITY_VPU_H

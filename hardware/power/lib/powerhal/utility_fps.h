@@ -17,19 +17,19 @@
 #ifndef ANDROID_UTILITY_FPS_H
 #define ANDROID_UTILITY_FPS_H
 
-#define PATH_FSTB_FPS             "/sys/kernel/debug/fpsgo/fstb/fstb_level"
-#define PATH_FSTB_SOFT_FPS        "/sys/kernel/debug/fpsgo/fstb/fstb_soft_level"
-#define PATH_FSTB_LIST            "/sys/kernel/debug/fpsgo/fstb/fstb_fps_list"
-#define PATH_FSTB_LIST_FILE       "/vendor/etc/fstb.cfg"
-#define PATH_FTEH_LIST            "/sys/kernel/debug/fpsgo/fstb/fstb_fteh_list"
-#define PATH_FTEH_LIST_FILE       "/vendor/etc/fteh.cfg"
+#define PATH_FSTB_FPS "/sys/kernel/debug/fpsgo/fstb/fstb_level"
+#define PATH_FSTB_SOFT_FPS "/sys/kernel/debug/fpsgo/fstb/fstb_soft_level"
+#define PATH_FSTB_LIST "/sys/kernel/debug/fpsgo/fstb/fstb_fps_list"
+#define PATH_FSTB_LIST_FILE "/vendor/etc/fstb.cfg"
+#define PATH_FTEH_LIST "/sys/kernel/debug/fpsgo/fstb/fstb_fteh_list"
+#define PATH_FTEH_LIST_FILE "/vendor/etc/fteh.cfg"
 
 extern int fstb_init(int power_on_init);
-extern int setFstbFpsHigh(int fps_high, void *scn);
-extern int setFstbFpsLow(int fps_low, void *scn);
-extern int setFstbSoftFpsHigh(int fps_high, void *scn);
-extern int setFstbSoftFpsLow(int fps_low, void *scn);
-extern int setCfpUpLoading(int up_loading, void *scn);
-extern int setCfpDownLoading(int down_loading, void *scn);
+extern int setFstbFpsHigh(int fps_high, void* scn);
+extern int setFstbFpsLow(int fps_low, void* scn);
+extern int setFstbSoftFpsHigh(int fps_high, void* scn);
+extern int setFstbSoftFpsLow(int fps_low, void* scn);
+extern int setCfpUpLoading(int up_loading, void* scn);
+extern int setCfpDownLoading(int down_loading, void* scn);
 
-#endif // ANDROID_UTILITY_FPS_H
+#endif  // ANDROID_UTILITY_FPS_H

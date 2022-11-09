@@ -20,26 +20,20 @@
 #include "DrmTypeDef.h"
 #include <openssl/evp.h>
 
-namespace android
-{
+namespace android {
 
-class CryptoHelper
-{
-public:
-    enum CIPHER
-    {
-        CIPHER_AES128CBC,
-        CIPHER_RC4
-    };
+class CryptoHelper {
+  public:
+    enum CIPHER { CIPHER_AES128CBC, CIPHER_RC4 };
 
-public:
+  public:
     /*
      * constructs a CryptoHelper object.
      *
      * Parameter:
      *     cipher: an enum CiPHER constant value representing the cipher to use. e.g. CIPHER_RC4
-     *     key:    a BYTE buffer containing the cryption key value. SHOULD contain enough key data (16 bytes).
-                     call static function: cipherKeyLen(CIPHER cipher) to find out the required length.
+     *     key:    a BYTE buffer containing the cryption key value. SHOULD contain enough key data
+     (16 bytes). call static function: cipherKeyLen(CIPHER cipher) to find out the required length.
      *               you can release the buffer after the CryptoHelper object is created.
      *     is_enc: 1 for encryption & 0 for decryption.
      *
@@ -49,17 +43,17 @@ public:
     CryptoHelper(CIPHER cipher, BYTE* key, int is_enc);
     ~CryptoHelper();
 
-private:
+  private:
     CryptoHelper(const CryptoHelper& copy);
     CryptoHelper& operator=(const CryptoHelper& other);
 
-public:
+  public:
     /* returns the length of KEY / IV / BLOCK (in bytes) according to different cipher */
     static int cipherKeyLen(CIPHER cipher);
     static int cipherIvLen(CIPHER cipher);
     static int cipherBlkLen(CIPHER cipher);
 
-public:
+  public:
     /*
      * Call this function to make encryption / decryption operations.
      * You may call this function repeatedly. When it's the very last part of data you are
@@ -99,7 +93,8 @@ public:
      *          deals with "padding" and remove it, so the {buf_out} buffer contains
      *          less valid data bytes than the original input buffer.
      */
-    int doCryption(BYTE* buf_in, int len_in, BYTE* buf_out, int& len_out, BYTE* iv, bool is_final = false);
+    int doCryption(BYTE* buf_in, int len_in, BYTE* buf_out, int& len_out, BYTE* iv,
+                   bool is_final = false);
 
     /* returns the length of KEY / IV / BLK (in bytes) for this cipher */
     int getKeyLen(void);
@@ -112,16 +107,16 @@ public:
     /* deprecated */
     int desiredInDataSize(int req_out_len);
 
-private:
+  private:
     int calc_cipher_length(int len_in);
     static EVP_CIPHER* getCipher(CIPHER cipher);
 
-private:
+  private:
     EVP_CIPHER_CTX m_ctx;
     BYTE* m_key;
     int m_isEnc;
 };
 
-} // namespace android
+}  // namespace android
 
 #endif /* CRYPTOHELPER_H_ */

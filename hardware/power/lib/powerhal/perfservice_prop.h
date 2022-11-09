@@ -17,6 +17,6 @@
 #ifndef ANDROID_PERFSERVICE_PROP_H
 #define ANDROID_PERFSERVICE_PROP_H
 
-#define POWER_PROP_INIT    "vendor.powerhal.init"  // init before
+#define POWER_PROP_INIT "vendor.powerhal.init"  // init before
 
-#endif // ANDROID_PERFSERVICE_PROP_H
+#endif  // ANDROID_PERFSERVICE_PROP_H

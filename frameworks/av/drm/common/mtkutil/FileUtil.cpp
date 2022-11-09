@@ -25,74 +25,61 @@
 
 using namespace android;
 
-bool FileUtil::fopenx(const char* filename, const char* mode, FILE** fp)
-{
+bool FileUtil::fopenx(const char* filename, const char* mode, FILE** fp) {
     *fp = fopen(filename, mode);
-    if (*fp == NULL)
-    {
-        ALOGE("fopenx: failed to open file [%s] using mode [%s], reason [%s]",
-                filename, mode, strerror(errno));
+    if (*fp == NULL) {
+        ALOGE("fopenx: failed to open file [%s] using mode [%s], reason [%s]", filename, mode,
+              strerror(errno));
         return false;
     }
     return true;
 }
 
-bool FileUtil::fclosex(FILE* fp)
-{
-    if (NULL == fp)
-    {
+bool FileUtil::fclosex(FILE* fp) {
+    if (NULL == fp) {
         ALOGD("fclosex: NULL file pointer.");
         return true;
     }
 
-    if (fclose(fp) != 0)
-    {
+    if (fclose(fp) != 0) {
         ALOGE("fclosex: failed to close file.");
         return false;
     }
     return true;
 }
 
-bool FileUtil::fseekx(FILE* fp, long int offset, int origin)
-{
-    if (fseek(fp, offset, origin) != 0)
-    {
-        ALOGE("fseekx: faild to seek to offset [%ld] from origin type [%d], reason [%s]",
-                offset, origin, strerror(errno));
+bool FileUtil::fseekx(FILE* fp, long int offset, int origin) {
+    if (fseek(fp, offset, origin) != 0) {
+        ALOGE("fseekx: faild to seek to offset [%ld] from origin type [%d], reason [%s]", offset,
+              origin, strerror(errno));
         return false;
     }
     return true;
 }
 
-bool FileUtil::fwritex(void* ptr, size_t size, FILE* fp)
-{
+bool FileUtil::fwritex(void* ptr, size_t size, FILE* fp) {
     size_t writeSize = fwrite(ptr, size, 1, fp);
-    if (writeSize != 1)
-    {
-        ALOGE("fwritex: failed to write [%d] amount of data to file, reason [%s]",
-                size, strerror(errno));
+    if (writeSize != 1) {
+        ALOGE("fwritex: failed to write [%d] amount of data to file, reason [%s]", size,
+              strerror(errno));
         return false;
     }
     return true;
 }
 
-bool FileUtil::freadx(void* ptr, size_t size, FILE* fp)
-{
+bool FileUtil::freadx(void* ptr, size_t size, FILE* fp) {
     size_t readSize = fread(ptr, size, 1, fp);
-    if (readSize != 1)
-    {
-        ALOGE("freadx: failed to read [%d] amount of data from file, reason [%s]",
-                size, strerror(errno));
+    if (readSize != 1) {
+        ALOGE("freadx: failed to read [%d] amount of data from file, reason [%s]", size,
+              strerror(errno));
         return false;
     }
     return true;
 }
 
-bool FileUtil::ftellx(FILE* fp, long int& pos)
-{
+bool FileUtil::ftellx(FILE* fp, long int& pos) {
     pos = ftell(fp);
-    if (pos == -1L)
-    {
+    if (pos == -1L) {
         ALOGE("ftellx: failed to get current fp position, reason [%s]", strerror(errno));
         return false;
     }
@@ -101,18 +88,14 @@ bool FileUtil::ftellx(FILE* fp, long int& pos)
 
 // get one line from input file
 // result contains CR LF, and NULL terminator
-bool FileUtil::fgetsx(FILE* fp, char* str, int num)
-{
+bool FileUtil::fgetsx(FILE* fp, char* str, int num) {
     char* p = fgets(str, num, fp);
-    if (p == NULL)
-    {
-        if (feof(fp) != 0) // reach end of file
+    if (p == NULL) {
+        if (feof(fp) != 0)  // reach end of file
         {
             ALOGE("fgetsx: reach EOF and nothing read.");
             return false;
-        }
-        else if (ferror(fp) != 0)
-        {
+        } else if (ferror(fp) != 0) {
             ALOGE("fgetsx: faild to get a line from file.");
             return false;
         }

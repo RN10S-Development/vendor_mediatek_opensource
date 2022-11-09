@@ -20,14 +20,12 @@
 #include <utils/String8.h>
 #include <stdio.h>
 
-namespace android
-{
+namespace android {
 
 class CryptoHelper;
 
-class CipherFileUtil
-{
-public:
+class CipherFileUtil {
+  public:
     /*
      * Read {byte_num} bytes from cipher file (DCF) referred by {fd}.
      *
@@ -53,19 +51,22 @@ public:
      *        at the beginning of the content part, you are really specifying the {offset} from
      *        the BEGINNING OF the raw data (not encrypted), not considering the IV.
      */
-    static int CipherFileRead(int fd, void* buf, int byte_num, int offset,
-                              int data_offset, int data_size, CryptoHelper& hlp);
+    static int CipherFileRead(int fd, void* buf, int byte_num, int offset, int data_offset,
+                              int data_size, CryptoHelper& hlp);
 
     // Add for Decode image with open decrypt seesion with ashmem
-    static int CipherFileRead(char* data, void* buf, int byte_num, int offset,
-                                   int data_offset, int data_size, CryptoHelper& hlp);
+    static int CipherFileRead(char* data, void* buf, int byte_num, int offset, int data_offset,
+                              int data_size, CryptoHelper& hlp);
 
-    static int CipherFileDump(int fd, int data_offset, int data_size, CryptoHelper& hlp); // deprecated
+    static int CipherFileDump(int fd, int data_offset, int data_size,
+                              CryptoHelper& hlp);  // deprecated
 
-    static int CipherFileDump(String8 file_name, int fd, int data_offset, int data_size, CryptoHelper& hlp);
+    static int CipherFileDump(String8 file_name, int fd, int data_offset, int data_size,
+                              CryptoHelper& hlp);
 
     /*
-     * Encrypt the data of the file referred by {origin} and save the encryted data to the file referred by {out}.
+     * Encrypt the data of the file referred by {origin} and save the encryted data to the file
+     * referred by {out}.
      *
      * Parameter:
      *     origin:         file to be encrypted.
@@ -80,12 +81,14 @@ public:
      */
     static int CipherFileInstall(FILE* origin, int data_offset, int data_size, FILE* out,
                                  CryptoHelper& hlp, unsigned char* iv);
-private:
+
+  private:
     static bool isEnableDebug();
-private:
+
+  private:
     static bool sDebug;
 };
 
-} // namespace android
+}  // namespace android
 
 #endif /* CIPHERFILEUTIL_H_ */

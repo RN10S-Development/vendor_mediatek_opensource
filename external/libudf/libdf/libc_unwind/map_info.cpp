@@ -56,12 +56,9 @@ bool is_executable_map(const map_info_t* milist, uintptr_t addr) {
     return mi && mi->is_executable;
 }
 
-map_info_t* acquire_my_map_info_list() {
-    return NULL;
-}
+map_info_t* acquire_my_map_info_list() { return NULL; }
 
-void release_my_map_info_list(map_info_t* milist __attribute__((unused))) {
-}
+void release_my_map_info_list(map_info_t* milist __attribute__((unused))) {}
 
 #ifdef __cplusplus
 }

@@ -28,23 +28,24 @@
 using android::hardware::power::V1_3::IPower;
 using vendor::mediatek::hardware::mtkpower::V1_0::IMtkPerf;
 using vendor::mediatek::hardware::mtkpower::V1_0::IMtkPower;
-//using android::hardware::defaultPassthroughServiceImplementation;
-using ::android::hardware::registerPassthroughServiceImplementation;
-using ::android::hardware::configureRpcThreadpool;
-using ::android::hardware::joinRpcThreadpool;
+// using android::hardware::defaultPassthroughServiceImplementation;
 using ::android::OK;
 using ::android::status_t;
+using ::android::hardware::configureRpcThreadpool;
+using ::android::hardware::joinRpcThreadpool;
+using ::android::hardware::registerPassthroughServiceImplementation;
 
 pthread_mutex_t g_mutex;
-pthread_cond_t  g_cond;
+pthread_cond_t g_cond;
 bool powerd_done = false;
 
-#define register(service) do { \
-    status_t err = registerPassthroughServiceImplementation<service>(); \
-    if (err != OK) { \
-        ALOGE("Err %d while registering " #service, err); \
-    } \
-} while(false)
+#define register(service)                                                   \
+    do {                                                                    \
+        status_t err = registerPassthroughServiceImplementation<service>(); \
+        if (err != OK) {                                                    \
+            ALOGE("Err %d while registering " #service, err);               \
+        }                                                                   \
+    } while (false)
 
 #if 0
 void* mtkPowerHandler(void *data)
@@ -60,18 +61,17 @@ void* mtkPowerHandler(void *data)
 }
 #endif
 
-void* mtkPowerService(void *data)
-{
-    //int ret;
+void* mtkPowerService(void* data) {
+    // int ret;
     ALOGV("mtkPowerService - data:%p", data);
 
-    //nice(-10);
+    // nice(-10);
 
     // set name
-    //pthread_setname_np(*(pthread_t*)data, "mtkPowerService");
+    // pthread_setname_np(*(pthread_t*)data, "mtkPowerService");
     pthread_mutex_lock(&g_mutex);
     while (powerd_done == false) {
-       pthread_cond_wait(&g_cond, &g_mutex);
+        pthread_cond_wait(&g_cond, &g_mutex);
     }
     pthread_mutex_unlock(&g_mutex);
 
@@ -98,7 +98,7 @@ void* mtkPowerService(void *data)
 int main() {
     pthread_t handlerThread, serviceThread;
     pthread_attr_t attr;
-    //struct sched_param param;
+    // struct sched_param param;
 
     /* init */
     pthread_mutex_init(&g_mutex, NULL);
@@ -117,6 +117,5 @@ int main() {
     pthread_join(handlerThread, NULL);
     pthread_join(serviceThread, NULL);
     return 0;
-    //return defaultPassthroughServiceImplementation<IPower>();
+    // return defaultPassthroughServiceImplementation<IPower>();
 }
-

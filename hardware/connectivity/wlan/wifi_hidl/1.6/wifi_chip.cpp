@@ -391,9 +391,7 @@ void WifiChip::invalidate() {
     is_valid_ = false;
 }
 
-bool WifiChip::isValid() {
-    return is_valid_;
-}
+bool WifiChip::isValid() { return is_valid_; }
 
 std::set<sp<V1_4::IWifiChipEventCallback>> WifiChip::getEventCallbacks() {
     return event_cb_handler_.getCallbacks();
@@ -1636,7 +1634,6 @@ WifiStatus WifiChip::registerDebugRingBufferCallback() {
                     shared_ptr_this->writeRingbufferFilesInternal();
                     return;
                 }
-
             };
     legacy_hal::wifi_error legacy_status = legacy_hal_.lock()->registerRingBufferCallbackHandler(
             getFirstActiveWlanIfaceName(), on_ring_buffer_data_callback);
@@ -1953,9 +1950,7 @@ std::vector<std::string> WifiChip::allocateBridgedApInstanceNames() {
 
 // STA iface names start with idx 0.
 // Primary STA iface will always be 0.
-std::string WifiChip::allocateStaIfaceName() {
-    return allocateApOrStaIfaceName(IfaceType::STA, 0);
-}
+std::string WifiChip::allocateStaIfaceName() { return allocateApOrStaIfaceName(IfaceType::STA, 0); }
 
 bool WifiChip::writeRingbufferFilesInternal() {
     if (!removeOldFilesInternal()) {

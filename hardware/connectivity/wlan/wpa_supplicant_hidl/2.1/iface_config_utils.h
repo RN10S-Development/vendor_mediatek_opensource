@@ -39,14 +39,13 @@ namespace V2_1 {
 namespace implementation {
 namespace iface_config_utils {
 
-SupplicantStatus setWapiCertList(
-    struct wpa_supplicant* wpa_s, const std::string& list);
+SupplicantStatus setWapiCertList(struct wpa_supplicant* wpa_s, const std::string& list);
 }  // namespace iface_config_utils
 }  // namespace implementation
 }  // namespace V2_1
-}  // namespace wifi
 }  // namespace supplicant
+}  // namespace wifi
 }  // namespace hardware
 }  // namespace mediatek
-}  //namespace vendor
+}  // namespace vendor
 #endif  // MTK_WPA_SUPPLICANT_HIDL_IFACE_CONFIG_UTILS_H

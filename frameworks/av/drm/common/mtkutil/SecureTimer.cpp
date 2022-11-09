@@ -61,45 +61,37 @@ SecureTimer* SecureTimer::m_pTimer = new SecureTimer();
 // lock for load() and save() operation
 Mutex SecureTimer::mLock;
 
-SecureTimer& SecureTimer::instance(void)
-{
+SecureTimer& SecureTimer::instance(void) {
     // WARNING: the race condition is not considered here!
     return *m_pTimer;
 }
 
-SecureTimer::SecureTimer(void) :
-    m_bIsValid(false),
-    m_nOffset(0),
-    m_nBaseTicks(0),
-    m_nBaseTime(0),
-    m_nLastSync(0),
-    m_nLastSave(0)
-{
+SecureTimer::SecureTimer(void)
+    : m_bIsValid(false),
+      m_nOffset(0),
+      m_nBaseTicks(0),
+      m_nBaseTime(0),
+      m_nLastSync(0),
+      m_nLastSave(0) {
     updateTimeBase();
 }
 
-SecureTimer::~SecureTimer(void)
-{
-}
+SecureTimer::~SecureTimer(void) {}
 
-bool SecureTimer::isValid()
-{
-    return m_bIsValid;
-}
+bool SecureTimer::isValid() { return m_bIsValid; }
 
 // call this when device reboots or wake up
 // called at DrmProvider
-int SecureTimer::updateTimeBase()
-{
+int SecureTimer::updateTimeBase() {
     if (DrmUtil::sDDebug) ALOGD("updateTimeBase()");
     m_nBaseTime = deviceTime();
     m_nBaseTicks = deviceTicks();
-    if (DrmUtil::sDDebug) ALOGD("updateTimeBase(): base=[%ld], tick=[%ld]", m_nBaseTime, m_nBaseTicks);
+    if (DrmUtil::sDDebug)
+        ALOGD("updateTimeBase(): base=[%ld], tick=[%ld]", m_nBaseTime, m_nBaseTicks);
 
     // under valid state, check if it has passed 20 day interval or not.
     if (m_bIsValid && ((m_nBaseTime + m_nOffset) > (m_nLastSync + CLK_DFT_INTERVAL) ||
-        ((m_nBaseTime + m_nOffset) < m_nLastSync)))
-    {
+                       ((m_nBaseTime + m_nOffset) < m_nLastSync))) {
         ALOGI("updateTimeBase() : 20 days interval has expired. reset secure timer.");
         reset();
     }
@@ -113,18 +105,18 @@ int SecureTimer::updateTimeBase()
 
 // call this when the date/time is modified by user
 // called at DrmProvider
-int SecureTimer::updateOffset()
-{
+int SecureTimer::updateOffset() {
     if (DrmUtil::sDDebug) ALOGD("updateOffset()");
-    if (m_bIsValid)
-    {
+    if (m_bIsValid) {
         if (DrmUtil::sDDebug) ALOGD("updateOffset() : secure timer valid.");
         time_t dev_time = deviceTime();
         time_t dev_ticks = deviceTicks();
-        if (DrmUtil::sVDebug) ALOGV("updateOffset() : time base [%ld], ticks base [%ld], old offset [%ld], device time [%ld], device ticks [%ld]",
-                m_nBaseTime, m_nBaseTicks, m_nOffset, dev_time, dev_ticks);
+        if (DrmUtil::sVDebug)
+            ALOGV("updateOffset() : time base [%ld], ticks base [%ld], old offset [%ld], device "
+                  "time [%ld], device ticks [%ld]",
+                  m_nBaseTime, m_nBaseTicks, m_nOffset, dev_time, dev_ticks);
         time_t delta = (dev_ticks - m_nBaseTicks) - (dev_time - m_nBaseTime);
-        //m_nOffset = m_nBaseTime + m_nOffset + (dev_ticks - m_nBaseTicks) - dev_time;
+        // m_nOffset = m_nBaseTime + m_nOffset + (dev_ticks - m_nBaseTicks) - dev_time;
         m_nOffset = delta + m_nOffset;
         if (DrmUtil::sDDebug) ALOGD("updateOffset() : new offset [%ld]", m_nOffset);
 
@@ -137,16 +129,13 @@ int SecureTimer::updateOffset()
 }
 
 // called at DrmProvider
-int SecureTimer::updateDRMTime(time_t offset)
-{
+int SecureTimer::updateDRMTime(time_t offset) {
     if (DrmUtil::sDDebug) ALOGD("updateDRMTime()");
     // check offset
     time_t realTime = deviceTime() + offset;
-    if (realTime < MIN_REAL_TIME || realTime > MAX_REAL_TIME)
-    {
-        ALOGE("updateDRMTime() : invalid offset: %ld, st state: %d.",offset,m_bIsValid);
-        if (m_bIsValid)
-        {
+    if (realTime < MIN_REAL_TIME || realTime > MAX_REAL_TIME) {
+        ALOGE("updateDRMTime() : invalid offset: %ld, st state: %d.", offset, m_bIsValid);
+        if (m_bIsValid) {
             reset();
             save();
         }
@@ -156,11 +145,12 @@ int SecureTimer::updateDRMTime(time_t offset)
     // first we should update the base:
     updateTimeBase();
 
-    if (DrmUtil::sDDebug) ALOGD("updateDRMTime() : update secure timer offset with value [%ld]", offset);
+    if (DrmUtil::sDDebug)
+        ALOGD("updateDRMTime() : update secure timer offset with value [%ld]", offset);
     m_nOffset = offset;
     m_bIsValid = true;
 
-    getDRMTime(m_nLastSync); // stores the last time when it was synchronized
+    getDRMTime(m_nLastSync);  // stores the last time when it was synchronized
     save();
 
     return SecureTimerHelper::NTP_SYNC_SUCCESS;
@@ -169,33 +159,31 @@ int SecureTimer::updateDRMTime(time_t offset)
 // call this if a time-based rights need to be checked
 // the real DRM time, or real world time, is returned by {t}
 // called at drmserver side.
-int SecureTimer::getDRMTime(time_t& t)
-{
-    if (m_bIsValid)
-    {
+int SecureTimer::getDRMTime(time_t& t) {
+    if (m_bIsValid) {
         if (DrmUtil::sDDebug) ALOGD("getDRMTime() : secure timer valid.");
         // validate current secure timer because the device time may be changed
         //   but not notified with TIME_SET broadcast.
         time_t dev_time = deviceTime();
         time_t dev_ticks = deviceTicks();
-        if (DrmUtil::sDDebug) ALOGD("getDRMTime() : validate with time base [%ld], ticks base [%ld], device time [%ld], device ticks [%ld]",
-                m_nBaseTime, m_nBaseTicks, dev_time, dev_ticks);
+        if (DrmUtil::sDDebug)
+            ALOGD("getDRMTime() : validate with time base [%ld], ticks base [%ld], device time "
+                  "[%ld], device ticks [%ld]",
+                  m_nBaseTime, m_nBaseTicks, dev_time, dev_ticks);
         time_t delta = dev_ticks - m_nBaseTicks - (dev_time - m_nBaseTime);
-        if (5 < delta || delta < -5)
-        {
+        if (5 < delta || delta < -5) {
             // we allow 5 seconds for error; the error exceeds and we need to update offset
-            if (DrmUtil::sDDebug) ALOGD("getDRMTime() : time changed but not notified, delta [%ld]", delta);
+            if (DrmUtil::sDDebug)
+                ALOGD("getDRMTime() : time changed but not notified, delta [%ld]", delta);
             updateOffset();
         }
 
         // get real time using offset
         t = deviceTime() + m_nOffset;
         if (DrmUtil::sDDebug) ALOGD("getDRMTime() : real time [%ld], offset [%ld]", t, m_nOffset);
-        if (t < MIN_REAL_TIME || t > MAX_REAL_TIME)
-        {
+        if (t < MIN_REAL_TIME || t > MAX_REAL_TIME) {
             ALOGE("getDRMTime() : invalid offset: %ld, st state: %d.", m_nOffset, m_bIsValid);
-            if (m_bIsValid)
-            {
+            if (m_bIsValid) {
                 reset();
                 save();
             }
@@ -211,22 +199,18 @@ int SecureTimer::getDRMTime(time_t& t)
 }
 
 // called at drmserver side.
-time_t SecureTimer::getOffset()
-{
+time_t SecureTimer::getOffset() {
     if (DrmUtil::sDDebug) ALOGD("getOffset(): offset=[%ld]", m_nOffset);
     return m_nOffset;
 }
 
-int SecureTimer::load()
-{
+int SecureTimer::load() {
     Mutex::Autolock lock(mLock);
 
     if (DrmUtil::sDDebug) ALOGD("load() : re-load secure timer.");
     FILE* fp = fopen(ST_FILE.string(), "rb");
-    if (NULL == fp)
-    {
-        ALOGE("load() : failed to open ST file, reason: [%s].",
-                strerror(errno));
+    if (NULL == fp) {
+        ALOGE("load() : failed to open ST file, reason: [%s].", strerror(errno));
         reset();
         return RESULT_ERR;
     }
@@ -236,10 +220,8 @@ int SecureTimer::load()
     // read data
     BYTE data[24];
     bzero(data, sizeof(data));
-    if (sizeof(data) != fread(data, sizeof(BYTE), sizeof(data), fp))
-    {
-        ALOGE("load() : failed to read data from ST file, reason: [%s].",
-                strerror(errno));
+    if (sizeof(data) != fread(data, sizeof(BYTE), sizeof(data), fp)) {
+        ALOGE("load() : failed to read data from ST file, reason: [%s].", strerror(errno));
         fclose(fp);
         reset();
         return RESULT_ERR;
@@ -265,12 +247,13 @@ int SecureTimer::load()
     m_nLastSync = (time_t)(result[3]);
     m_nBaseTime = (time_t)(result[4]);
     m_nBaseTicks = (time_t)(result[5]);
-    if (DrmUtil::sDDebug) ALOGD("load() : re-load secure timer basetime: [%ld],baseticks: [%ld],lastSync: [%ld]", m_nBaseTime, m_nBaseTicks, m_nLastSync);
+    if (DrmUtil::sDDebug)
+        ALOGD("load() : re-load secure timer basetime: [%ld],baseticks: [%ld],lastSync: [%ld]",
+              m_nBaseTime, m_nBaseTicks, m_nLastSync);
     return RESULT_OK;
 }
 
-int SecureTimer::save()
-{
+int SecureTimer::save() {
     Mutex::Autolock lock(mLock);
 
     if (DrmUtil::sDDebug) ALOGD("save() : save secure timer.");
@@ -278,17 +261,11 @@ int SecureTimer::save()
     remove(ST_FILE.string());
 
     // the last time it was saved - abandoned using this value
-    //getDRMTime(m_nLastSave);
+    // getDRMTime(m_nLastSave);
 
     // prepare data
-    DWORD result[6] = {
-        (DWORD)m_bIsValid,
-        (DWORD)m_nOffset,
-        (DWORD)m_nLastSave,
-        (DWORD)m_nLastSync,
-        (DWORD)m_nBaseTime,
-        (DWORD)m_nBaseTicks
-    };
+    DWORD result[6] = {(DWORD)m_bIsValid,  (DWORD)m_nOffset,   (DWORD)m_nLastSave,
+                       (DWORD)m_nLastSync, (DWORD)m_nBaseTime, (DWORD)m_nBaseTicks};
     BYTE temp[24];
     bzero(temp, sizeof(temp));
     memcpy(temp, (BYTE*)result, sizeof(temp));
@@ -301,10 +278,8 @@ int SecureTimer::save()
     // check the storage position & file
     DrmUtil::checkDir(ST_DIR);
     FILE* fp = fopen(ST_FILE.string(), "wb");
-    if (NULL == fp)
-    {
-        ALOGE("save() : failed to open ST file, reason: [%s].",
-                strerror(errno));
+    if (NULL == fp) {
+        ALOGE("save() : failed to open ST file, reason: [%s].", strerror(errno));
         return RESULT_ERR;
     }
 
@@ -315,39 +290,33 @@ int SecureTimer::save()
     // fseek(fp, 0, SEEK_SET);
 
     // write to file
-    if (sizeof(data) != fwrite(data, sizeof(BYTE), sizeof(data), fp))
-    {
-        ALOGE("save() : failed to write data to ST file, reason: [%s].",
-                strerror(errno));
+    if (sizeof(data) != fwrite(data, sizeof(BYTE), sizeof(data), fp)) {
+        ALOGE("save() : failed to write data to ST file, reason: [%s].", strerror(errno));
         fclose(fp);
         remove(ST_FILE.string());
         return RESULT_ERR;
     }
     fclose(fp);
 
-    //make sure other and group users have no permission to write
+    // make sure other and group users have no permission to write
     chmod(ST_FILE.string(), 0644);
 
     return RESULT_OK;
 }
 
 // returns the current time of device (in seconds) since 1970-1-1 Zulu
-time_t SecureTimer::deviceTime()
-{
-    return time(NULL); // in <time.h>
+time_t SecureTimer::deviceTime() {
+    return time(NULL);  // in <time.h>
 }
 
 // returns time interval (in seconds) since the last boot of system
-time_t SecureTimer::deviceTicks()
-{
+time_t SecureTimer::deviceTicks() {
     // get the time interval since last time the system boot-up, by reading file: /proc/uptime
     // the format of /proc/uptime is like: xxxx.xx xxxx.xx
-    // and we just read the first float value (only the integer part) for system up time (in seconds)
-    // M: @{
-    // ALPS01226756, Modify the method of get deviceTicks.
+    // and we just read the first float value (only the integer part) for system up time (in
+    // seconds) M: @{ ALPS01226756, Modify the method of get deviceTicks.
     FILE* fp = fopen(SYS_UP_TIME_FILE, "r");
-    if (fp == NULL)
-    {
+    if (fp == NULL) {
         ALOGE("open proc/uptime failed: [%s].", strerror(errno));
         return 0;
     }
@@ -357,16 +326,16 @@ time_t SecureTimer::deviceTicks()
         ALOGE("Read uptime failed from proc/uptime");
         uptime = 0.0;
     }
-    if (DrmUtil::sDDebug) ALOGD("uptime = %lf,idletime = %lf,return value = %d", uptime, idletime, (time_t) uptime);
+    if (DrmUtil::sDDebug)
+        ALOGD("uptime = %lf,idletime = %lf,return value = %d", uptime, idletime, (time_t)uptime);
     fclose(fp);
     fp = NULL;
-    return (time_t) uptime;
+    return (time_t)uptime;
     // M: @}
 }
 
 // reset the secure clock to an initial "invalid" state
-void SecureTimer::reset()
-{
+void SecureTimer::reset() {
     m_bIsValid = false;
     m_nOffset = 0;
     m_nBaseTicks = 0;

@@ -35,7 +35,7 @@
 #include <errno.h>
 #include <log/log.h>
 
-#include<sys/mount.h>
+#include <sys/mount.h>
 #include <mtd/mtd-abi.h>
 
 #include <cutils/atomic.h>
@@ -49,141 +49,130 @@
 #include "libnvram_log.h"
 using namespace android;
 enum {
-	TRANSACTION_readFile = IBinder::FIRST_CALL_TRANSACTION,
-	TRANSACTION_writeFile,
-	TRANSACTION_readFileByName,
-	TRANSACTION_writeFileByName,
-	TRANSACTION_getFileDesSize,
-	TRANSACTION_writeFileEx,
+    TRANSACTION_readFile = IBinder::FIRST_CALL_TRANSACTION,
+    TRANSACTION_writeFile,
+    TRANSACTION_readFileByName,
+    TRANSACTION_writeFileByName,
+    TRANSACTION_getFileDesSize,
+    TRANSACTION_writeFileEx,
 };
 
-class INvRAMAgent: public IInterface {
+class INvRAMAgent : public IInterface {
   public:
-	DECLARE_META_INTERFACE(NvRAMAgent)
-	virtual char* readFile(int file_lid, int & size) = 0;
-	virtual int writeFile(int file_lid, int size, char *buff) = 0;
-	virtual char* readFileByName(char* file_name, int & size) = 0;
-	virtual int writeFileByName(char*  file_name, int size, char *buff) = 0;
-	virtual int getFileDesSize(int file_lid, int & recSize, int & recNum) = 0;
-	virtual int writeFileEx(int file_lid, int rec_no, int size, char *buff) = 0;
+    DECLARE_META_INTERFACE(NvRAMAgent)
+    virtual char* readFile(int file_lid, int& size) = 0;
+    virtual int writeFile(int file_lid, int size, char* buff) = 0;
+    virtual char* readFileByName(char* file_name, int& size) = 0;
+    virtual int writeFileByName(char* file_name, int size, char* buff) = 0;
+    virtual int getFileDesSize(int file_lid, int& recSize, int& recNum) = 0;
+    virtual int writeFileEx(int file_lid, int rec_no, int size, char* buff) = 0;
 };
 
-class BpNvRAMAgent: public android::BpInterface<INvRAMAgent> {
+class BpNvRAMAgent : public android::BpInterface<INvRAMAgent> {
   public:
-	BpNvRAMAgent(const android::sp<android::IBinder>& impl)
-		: android::BpInterface<INvRAMAgent>(impl) {
-	}
-	char* readFile(int file_lid, int & size) {
-		Parcel data, reply;
-		data.writeInterfaceToken(INvRAMAgent::getInterfaceDescriptor());
-		data.writeInt32(file_lid);
-		if (remote()->transact(TRANSACTION_readFile, data, &reply)) {
-			NVRAM_LOG("remote->transact error\n");
-		}
-		int tap = reply.readInt32();
-		if (tap < 0) {
-			NVRAM_LOG("Read Error,file_lid = %d\n", file_lid);
-			return NULL;
-		}
-		size = reply.readInt32();
-		char *buf = NULL;
-		if (size > 0) {
-			buf = (char *) malloc(sizeof(char) * size);
-			if (!buf) {
-				NVRAM_LOG("Malloc Error in readFile(),file_lid = %d\n", file_lid);
-				return NULL;
-			}
-			reply.read(buf, size);
-		}
-		return buf;
-	}
-	int writeFile(int file_lid, int size, char *buff) {
-		Parcel data, reply;
-		data.writeInterfaceToken(INvRAMAgent::getInterfaceDescriptor());
-		data.writeInt32(file_lid);
-		data.writeInt32(size);
-		data.write(buff, size);
-		if (remote()->transact(TRANSACTION_writeFile, data, &reply)) {
-			NVRAM_LOG("remote->transact error\n");
-		}
+    BpNvRAMAgent(const android::sp<android::IBinder>& impl)
+        : android::BpInterface<INvRAMAgent>(impl) {}
+    char* readFile(int file_lid, int& size) {
+        Parcel data, reply;
+        data.writeInterfaceToken(INvRAMAgent::getInterfaceDescriptor());
+        data.writeInt32(file_lid);
+        if (remote()->transact(TRANSACTION_readFile, data, &reply)) {
+            NVRAM_LOG("remote->transact error\n");
+        }
+        int tap = reply.readInt32();
+        if (tap < 0) {
+            NVRAM_LOG("Read Error,file_lid = %d\n", file_lid);
+            return NULL;
+        }
+        size = reply.readInt32();
+        char* buf = NULL;
+        if (size > 0) {
+            buf = (char*)malloc(sizeof(char) * size);
+            if (!buf) {
+                NVRAM_LOG("Malloc Error in readFile(),file_lid = %d\n", file_lid);
+                return NULL;
+            }
+            reply.read(buf, size);
+        }
+        return buf;
+    }
+    int writeFile(int file_lid, int size, char* buff) {
+        Parcel data, reply;
+        data.writeInterfaceToken(INvRAMAgent::getInterfaceDescriptor());
+        data.writeInt32(file_lid);
+        data.writeInt32(size);
+        data.write(buff, size);
+        if (remote()->transact(TRANSACTION_writeFile, data, &reply)) {
+            NVRAM_LOG("remote->transact error\n");
+        }
 
-		int ret = reply.readInt32();
-		if (ret < 0) {
-			NVRAM_LOG("writeFile Error,file_lid = %d\n", file_lid);
-			return 0;
-		}
+        int ret = reply.readInt32();
+        if (ret < 0) {
+            NVRAM_LOG("writeFile Error,file_lid = %d\n", file_lid);
+            return 0;
+        }
 
-		return reply.readInt32();
-	}
+        return reply.readInt32();
+    }
 
-	int writeFileEx(int file_lid, int rec_no, int size, char *buff) {
-		Parcel data, reply;
-		data.writeInterfaceToken(INvRAMAgent::getInterfaceDescriptor());
-		data.writeInt32(file_lid);
-		data.writeInt32(rec_no);
-		data.writeInt32(size);
-		data.write(buff, size);
-		if (remote()->transact(TRANSACTION_writeFileEx, data, &reply)) {
-			NVRAM_LOG("remote->transact error\n");
-		}
+    int writeFileEx(int file_lid, int rec_no, int size, char* buff) {
+        Parcel data, reply;
+        data.writeInterfaceToken(INvRAMAgent::getInterfaceDescriptor());
+        data.writeInt32(file_lid);
+        data.writeInt32(rec_no);
+        data.writeInt32(size);
+        data.write(buff, size);
+        if (remote()->transact(TRANSACTION_writeFileEx, data, &reply)) {
+            NVRAM_LOG("remote->transact error\n");
+        }
 
-		int ret = reply.readInt32();
-		if (ret < 0) {
-			NVRAM_LOG("writeFile Error,file_lid = %d\n", file_lid);
-			return 0;
-		}
+        int ret = reply.readInt32();
+        if (ret < 0) {
+            NVRAM_LOG("writeFile Error,file_lid = %d\n", file_lid);
+            return 0;
+        }
 
-		return reply.readInt32();
-	}
-	char* readFileByName(char*  file_name, int & size) {
-		return 0;
-	}
-	int writeFileByName(char*  file_name, int size, char *buff) {
-		return 1;
-	}
-	int getFileDesSize(int file_lid, int & recSize, int & recNum) {
-		Parcel data, reply;
-		data.writeInterfaceToken(INvRAMAgent::getInterfaceDescriptor());
-		data.writeInt32(file_lid);
-		if (remote()->transact(TRANSACTION_getFileDesSize, data, &reply)) {
-			NVRAM_LOG("remote()->transact error \n");
-		}
-		int ret = reply.readInt32();
-		if (ret < 0) {
-			NVRAM_LOG("getFileDesSize Error,file_lid = %d\n", file_lid);
-			return 0;
-		}
+        return reply.readInt32();
+    }
+    char* readFileByName(char* file_name, int& size) { return 0; }
+    int writeFileByName(char* file_name, int size, char* buff) { return 1; }
+    int getFileDesSize(int file_lid, int& recSize, int& recNum) {
+        Parcel data, reply;
+        data.writeInterfaceToken(INvRAMAgent::getInterfaceDescriptor());
+        data.writeInt32(file_lid);
+        if (remote()->transact(TRANSACTION_getFileDesSize, data, &reply)) {
+            NVRAM_LOG("remote()->transact error \n");
+        }
+        int ret = reply.readInt32();
+        if (ret < 0) {
+            NVRAM_LOG("getFileDesSize Error,file_lid = %d\n", file_lid);
+            return 0;
+        }
 
-		recSize = reply.readInt32();
-		recNum = reply.readInt32();
+        recSize = reply.readInt32();
+        recNum = reply.readInt32();
 
-		return 1;
-	}
+        return 1;
+    }
 };
 
 class BnNvRAMAgent : public BnInterface<INvRAMAgent> {
   public:
-	status_t onTransact(uint32_t code,
-	                    const Parcel &data,
-	                    Parcel *reply,
-	                    uint32_t flags);
-
+    status_t onTransact(uint32_t code, const Parcel& data, Parcel* reply, uint32_t flags);
 };
 
 class NvRAMAgent : public BnNvRAMAgent {
-
   public:
-	static  void instantiate();
-	NvRAMAgent();
-	~NvRAMAgent() {}
-	virtual char* readFile(int file_lid, int & size);
-	virtual int writeFile(int file_lid, int size, char *buff);
-	virtual char* readFileByName(char*  file_name, int & size);
-	virtual int writeFileByName(char*  file_name, int size, char *buff);
-	virtual int getFileDesSize(int file_lid, int & recSize, int & recNum);
+    static void instantiate();
+    NvRAMAgent();
+    ~NvRAMAgent() {}
+    virtual char* readFile(int file_lid, int& size);
+    virtual int writeFile(int file_lid, int size, char* buff);
+    virtual char* readFileByName(char* file_name, int& size);
+    virtual int writeFileByName(char* file_name, int size, char* buff);
+    virtual int getFileDesSize(int file_lid, int& recSize, int& recNum);
 
-	virtual int writeFileEx(int file_lid, int rec_no, int size, char *buff);
+    virtual int writeFileEx(int file_lid, int rec_no, int size, char* buff);
 };
-
 
 IMPLEMENT_META_INTERFACE(NvRAMAgent, "NvRAMAgent")

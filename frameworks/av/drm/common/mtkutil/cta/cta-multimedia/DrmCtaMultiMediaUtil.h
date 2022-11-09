@@ -20,30 +20,26 @@
 #include <utils/String8.h>
 #include <stdio.h>
 
-namespace android
-{
+namespace android {
 
-#define FOURCC(c1, c2, c3, c4) \
-    (c1 << 24 | c2 << 16 | c3 << 8 | c4)
+#define FOURCC(c1, c2, c3, c4) (c1 << 24 | c2 << 16 | c3 << 8 | c4)
 
 class DrmCtaMultiMediaUtil {
-private:
-
+  private:
     DrmCtaMultiMediaUtil();
 
-public:
+  public:
     static uint64_t ntoh64(uint64_t x);
-    static void MakeFourCCString(uint32_t x, char *s);
+    static void MakeFourCCString(uint32_t x, char* s);
     static bool isCompatibleBrand(uint32_t fourcc);
-    static ssize_t readAt(int fd, off64_t offset, void *data, size_t size);
+    static ssize_t readAt(int fd, off64_t offset, void* data, size_t size);
     static bool isExistedInMultiMediaList(const String8& fileType);
-public:
 
+  public:
     static const int MULTI_MEDIA_LIST_CNT = 11;
     static const char* MULTI_MEDIA_LIST[MULTI_MEDIA_LIST_CNT];
-
 };
 
-}
+}  // namespace android
 
-#endif // __DRM_CTA_UTIL_H__
+#endif  // __DRM_CTA_UTIL_H__

@@ -39,8 +39,7 @@ typedef struct {
     memory_t memory;
 } backtrace_state_t;
 
-static _Unwind_Reason_Code unwind_backtrace_callback(struct _Unwind_Context* context, void* arg)
-{
+static _Unwind_Reason_Code unwind_backtrace_callback(struct _Unwind_Context* context, void* arg) {
     backtrace_state_t* state = (backtrace_state_t*)arg;
     uintptr_t pc = _Unwind_GetIP(context);
     if (pc) {
@@ -49,14 +48,14 @@ static _Unwind_Reason_Code unwind_backtrace_callback(struct _Unwind_Context* con
         //       the appropriate registers.  Current callers of unwind_backtrace
         //       don't need this information, so we won't bother collecting it just yet.
         add_backtrace_entry(rewind_pc_arch(&state->memory, pc), state->backtrace,
-                state->ignore_depth, state->max_depth,
-                &state->ignored_frames, &state->returned_frames);
+                            state->ignore_depth, state->max_depth, &state->ignored_frames,
+                            &state->returned_frames);
     }
     return state->returned_frames < state->max_depth ? _URC_NO_REASON : _URC_END_OF_STACK;
 }
 
-ssize_t libudf_unwind_backtrace_gcc(backtrace_frame_t* backtrace, size_t ignore_depth, size_t max_depth)
-{
+ssize_t libudf_unwind_backtrace_gcc(backtrace_frame_t* backtrace, size_t ignore_depth,
+                                    size_t max_depth) {
     map_info_t* milist = acquire_my_map_info_list();
 
     backtrace_state_t state;
@@ -77,13 +76,13 @@ ssize_t libudf_unwind_backtrace_gcc(backtrace_frame_t* backtrace, size_t ignore_
     return rc == _URC_END_OF_STACK ? 0 : -1;
 }
 
-extern "C" ssize_t unwind_backtrace_signal_arch_selfnogcc(
-        const map_info_t* map_info_list,
-        backtrace_frame_t* backtrace, size_t ignore_depth, size_t max_depth);
+extern "C" ssize_t unwind_backtrace_signal_arch_selfnogcc(const map_info_t* map_info_list,
+                                                          backtrace_frame_t* backtrace,
+                                                          size_t ignore_depth, size_t max_depth);
 
-__attribute__((visibility("default")))
-ssize_t libudf_unwind_backtrace(backtrace_frame_t* backtrace, size_t ignore_depth, size_t max_depth)
-{
+__attribute__((visibility("default"))) ssize_t libudf_unwind_backtrace(backtrace_frame_t* backtrace,
+                                                                       size_t ignore_depth,
+                                                                       size_t max_depth) {
     ssize_t frames = -1;
     map_info_t* milist = acquire_my_map_info_list();
     frames = unwind_backtrace_signal_arch_selfnogcc(milist, backtrace, ignore_depth, max_depth);
@@ -92,6 +91,7 @@ ssize_t libudf_unwind_backtrace(backtrace_frame_t* backtrace, size_t ignore_dept
 }
 
 ssize_t libudf_unwind_backtrace_ptrace(pid_t tid, const ptrace_context_t* context,
-        backtrace_frame_t* backtrace, size_t ignore_depth, size_t max_depth) {
+                                       backtrace_frame_t* backtrace, size_t ignore_depth,
+                                       size_t max_depth) {
     return unwind_backtrace_ptrace_arch(tid, context, backtrace, ignore_depth, max_depth);
 }

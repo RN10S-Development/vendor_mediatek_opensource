@@ -41,11 +41,11 @@ namespace supplicant {
 namespace V2_1 {
 namespace implementation {
 using android::sp;
-using android::hardware::Return;
 using android::hardware::hidl_string;
+using android::hardware::Return;
+using android::hardware::wifi::supplicant::V1_0::IfaceType;
 using android::hardware::wifi::supplicant::V1_0::SupplicantNetworkId;
 using android::hardware::wifi::supplicant::V1_0::SupplicantStatus;
-using android::hardware::wifi::supplicant::V1_0::IfaceType;
 using namespace vendor::mediatek::hardware::wifi::supplicant::V2_0;
 
 /**
@@ -53,9 +53,8 @@ using namespace vendor::mediatek::hardware::wifi::supplicant::V2_0;
  * object is used for control operations on a specific interface
  * controlled by wpa_supplicant.
  */
-class StaIface : public ISupplicantStaIface
-{
-public:
+class StaIface : public ISupplicantStaIface {
+  public:
     StaIface(struct wpa_global* wpa_global, const char ifname[]);
     ~StaIface() override = default;
     // HIDL does not provide a built-in mechanism to let the server
@@ -76,30 +75,27 @@ public:
     // Hidl methods exposed.
     Return<void> getName(getName_cb _hidl_cb) override;
     Return<void> getType(getType_cb _hidl_cb) override;
-    Return<void> getNetwork(
-        SupplicantNetworkId id, getNetwork_cb _hidl_cb) override;
-    Return<void> registerCallback(
-        const sp<vendor::mediatek::hardware::wifi::supplicant::V2_0::ISupplicantStaIfaceCallback>& callback,
-        registerCallback_cb _hidl_cb) override;
-    Return<void> registerCallback_2_1(
-        const sp<V2_1::ISupplicantStaIfaceCallback>& callback,
-        registerCallback_cb _hidl_cb) override;
-    Return<void> setWapiCertAliasList(
-        const hidl_string& list, setWapiCertAliasList_cb _hidl_cb) override;
+    Return<void> getNetwork(SupplicantNetworkId id, getNetwork_cb _hidl_cb) override;
+    Return<void> registerCallback(const sp<vendor::mediatek::hardware::wifi::supplicant::V2_0::
+                                                   ISupplicantStaIfaceCallback>& callback,
+                                  registerCallback_cb _hidl_cb) override;
+    Return<void> registerCallback_2_1(const sp<V2_1::ISupplicantStaIfaceCallback>& callback,
+                                      registerCallback_cb _hidl_cb) override;
+    Return<void> setWapiCertAliasList(const hidl_string& list,
+                                      setWapiCertAliasList_cb _hidl_cb) override;
     Return<void> getFeatureMask(getFeatureMask_cb _hidl_cb) override;
 
-private:
+  private:
     // Corresponding worker functions for the HIDL methods.
     std::pair<SupplicantStatus, std::string> getNameInternal();
     std::pair<SupplicantStatus, IfaceType> getTypeInternal();
 
-    std::pair<SupplicantStatus, sp<ISupplicantNetwork>> getNetworkInternal(
-        SupplicantNetworkId id);
+    std::pair<SupplicantStatus, sp<ISupplicantNetwork>> getNetworkInternal(SupplicantNetworkId id);
     SupplicantStatus registerCallbackInternal(
-        const sp<vendor::mediatek::hardware::wifi::supplicant::V2_0::ISupplicantStaIfaceCallback>& callback);
-    SupplicantStatus registerCallbackInternal_2_1(
-        const sp<ISupplicantStaIfaceCallback>& callback);
-    SupplicantStatus setWapiCertAliasListInternal(const std::string &list);
+            const sp<vendor::mediatek::hardware::wifi::supplicant::V2_0::
+                             ISupplicantStaIfaceCallback>& callback);
+    SupplicantStatus registerCallbackInternal_2_1(const sp<ISupplicantStaIfaceCallback>& callback);
+    SupplicantStatus setWapiCertAliasListInternal(const std::string& list);
     std::pair<SupplicantStatus, uint32_t> getFeatureMaskInternal();
 
     struct wpa_supplicant* retrieveIfacePtr();
@@ -116,9 +112,9 @@ private:
 
 }  // namespace implementation
 }  // namespace V2_1
-}  // namespace wifi
 }  // namespace supplicant
+}  // namespace wifi
 }  // namespace hardware
 }  // namespace mediatek
-}  //namespace vendor
+}  // namespace vendor
 #endif  // MTK_WPA_SUPPLICANT_HIDL_STA_IFACE_H
